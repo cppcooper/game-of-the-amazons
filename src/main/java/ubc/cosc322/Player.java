@@ -1,10 +1,9 @@
 
 package ubc.cosc322;
 
-import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
-import sfs2x.client.entities.Room;
 import ygraph.ai.smartfox.games.BaseGameGUI;
 import ygraph.ai.smartfox.games.GameClient;
 import ygraph.ai.smartfox.games.GamePlayer;
@@ -15,7 +14,7 @@ import ygraph.ai.smartfox.games.GamePlayer;
  * Jan 5, 2021
  *
  */
-public class COSC322Test extends GamePlayer{
+public class Player extends GamePlayer{
 
     private GameClient gameClient = null; 
     private BaseGameGUI gamegui = null;
@@ -30,7 +29,7 @@ public class COSC322Test extends GamePlayer{
      */
     public static void main(String[] args) {
     	if(args.length >= 2) {
-			COSC322Test player = new COSC322Test(args[0], args[1]);
+			Player player = new Player(args[0], args[1]);
 
 			if (player.getGameGUI() == null) {
 				player.Go();
@@ -52,13 +51,13 @@ public class COSC322Test extends GamePlayer{
      * @param userName
       * @param passwd
      */
-    public COSC322Test(String userName, String passwd) {
+    public Player(String userName, String passwd) {
     	this.userName = userName;
     	this.passwd = passwd;
     	
     	//To make a GUI-based player, create an instance of BaseGameGUI
     	//and implement the method getGameGUI() accordingly
-    	//this.gamegui = new BaseGameGUI(this);
+    	this.gamegui = new BaseGameGUI(this);
     }
  
 
@@ -80,8 +79,13 @@ public class COSC322Test extends GamePlayer{
 
     	//For a detailed description of the message types and format, 
     	//see the method GamePlayer.handleGameMessage() in the game-client-api document.
-		System.out.println(messageType);
-		System.out.println(msgDetails.toString());
+		//
+		if (messageType.equals("cosc322.game-state.board")) {
+			gamegui.setGameState((ArrayList<Integer>) msgDetails.get("game-state") );
+		}
+		if (messageType.equals("cosc322.game-action.move")) {
+			gamegui.updateGameState(msgDetails);
+		}
     	return true;
     }
     
@@ -106,5 +110,7 @@ public class COSC322Test extends GamePlayer{
     	gameClient = new GameClient(userName, passwd, this);
 	}
 
+	private void read_state(){
+	}
  
 }//end of class
