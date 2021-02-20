@@ -26,8 +26,9 @@ public class Player extends GamePlayer{
     /**
      * The main method
      * @param args for name and passwd (current, any string would work)
+     * @throws Exception 
      */
-    public static void main(String[] args) {
+    public static void main(String[] args){
     	if(args.length >= 2) {
 			Player player = new Player(args[0], args[1]);
 
@@ -41,9 +42,11 @@ public class Player extends GamePlayer{
 					}
 				});
 			}
+			
 		} else {
 			System.out.println("Command line arguments missing.");
 		}
+    	
     }
 	
     /**

@@ -6,8 +6,8 @@ public class BoardPiece {
     public int player;
 
     public BoardPiece(int index, int player){
-        y = index / 10;
-        x = index - (y * 10);
+        x = index / 11;
+        y = index - (x * 11);
         this.player = player;
     }
     public BoardPiece(int x, int y, int player){
