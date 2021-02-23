@@ -18,6 +18,7 @@ public class Player extends GamePlayer{
 
     private GameClient gameClient = null; 
     private BaseGameGUI gamegui = null;
+    public ArrayList<Integer> state = null;
 	
     private String userName = null;
     private String passwd = null;
@@ -84,7 +85,8 @@ public class Player extends GamePlayer{
     	//see the method GamePlayer.handleGameMessage() in the game-client-api document.
 		//
 		if (messageType.equals("cosc322.game-state.board")) {
-			gamegui.setGameState((ArrayList<Integer>) msgDetails.get("game-state") );
+			state = (ArrayList<Integer>) msgDetails.get("game-state");
+			gamegui.setGameState(state);
 		}
 		if (messageType.equals("cosc322.game-action.move")) {
 			gamegui.updateGameState(msgDetails);
