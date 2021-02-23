@@ -13,20 +13,23 @@ public class LocalState {
 		}
 		board = state;
 		if(find_pieces) {
-			int p1 = 0;
-			int p2 = 0;
-			int index = 0;
-			for (Integer tile : state) {
-				switch (tile) {
+			FindPieces();
+		}
+	}
+	public void FindPieces(){
+		int p1 = 0;
+		int p2 = 0;
+		int index = 0;
+		for (Integer tile : board) {
+			switch (tile) {
 				case 1:
 					player1[p1++] = new BoardPiece(index,1);
 					break;
 				case 2:
 					player2[p2++] = new BoardPiece(index,2);
 					break;
-				}
-				index++;
 			}
+			index++;
 		}
 	}
 	public final BoardPiece[] GetP1Pieces(){
@@ -35,23 +38,38 @@ public class LocalState {
 	public final BoardPiece[] GetP2Pieces(){
 		return player2;
 	}
+	public int ReadTile(int index){
+		return board.get(index);
+	}
 	public int ReadTile(int x, int y){
 		int index = (x*11)+y;
-		return board.get(index);
+		return ReadTile(index);
+		/* in case it happens again
+		try {
+		} catch (Exception e) {
+			System.out.println("x: " + x + ", y: " + y + ", index: " + index);
+		} finally {
+			return -1;
+		}*/
 	}
-	public int ReadTile(BoardPiece pos){
-		int index = (pos.x*11)+pos.y;
-		return board.get(index);
+	public int ReadTile(Position pos){
+		return ReadTile(pos.x,pos.y);
 	}
-	public void SetTile(BoardPiece pos, int value){
-		int index = (pos.x*11)+pos.y;
+	public void SetTile(int index, int value){
 		board.set(index,value);
 	}
-	public void MakeMove(BoardPiece piece, BoardPiece new_pos, BoardPiece arrow_pos) throws Exception {
-		if(ReadTile(piece) != piece.player || ReadTile(new_pos) != 0 || ReadTile(arrow_pos) != 0){
+	public void SetTile(int x, int y, int value){
+		int index = (x*11)+y;
+		SetTile(index,value);
+	}
+	public void SetTile(Position pos, int value){
+		SetTile(pos.x,pos.y,value);
+	}
+	public void MakeMove(BoardPiece piece, Position new_pos, Position arrow_pos) throws Exception {
+		if(ReadTile(piece.pos) != piece.player || ReadTile(new_pos) != 0 || ReadTile(arrow_pos) != 0){
 			throw new Exception("Invalid move");
 		}
-		SetTile(piece,0);
+		SetTile(piece.pos,0);
 		SetTile(new_pos,piece.player);
 		SetTile(arrow_pos,3);
 	}
