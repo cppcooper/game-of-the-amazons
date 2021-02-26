@@ -49,23 +49,27 @@ public class Analysis {
 
     //this will always be faster than a parallel version for the board size we have
     protected static ArrayList<Integer> ScanMoves(LocalState board, Position pos){
-        Integer[] moves = new Integer[80];
+        Integer[] moves = new Integer[40];
 
-        ScanDirection(moves,0,board,pos.x,pos.y,1,1);
-        ScanDirection(moves,10,board,pos.x,pos.y,-1,-1);
-        ScanDirection(moves,20,board,pos.x,pos.y,1,-1);
-        ScanDirection(moves,30,board,pos.x,pos.y,-1,1);
+        int starting_index = 0;
+        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,-1,0);
+        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,1,0);
+        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,0,1);
+        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,0,-1);
 
-        ScanDirection(moves,40,board,pos.x,pos.y,1,0);
-        ScanDirection(moves,50,board,pos.x,pos.y,-1,0);
-        ScanDirection(moves,60,board,pos.x,pos.y,0,1);
-        ScanDirection(moves,70,board,pos.x,pos.y,0,-1);
+        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,1,1);
+        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,-1,-1);
+        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,1,-1);
+        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,-1,1);
+        for(int i = starting_index; i < 40; ++i){
+            moves[i] = -1;
+        }
 
         return new ArrayList<>(Arrays.asList(moves));
     }
 
     //this has been optimized to death
-    protected static void ScanDirection(Integer[] moves, int start_index, LocalState board, int x, int y, int xi, int yi){
+    protected static int ScanDirection(Integer[] moves, int start_index, LocalState board, int x, int y, int xi, int yi){
         x += xi;
         y += yi;
         int i = start_index;
@@ -81,8 +85,6 @@ public class Analysis {
             x += xi;
             y += yi;
         }
-        while(i < start_index + 10){
-            moves[i++] = -1;
-        }
+        return i;
     }
 }
