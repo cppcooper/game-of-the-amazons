@@ -2,7 +2,6 @@ package ubc.cosc322;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.*;
 
 public class Analysis {
@@ -12,7 +11,7 @@ public class Analysis {
     public static ArrayList<Integer>[] GetMoveList(LocalState board, BoardPiece[] player_pieces){
         ArrayList<Integer>[] all_moves = new ArrayList[4];
         for(int i = 0; i < 4; ++i){
-            all_moves[i] = ScanMoves(board,player_pieces[i].pos);
+            all_moves[i] = ScanAllDirections(board,player_pieces[i].pos);
         }
         return all_moves;
     }
@@ -22,7 +21,7 @@ public class Analysis {
     public static ArrayList<Integer>[] GetOpenPositions(LocalState board, ArrayList<Integer> starting_positions){
         ArrayList<Integer>[] all_moves = new ArrayList[starting_positions.size()];
         for(int i = 0; i < starting_positions.size(); ++i){
-            all_moves[i] = ScanMoves(board,starting_positions.get(i));
+            all_moves[i] = ScanAllDirections(board,starting_positions.get(i));
         }
         return all_moves;
     }
@@ -43,24 +42,24 @@ public class Analysis {
 
     ///Helper functions
 
-    protected static ArrayList<Integer> ScanMoves(LocalState board, int index){
-        return ScanMoves(board,new Position(index));
+    protected static ArrayList<Integer> ScanAllDirections(LocalState board, int index){
+        return ScanAllDirections(board,new Position(index)); //replacing this with math would save time on the allocation
     }
 
     //this will always be faster than a parallel version for the board size we have
-    protected static ArrayList<Integer> ScanMoves(LocalState board, Position pos){
+    protected static ArrayList<Integer> ScanAllDirections(LocalState board, Position pos){
         Integer[] moves = new Integer[40];
 
         int starting_index = 0;
-        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,-1,0);
-        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,1,0);
-        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,0,1);
-        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,0,-1);
+        starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,-1,0);
+        starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,1,0);
+        starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,0,1);
+        starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,0,-1);
 
-        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,1,1);
-        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,-1,-1);
-        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,1,-1);
-        starting_index += ScanDirection(moves,starting_index,board,pos.x,pos.y,-1,1);
+        starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,1,1);
+        starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,-1,-1);
+        starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,1,-1);
+        starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,-1,1);
         for(int i = starting_index; i < 40; ++i){
             moves[i] = -1;
         }
