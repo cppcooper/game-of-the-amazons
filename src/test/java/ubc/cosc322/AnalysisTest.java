@@ -39,19 +39,6 @@ class AnalysisTest {
             BoardPiece p = new BoardPiece(4,4,2);
             Benchmarker B = new Benchmarker();
 
-            //System.out.println("Threaded: " + B.TestCode(()->Analysis.ScanMovesThreaded(board,p.pos)) + " ns"); //exception caught inside function
-            System.out.println("Non threaded: " + B.TestCode(()->Analysis.ScanMoves(board,p.pos)) + " ns");
-
-            System.out.println("Threaded: " + B.TestCode(() -> {
-                try {
-                    Analysis.GetMoveListThreaded(board, board.GetP1Pieces());
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }) + " ns");
-            System.out.println("Non threaded: " + B.TestCode(() -> Analysis.GetMoveList(board, board.GetP1Pieces())) + " ns");
 
         } catch (Exception e) {
             e.printStackTrace();
