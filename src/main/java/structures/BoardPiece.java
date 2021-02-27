@@ -5,9 +5,7 @@ public class BoardPiece {
     public int player; //3 if non-player or 0 if not a piece
 
     public BoardPiece(int index, int player){
-        int x = index / 11;
-        int y = index - (x * 11);
-        pos = new Position(x,y);
+        pos = new Position(index);
         this.player = player;
     }
     public BoardPiece(int x, int y, int player){
