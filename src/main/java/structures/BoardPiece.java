@@ -1,4 +1,4 @@
-package ubc.cosc322;
+package structures;
 
 public class BoardPiece {
     public Position pos;

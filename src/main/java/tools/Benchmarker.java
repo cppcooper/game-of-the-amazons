@@ -1,4 +1,4 @@
-package ubc.cosc322;
+package tools;
 
 public class Benchmarker {
     private long start = -1;

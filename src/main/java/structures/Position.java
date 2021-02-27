@@ -1,4 +1,4 @@
-package ubc.cosc322;
+package structures;
 
 public class Position {
     public int x;
