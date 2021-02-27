@@ -56,12 +56,27 @@ public class LocalState {
 	public void SetTile(Position pos, int value){
 		SetTile(pos.x,pos.y,value);
 	}
-	public void MakeMove(BoardPiece piece, Position new_pos, Position arrow_pos) throws Exception {
-		if(ReadTile(piece.pos) != piece.player || ReadTile(new_pos) != 0 || ReadTile(arrow_pos) != 0){
-			throw new Exception("Invalid move");
+	public void MakeMoves(Move sequence, boolean update_pieces) throws Exception {
+		Move current = sequence;
+		while(current != null){
+			int player = ReadTile(current.start);
+			if(update_pieces) {
+				BoardPiece[] arr = null;
+				if (player == 1) {
+					arr = player1;
+				} else if(player == 2){
+					arr = player2;
+				}
+				for (BoardPiece p : arr) {
+					if (p.pos.CalculateIndex() == current.start) {
+						p.pos = new Position(current.piece);
+					}
+				}
+			}
+			SetTile(current.piece, player);
+			SetTile(current.start,0);
+			SetTile(current.arrow, 3);
+			current = sequence.next_move;
 		}
-		SetTile(piece.pos,0);
-		SetTile(new_pos,piece.player);
-		SetTile(arrow_pos,3);
 	}
 }
