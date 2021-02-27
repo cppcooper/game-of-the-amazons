@@ -24,7 +24,7 @@ public class Position {
         return false;
     }
     public int CalculateIndex(){
-        return (x*11)+y;
+        return CalculateIndex(x,y);
     }
     static public int CalculateIndex(int x, int y){
         return (x*11)+y;

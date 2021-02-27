@@ -89,7 +89,7 @@ public class Analysis {
             return (v < 11 && v > 0);
         }; //JVM should inline this =)
         while(check_in_range.apply(x) && check_in_range.apply(y)){
-            int index = (x*11)+y;
+            int index = Position.CalculateIndex(x,y);
             if(board.ReadTile(index) != 0){
                 break;
             }
