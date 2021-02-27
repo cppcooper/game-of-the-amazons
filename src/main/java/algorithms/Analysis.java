@@ -1,4 +1,6 @@
-package ubc.cosc322;
+package algorithms;
+
+import structures.*;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -99,11 +101,11 @@ public class Analysis {
     }
 }
 // This is not faster, but the code is useful for syntax lookup purposes
-//    public static ArrayList<Integer>[] GetMoveListThreaded(LocalState board, BoardPiece[] player_pieces) throws ExecutionException, InterruptedException {
+//    public static ArrayList<Integer>[] GetMoveListThreaded(structures.LocalState board, structures.BoardPiece[] player_pieces) throws ExecutionException, InterruptedException {
 //        ArrayList<Integer>[] all_moves = new ArrayList[4];
 //        Future<ArrayList<Integer>>[] ret_values = new Future[4];
 //        for(int i = 0; i < 4; ++i){
-//            BoardPiece piece = player_pieces[i];
+//            structures.BoardPiece piece = player_pieces[i];
 //            ret_values[i] = thread_manager.submit(() -> ScanMoves(board,piece.pos));
 //        }
 //        for(int i = 0; i < 4; ++i){

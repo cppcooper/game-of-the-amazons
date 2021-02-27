@@ -1,4 +1,4 @@
-package ubc.cosc322;
+package structures;
 
 import java.util.ArrayList;
 
