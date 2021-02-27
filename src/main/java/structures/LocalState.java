@@ -42,15 +42,7 @@ public class LocalState {
 		return board.get(index);
 	}
 	public int ReadTile(int x, int y){
-		int index = (x*11)+y;
-		return ReadTile(index);
-		/* in case it happens again
-		try {
-		} catch (Exception e) {
-			System.out.println("x: " + x + ", y: " + y + ", index: " + index);
-		} finally {
-			return -1;
-		}*/
+		return ReadTile(Position.CalculateIndex(x,y));
 	}
 	public int ReadTile(Position pos){
 		return ReadTile(pos.x,pos.y);
@@ -59,8 +51,7 @@ public class LocalState {
 		board.set(index,value);
 	}
 	public void SetTile(int x, int y, int value){
-		int index = (x*11)+y;
-		SetTile(index,value);
+		SetTile(Position.CalculateIndex(x,y),value);
 	}
 	public void SetTile(Position pos, int value){
 		SetTile(pos.x,pos.y,value);
