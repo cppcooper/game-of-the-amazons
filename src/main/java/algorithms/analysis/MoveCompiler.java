@@ -1,4 +1,4 @@
-package algorithms;
+package algorithms.analysis;
 
 import structures.*;
 
@@ -6,9 +6,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 
-public class Analysis {
-    static private ExecutorService thread_manager = Executors.newCachedThreadPool();
-
+public class MoveCompiler {
     // To find all of one player's move options you calculate `pieces x positions x arrows` = 4*40*40 = 6400 max options/operations
     public static ArrayList<Move> GetMoveList(LocalState board, BoardPiece[] player_pieces){
         //todo: Can probably find a faster average way to pre-allocate
