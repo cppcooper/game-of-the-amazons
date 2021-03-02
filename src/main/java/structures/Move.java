@@ -1,6 +1,7 @@
 package structures;
 
-//Stores indices of a piece and arrow, can be used to represent a structures.Move
+//Stores indices of a piece and arrow, can be used to represent a structures.
+//todo: implement synchronization
 public class Move {
     public int start = -1;
     public int piece = -1;
