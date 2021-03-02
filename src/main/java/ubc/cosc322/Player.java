@@ -58,9 +58,11 @@ public class Player extends GamePlayer{
 		//
 		if (messageType.equals("cosc322.game-state.board")) {
 			ArrayList<Integer> state = (ArrayList<Integer>) msgDetails.get("game-state");
+			AICore.SetState(state);
 			gamegui.setGameState(state);
 		}
 		if (messageType.equals("cosc322.game-action.move")) {
+			AICore.UpdateState(msgDetails);
 			gamegui.updateGameState(msgDetails);
 			//gamegui.get
 		}
