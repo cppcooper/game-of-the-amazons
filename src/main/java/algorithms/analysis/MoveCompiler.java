@@ -57,7 +57,7 @@ public class MoveCompiler {
     ///Helper functions
 
     //this will always be faster than a parallel version for the board size we have
-    protected static int[] ScanAllDirections(LocalState board, int index){
+    public static int[] ScanAllDirections(LocalState board, int index){
         int[] moves = new int[40];
         Position pos = new Position(index); //JVM should optimize this to be in the stack memory
 
