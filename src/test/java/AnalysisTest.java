@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import structures.BoardPiece;
 import structures.LocalState;
 import tools.Benchmarker;
+import tools.RandomTool;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -11,21 +12,8 @@ import java.util.Random;
 class AnalysisTest {
     @Test
     void TestScanMoves() {
-        ArrayList<Integer> arr = new ArrayList<>(121);
-        Random RNG = new Random();
-        double threshold = RNG.nextDouble() * 0.75;
-        for(int i = 0; i < 121; ++i){
-            if(RNG.nextDouble() < threshold){
-                int v = RNG.nextInt();
-                if(v == 1 || v == 2){
-                    arr.add(3);
-                } else {
-                    arr.add(v);
-                }
-            } else {
-                arr.add(0);
-            }
-        }
+        RandomTool rng = new RandomTool();
+        ArrayList<Integer> arr = rng.GetRandomState();
         try {
             LocalState board = new LocalState(arr,false);
             board.SetTile(3,3,1);
