@@ -76,27 +76,25 @@ public class LocalState {
 	public void SetTile(Position pos, int value){
 		SetTile(pos.x,pos.y,value);
 	}
-	public void MakeMoves(Move sequence, boolean update_pieces) throws Exception {
-		Move current = sequence;
-		while(current != null){
-			int player = ReadTile(current.start);
-			if(update_pieces) {
+	public void MakeMoves(Move move, boolean update_pieces) {
+		if(move.IsValidFor(this)) {
+			int player = ReadTile(move.start);
+			if (update_pieces) {
 				BoardPiece[] arr = null;
 				if (player == 1) {
 					arr = player1;
-				} else if(player == 2){
+				} else if (player == 2) {
 					arr = player2;
 				}
 				for (BoardPiece p : arr) {
-					if (p.pos.CalculateIndex() == current.start) {
-						p.pos = new Position(current.piece);
+					if (p.pos.CalculateIndex() == move.start) {
+						p.pos = new Position(move.piece);
 					}
 				}
 			}
-			SetTile(current.piece, player);
-			SetTile(current.start,0);
-			SetTile(current.arrow, 3);
-			current = sequence.next_move;
+			SetTile(move.piece, player);
+			SetTile(move.start, 0);
+			SetTile(move.arrow, 3);
 		}
 	}
 

@@ -5,16 +5,10 @@ public class Move {
     public int start = -1;
     public int piece = -1;
     public int arrow = -1;
-    public Move prev_move = null;
-    public Move next_move = null;
     public Move(int start, int piece, int arrow){
         this.start = start;
         this.piece = piece;
         this.arrow = arrow;
-    }
-    public Move(int start, int piece, int arrow, Move prev){
-        this(start,piece,arrow);
-        prev_move = prev;
     }
     public boolean IsValidFor(LocalState state){
         int start_pos = state.ReadTile(start);
