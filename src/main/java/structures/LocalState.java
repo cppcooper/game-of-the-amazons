@@ -1,15 +1,28 @@
 package structures;
 
 import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashSet;
 
 public class LocalState {
 	private ArrayList<Integer> board;
+	private static HashSet<Integer> always_empty = null;
 	private BoardPiece[] player1 = new BoardPiece[4];
 	private BoardPiece[] player2 = new BoardPiece[4];
 
 	public LocalState(ArrayList<Integer> state, boolean find_pieces) throws Exception {
 		if(state == null){
 			throw new Exception("What did you do!");
+		}
+		if (always_empty == null) {
+			always_empty = new HashSet<>();
+			for(int x = 0; x < 11; ++x){
+				for(int y = 0; y < 11; ++y){
+					if(x == 0 || y == 0){
+						always_empty.add(Position.CalculateIndex(x,y));
+					}
+				}
+			}
 		}
 		board = state;
 		if(find_pieces) {
@@ -78,5 +91,30 @@ public class LocalState {
 			SetTile(current.arrow, 3);
 			current = sequence.next_move;
 		}
+	}
+
+	public int hashCode(){
+		int hash = 0;
+		int hash_mask = ~((256-1) << 24);
+		BitSet hasher = new BitSet(200);
+		int index_count = 0;
+		for(int index = 0; index < board.size(); ++index){
+			if(!always_empty.contains(index)) {
+				for (int bit = 0; bit < 2; ++bit) {
+					boolean x = (board.get(index).intValue() & bit) != 0;
+					hasher.set((index_count++ * 2) + bit, x);
+				}
+			}
+		}
+		hash = (hasher.cardinality() << 24) & (hasher.hashCode() & hash_mask);
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		LocalState that = (LocalState) o;
+		return board.equals(that.board);
 	}
 }
