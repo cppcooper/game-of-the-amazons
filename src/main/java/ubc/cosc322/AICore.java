@@ -12,10 +12,6 @@ import java.util.Map;
 public class AICore {
     private static LocalState current_board_state;
 
-    public static synchronized void set(){}
-    public static synchronized void update(){}
-    public static synchronized void read(){}
-
     public static void run(){
 
     }
