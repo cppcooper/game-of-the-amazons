@@ -28,8 +28,4 @@ public class Game {
             System.out.println("Command line arguments missing.");
         }
     }
-
-    private static Move GetBestMove(){
-        return null;
-    }
 }
