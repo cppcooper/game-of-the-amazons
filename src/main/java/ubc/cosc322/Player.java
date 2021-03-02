@@ -18,38 +18,10 @@ public class Player extends GamePlayer{
 
     private GameClient gameClient = null; 
     private BaseGameGUI gamegui = null;
-    public ArrayList<Integer> state = null;
 	
     private String userName = null;
     private String passwd = null;
- 
-	
-    /**
-     * The main method
-     * @param args for name and passwd (current, any string would work)
-     * @throws Exception 
-     */
-    public static void main(String[] args){
-    	if(args.length >= 2) {
-			Player player = new Player(args[0], args[1]);
 
-			if (player.getGameGUI() == null) {
-				player.Go();
-			} else {
-				BaseGameGUI.sys_setup();
-				java.awt.EventQueue.invokeLater(new Runnable() {
-					public void run() {
-						player.Go();
-					}
-				});
-			}
-			
-		} else {
-			System.out.println("Command line arguments missing.");
-		}
-    	
-    }
-	
     /**
      * Any name and passwd 
      * @param userName
@@ -85,11 +57,12 @@ public class Player extends GamePlayer{
     	//see the method GamePlayer.handleGameMessage() in the game-client-api document.
 		//
 		if (messageType.equals("cosc322.game-state.board")) {
-			state = (ArrayList<Integer>) msgDetails.get("game-state");
+			ArrayList<Integer> state = (ArrayList<Integer>) msgDetails.get("game-state");
 			gamegui.setGameState(state);
 		}
 		if (messageType.equals("cosc322.game-action.move")) {
 			gamegui.updateGameState(msgDetails);
+			//gamegui.get
 		}
     	return true;
     }
@@ -115,7 +88,4 @@ public class Player extends GamePlayer{
     	gameClient = new GameClient(userName, passwd, this);
 	}
 
-	private void read_state(){
-	}
- 
 }//end of class
