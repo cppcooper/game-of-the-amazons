@@ -10,6 +10,13 @@ public class LocalState {
 	private BoardPiece[] player1 = new BoardPiece[4];
 	private BoardPiece[] player2 = new BoardPiece[4];
 
+	public LocalState(LocalState other){
+		board = new ArrayList<>(other.board);
+		for(int i = 0; i < player1.length; ++i){
+			player1[i] = new BoardPiece(other.player1[i]);
+			player2[i] = new BoardPiece(other.player2[i]);
+		}
+	}
 	public LocalState(ArrayList<Integer> state, boolean find_pieces) throws Exception {
 		if(state == null){
 			throw new Exception("What did you do!");
