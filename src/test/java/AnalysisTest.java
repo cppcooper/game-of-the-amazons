@@ -4,15 +4,14 @@ import org.junit.jupiter.api.Test;
 import structures.BoardPiece;
 import structures.LocalState;
 import tools.Benchmarker;
-import tools.RandomTool;
+import tools.RandomGen;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 class AnalysisTest {
     @Test
     void TestScanMoves() {
-        RandomTool rng = new RandomTool();
+        RandomGen rng = new RandomGen();
         ArrayList<Integer> arr = rng.GetRandomState();
         try {
             LocalState board = new LocalState(arr,false);
