@@ -5,9 +5,10 @@ import java.util.Queue;
 
 public class Heuristics {
 
-	public static int GetCount(int[] board, int index, String countType) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
-		int x = index / 11;
-		int y = index - (x * 11);
+	//todo: refactor int[] board => LocalState board
+	public static int GetCount(int[] board, int startingPos, String countType) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
+		int x = startingPos / 11;
+		int y = startingPos - (x * 11);
 
 		int blankcount = 0; //count of blank spaces
 		int blockedcount = 0; //count of blocked off spaces
@@ -17,7 +18,7 @@ public class Heuristics {
 		Queue<Integer> blockedspace = new LinkedList<Integer>();
 		int[] visited = new int[121];
 
-		visited[index] = index;
+		visited[startingPos] = startingPos;
 
 		GetNearbySpaces(blankspace, blockedspace, visited, board, x, y);
 
@@ -62,8 +63,7 @@ public class Heuristics {
 		}
 	}
 
-
-
+	//todo: refactor method to utilize MoveCompiler class, you'll likely want ScanAllDirections or possibly the other. If you need to operate on the tiles as you iterate, then we can add another variant of those methods and use lambda's to accomplish the end goal
 	public static void GetNearbySpaces(Queue<Integer> blankspace, Queue<Integer> blockedspace, int[] visited, int[] board, int x, int y){
 
 		int value = 0;
@@ -115,8 +115,6 @@ public class Heuristics {
 			AddToQueue(blankspace, blockedspace, visited, board, value);
 		}
 	}
-
-
 
 	public static void AddToQueue(Queue<Integer> blankspace, Queue<Integer> blockedspace, int[] visited, int[] board, int index) {
 		if (visited[index] == 0) {

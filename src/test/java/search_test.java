@@ -1,22 +1,22 @@
-package test;
-
 import java.util.LinkedList;
 import java.util.Queue;
 
+//todo: refactor test class to use Heuristics class's code (directly)
 public class search_test {
 	
 	// These are the methods that the Heuristics class uses. It's kinda useful if you 
 	// want to see what's going on with the board when you use the methods, but delete this if you want.
 
+	//todo: revise to not have main() but instead use junit test. See AnalysisTest for an example
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 
 		// 0 is open space
 		// 1 is player 1 pieces
 		// 2 is player 2 pieces
 		// 3 is blocked space
 		
-		int[] board = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+		int[] board = {
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 				0, 0, 0, 0, 2, 3, 0, 2, 0, 0, 0, 
 				0, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0, 
 				0, 0, 3, 0, 0, 3, 3, 3, 3, 0, 0, 
@@ -27,6 +27,7 @@ public class search_test {
 				0, 1, 3, 3, 0, 0, 0, 3, 0, 0, 1, 
 				0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 
 				0, 0, 0, 1, 3, 3, 0, 3, 0, 0, 0};
+		//todo: convert board to ArrayList<Integer> then construct LocalState with it
 
 		int count1 = 0;
 		for (int val: board) {
@@ -105,7 +106,7 @@ public class search_test {
 		System.out.println("Blank Count: " + blankcount);
 		System.out.println("Blocked Count: " + blockedcount);
 		System.out.println("Total Blocked Count: " + blockedtotal);
-
+		//todo: manually count what the values should be, then insert assert statements to test whether the Heuristics class arrives at the correct values
 
 		count1 = 0;
 		for (int val: board) {
@@ -119,6 +120,7 @@ public class search_test {
 
 	}
 
+	//todo: remove the below methods and use the Heuristics class instead
 	public static void GetNearbySpaces(Queue<Integer> blankspace, Queue<Integer> blockedspace, int[] visited, int[] board, int x, int y){
 
 		int value = 0;
