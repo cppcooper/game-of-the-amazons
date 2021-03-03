@@ -6,17 +6,19 @@ import java.util.HashSet;
 import java.util.function.Function;
 
 public class LocalState {
-	private ArrayList<Integer> board;
-	private int move_number = 1;
-	private boolean valid_hash = false;
-	private int hash = -1;
 	private static HashSet<Integer> always_empty = null;
-	private BoardPiece[] player1 = new BoardPiece[4];
-	private BoardPiece[] player2 = new BoardPiece[4];
+	private final ArrayList<Integer> board;
+	private final BoardPiece[] player1 = new BoardPiece[4];
+	private final BoardPiece[] player2 = new BoardPiece[4];
+	private int move_number = 1;
+	private int hash = -1;
+	private boolean valid_hash = false;
 
 	public LocalState(LocalState other){
 		board = new ArrayList<>(other.board);
 		move_number = other.move_number;
+		valid_hash = other.valid_hash;
+		hash = other.hash;
 		for(int i = 0; i < player1.length; ++i){
 			player1[i] = new BoardPiece(other.player1[i]);
 			player2[i] = new BoardPiece(other.player2[i]);
@@ -150,6 +152,7 @@ public class LocalState {
 				} else if (player == 2) {
 					arr = player2;
 				}
+				assert arr != null;
 				for (BoardPiece p : arr) {
 					if (p.pos.CalculateIndex() == move.start) {
 						p.pos = new Position(move.piece);
@@ -179,7 +182,7 @@ public class LocalState {
 		for(int index = 0; index < board.size(); ++index){
 			if(!always_empty.contains(index)) {
 				for (int bit = 0; bit < 2; ++bit) {
-					boolean x = (board.get(index).intValue() & bit) != 0;
+					boolean x = (board.get(index) & bit) != 0;
 					hasher.set((index_count++ * 2) + bit, x);
 				}
 			}
