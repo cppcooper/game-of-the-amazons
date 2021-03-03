@@ -11,8 +11,13 @@ public class Position {
         this.y = y;
     }
     public Position(int index){
-        this.x = index / 11;
-        this.y = index - (x * 11);
+        if(index > 0 && index < 121) {
+            x = index / 11;
+            y = index - (x * 11);
+        } else {
+            x = -1;
+            y = -1;
+        }
     }
     public boolean equals(Position other){
         if(x == other.x && y == other.y){
@@ -29,7 +34,13 @@ public class Position {
     public int CalculateIndex(){
         return CalculateIndex(x,y);
     }
+    public boolean IsValid(){
+        return IsValid(x,y);
+    }
     static public int CalculateIndex(int x, int y){
         return (x*11)+y;
+    }
+    static public boolean IsValid(int x, int y){
+        return (x > 0 && y > 0) && (x < 11 && y < 11);
     }
 }
