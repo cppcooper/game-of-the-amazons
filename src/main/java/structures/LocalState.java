@@ -3,15 +3,20 @@ package structures;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashSet;
+import java.util.function.Function;
 
 public class LocalState {
 	private ArrayList<Integer> board;
+	private int move_number = 1;
+	private boolean valid_hash = false;
+	private int hash = -1;
 	private static HashSet<Integer> always_empty = null;
 	private BoardPiece[] player1 = new BoardPiece[4];
 	private BoardPiece[] player2 = new BoardPiece[4];
 
 	public LocalState(LocalState other){
 		board = new ArrayList<>(other.board);
+		move_number = other.move_number;
 		for(int i = 0; i < player1.length; ++i){
 			player1[i] = new BoardPiece(other.player1[i]);
 			player2[i] = new BoardPiece(other.player2[i]);
@@ -107,8 +112,35 @@ public class LocalState {
 		}
 		return valid_neighbours;
 	}
+	public int[] GetNeighbours(int index, Function<Integer,Boolean> valid_check){
+		Position[] neighbours = new Position[8];
+		neighbours[0] = new Position(index - 1);
+		neighbours[1] = new Position(index + 1);
+		neighbours[2] = new Position(index - 12);
+		neighbours[3] = new Position(index - 11);
+		neighbours[4] = new Position(index - 10);
+		neighbours[5] = new Position(index + 10);
+		neighbours[6] = new Position(index + 11);
+		neighbours[7] = new Position(index + 12);
 
-	public void MakeMoves(Move move, boolean update_pieces) {
+		int valid_count = 0;
+		for(Position p : neighbours){
+			if(p.IsValid()){
+				valid_count++;
+			}
+		}
+		int[] valid_neighbours = new int[valid_count];
+		int i = 0;
+		for(Position p : neighbours){
+			int idx = p.CalculateIndex(); //index was taken
+			if(p.IsValid() && valid_check.apply(idx)){
+				valid_neighbours[i++] = idx;
+			}
+		}
+		return valid_neighbours;
+	}
+
+	public void MakeMove(Move move, boolean update_pieces) {
 		if(move.IsValidFor(this)) {
 			int player = ReadTile(move.start);
 			if (update_pieces) {
@@ -127,12 +159,21 @@ public class LocalState {
 			SetTile(move.piece, player);
 			SetTile(move.start, 0);
 			SetTile(move.arrow, 3);
+			move_number++;
+			if(valid_hash){
+				valid_hash = false;
+			}
 		}
 	}
 
+	public int GetMoveNumber(){
+		return move_number;
+	}
+
 	public int hashCode(){
-		int hash = 0;
-		int hash_mask = ~((256-1) << 24);
+		if(valid_hash){
+			return hash;
+		}
 		BitSet hasher = new BitSet(200);
 		int index_count = 0;
 		for(int index = 0; index < board.size(); ++index){
@@ -143,7 +184,8 @@ public class LocalState {
 				}
 			}
 		}
-		hash = (hasher.cardinality() << 24) & (hasher.hashCode() & hash_mask);
+		hash = hasher.hashCode();
+		valid_hash = true;
 		return hash;
 	}
 

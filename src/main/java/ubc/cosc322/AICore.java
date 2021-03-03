@@ -3,9 +3,7 @@ package ubc.cosc322;
 import structures.LocalState;
 import structures.Move;
 import structures.Position;
-import ygraph.ai.smartfox.games.amazons.AmazonsBoard;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -32,7 +30,7 @@ public class AICore {
                 Position.CalculateIndex(qcurr.get(0),qcurr.get(1)),
                 Position.CalculateIndex(qnew.get(0),qnew.get(1)),
                 Position.CalculateIndex(arrow.get(0),arrow.get(1)));
-        current_board_state.MakeMoves(move,true);
+        current_board_state.MakeMove(move,true);
         PruneGameTree();
     }
 

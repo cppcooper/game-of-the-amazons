@@ -28,7 +28,7 @@ public class MonteCarlo {
             for(int b = 0; b < sim_policy.branches; ++b){
                 LocalState s = new LocalState(board);
                 Move m = moves.get(rng_set.get(b));
-                s.MakeMoves(m,true);
+                s.MakeMove(m,true);
 
                 GameTreeNode current_node = new GameTreeNode();
                 current_node.move = m;
