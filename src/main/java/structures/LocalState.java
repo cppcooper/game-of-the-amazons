@@ -36,6 +36,7 @@ public class LocalState {
 			FindPieces();
 		}
 	}
+
 	public void FindPieces(){
 		int p1 = 0;
 		int p2 = 0;
@@ -52,12 +53,14 @@ public class LocalState {
 			index++;
 		}
 	}
+
 	public final BoardPiece[] GetP1Pieces(){
 		return player1;
 	}
 	public final BoardPiece[] GetP2Pieces(){
 		return player2;
 	}
+
 	public int ReadTile(int index){
 		return board.get(index);
 	}
@@ -67,6 +70,7 @@ public class LocalState {
 	public int ReadTile(Position pos){
 		return ReadTile(pos.x,pos.y);
 	}
+
 	public void SetTile(int index, int value){
 		board.set(index,value);
 	}
@@ -76,6 +80,34 @@ public class LocalState {
 	public void SetTile(Position pos, int value){
 		SetTile(pos.x,pos.y,value);
 	}
+
+	public int[] GetNeighbours(int index){
+		Position[] neighbours = new Position[8];
+		neighbours[0] = new Position(index - 1);
+		neighbours[1] = new Position(index + 1);
+		neighbours[2] = new Position(index - 12);
+		neighbours[3] = new Position(index - 11);
+		neighbours[4] = new Position(index - 10);
+		neighbours[5] = new Position(index + 10);
+		neighbours[6] = new Position(index + 11);
+		neighbours[7] = new Position(index + 12);
+
+		int valid_count = 0;
+		for(Position p : neighbours){
+			if(p.IsValid()){
+				valid_count++;
+			}
+		}
+		int[] valid_neighbours = new int[valid_count];
+		int i = 0;
+		for(Position p : neighbours){
+			if(p.IsValid()){
+				valid_neighbours[i++] = p.CalculateIndex();
+			}
+		}
+		return valid_neighbours;
+	}
+
 	public void MakeMoves(Move move, boolean update_pieces) {
 		if(move.IsValidFor(this)) {
 			int player = ReadTile(move.start);
