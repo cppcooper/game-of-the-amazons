@@ -4,9 +4,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GameTree {
-    private static ConcurrentHashMap<Integer,
+    private static final ConcurrentHashMap<Integer,
             ConcurrentHashMap<LocalState,GameTreeNode>> game_tree = new ConcurrentHashMap<>();
-    private static int hash_prune_mask = (256-1) << 24;
 
     public static boolean put(LocalState board, GameTreeNode node){
         var inner_map = game_tree.get(board.GetMoveNumber());

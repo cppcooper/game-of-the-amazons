@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MonteCarlo {
-    public class SimPolicy{
+    public static class SimPolicy{
         public int branches = 1;
         public int depth = 1;
         SimPolicy(int branches, int depth){
