@@ -1,5 +1,6 @@
 package algorithms.analysis;
 
+import structures.GameTree;
 import structures.GameTreeNode;
 import structures.LocalState;
 import structures.Move;
@@ -18,33 +19,37 @@ public class MonteCarlo {
         }
     }
 
-    public void RunSimulation(LocalState board, int player, SimPolicy sim_policy) throws Exception {
-        int depth = 0;
+    public void RunSimulation(LocalState board, int player, SimPolicy sim_policy) {
         RandomGen rng = new RandomGen();
-        while(depth++ < sim_policy.depth) {
-            ArrayList<Move> moves = GetMoveList(board, player);
-            List<Integer> rng_set = rng.GetSequenceShuffled(0, moves.size(), sim_policy.branches);
-
-            for(int b = 0; b < sim_policy.branches; ++b){
-                LocalState s = new LocalState(board);
-                Move m = moves.get(rng_set.get(b));
-                s.MakeMove(m,true);
-
-                GameTreeNode current_node = new GameTreeNode();
-                current_node.move = m;
-
-            }
-        }
+        RunSimulation(rng, board, player, sim_policy.branches, sim_policy.depth);
     }
 
-    protected ArrayList<Move> GetMoveList(LocalState board, int player) throws Exception {
-        if(player == 0 || player > 2){
-            throw new Exception("Invalid player");
-        }
-        if(player == 1){
-            return MoveCompiler.GetMoveList(board,board.GetP1Pieces());
-        } else {
-            return MoveCompiler.GetMoveList(board,board.GetP2Pieces());
+    protected void RunSimulation(RandomGen rng, LocalState board, int player, int branches, int depth){
+        /* Simulate X branches at Y depths
+         * simulate X branches
+         ** On each branch simulate X branches
+         * repeat until at Y depth
+         * */
+        if(depth > 0) {
+            player = player == 1 ? 2 : 1;
+            List<Move> moves = MoveCompiler.GetMoveList(board, player == 1 ? board.GetP1Pieces() : board.GetP2Pieces());
+            List<Integer> rng_set = rng.GetSequenceShuffled(0, moves.size(), branches);
+            for (int b = 0; b < branches; ++b) {
+                /* Copy board
+                 * Perform move on board's copy
+                 * Create new node for move
+                 * */
+                LocalState state = new LocalState(board);
+                Move m = moves.get(rng_set.get(b));
+                state.MakeMove(m, true);
+
+                GameTreeNode node = GameTree.get(state);
+                if (node == null) {
+                    node = new GameTreeNode(m);
+                    GameTree.put(state, node);
+                }
+                RunSimulation(rng, state, player, branches, depth - 1);
+            }
         }
     }
 }
