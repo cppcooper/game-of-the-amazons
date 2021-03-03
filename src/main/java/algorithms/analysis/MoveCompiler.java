@@ -77,7 +77,7 @@ public class MoveCompiler {
     }
 
     //this has been optimized to death
-    protected static int ScanDirection(int[] moves, int start_index, LocalState board, int x, int y, int xi, int yi){
+    public static int ScanDirection(int[] moves, int start_index, LocalState board, int x, int y, int xi, int yi){
         x += xi;
         y += yi;
         int i = start_index;
