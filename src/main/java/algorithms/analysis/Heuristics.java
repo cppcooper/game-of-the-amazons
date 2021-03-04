@@ -1,12 +1,14 @@
 package algorithms.analysis;
 
+import structures.LocalState;
 import java.util.LinkedList;
 import java.util.Queue;
 
 public class Heuristics {
 
 	//todo: refactor int[] board => LocalState board
-	public static int GetCount(int[] board, int startingPos, String countType) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
+	public static int GetCount(LocalState board, int startingPos, String countType) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
+
 		int x = startingPos / 11;
 		int y = startingPos - (x * 11);
 
@@ -20,15 +22,13 @@ public class Heuristics {
 
 		visited[startingPos] = startingPos;
 
-		GetNearbySpaces(blankspace, blockedspace, visited, board, x, y);
+		GetNearbySpaces(blankspace, blockedspace, visited, board, startingPos);
 
 		if (!blankspace.isEmpty()) {
 			while (!blankspace.isEmpty()) {
 				int value = blankspace.poll();
-				int qx = value / 11;
-				int qy = value - (qx * 11);
 				blankcount++;
-				GetNearbySpaces(blankspace, blockedspace, visited, board, qx, qy);
+				GetNearbySpaces(blankspace, blockedspace, visited, board, value);
 			}
 		}
 
@@ -53,7 +53,7 @@ public class Heuristics {
 
 			}
 		}
-		
+
 		if (countType.equals("blank")) {
 			return blankcount;
 		}else if (countType.equals("blocked")) {
@@ -64,66 +64,24 @@ public class Heuristics {
 	}
 
 	//todo: refactor method to utilize MoveCompiler class, you'll likely want ScanAllDirections or possibly the other. If you need to operate on the tiles as you iterate, then we can add another variant of those methods and use lambda's to accomplish the end goal
-	public static void GetNearbySpaces(Queue<Integer> blankspace, Queue<Integer> blockedspace, int[] visited, int[] board, int x, int y){
+	public static void GetNearbySpaces(Queue<Integer> blankspace, Queue<Integer> blockedspace, int[] visited, LocalState board, int startingpos){
 
-		int value = 0;
+		int[] neighbours = new int[8];
+		neighbours = board.GetNeighbours(startingpos);
 
-		// North
-		if (x-1 > 0 && y > 0 && x-1 < 11 && y < 11) {
-			value = (x-1)*11+y;
-			AddToQueue(blankspace, blockedspace, visited, board, value);
-		}
-		// Northeast
-		if (x-1 > 0 && y+1 > 0 && x-1 < 11 && y+1 < 11) {
-			value = (x-1)*11+(y+1);
-			AddToQueue(blankspace, blockedspace, visited, board, value);
-		}
-
-		// East
-		if (x > 0 && y+1 > 0 && x < 11 && y+1 < 11) {
-			value = x*11+(y+1);
-			AddToQueue(blankspace, blockedspace, visited, board, value);
-		}
-
-		// Southeast
-		if (x+1 > 0 && y+1 > 0 && x+1 < 11 && y+1 < 11) {
-			value = (x+1)*11+(y+1);
-			AddToQueue(blankspace, blockedspace, visited, board, value);
-		}
-
-		// South
-		if (x+1 > 0 && y > 0 && x+1 < 11 && y < 11) {
-			value = (x+1)*11+y;
-			AddToQueue(blankspace, blockedspace, visited, board, value);
-		}
-
-		// Southwest
-		if (x+1 > 0 && y-1 > 0 && x+1 < 11 && y-1 < 11) {
-			value = (x+1)*11+(y-1);
-			AddToQueue(blankspace, blockedspace, visited, board, value);
-		}
-
-		// West
-		if(x > 0 && y-1 > 0 && x < 11 && y-1 < 11) {
-			value = x*11+(y-1);
-			AddToQueue(blankspace, blockedspace, visited, board, value);
-		}
-
-		// NorthWest
-		if (x-1 > 0 && y-1 > 0 && x-1 < 11 && y-1 < 11) {
-			value = (x-1)*11+(y-1);
-			AddToQueue(blankspace, blockedspace, visited, board, value);
-		}
-	}
-
-	public static void AddToQueue(Queue<Integer> blankspace, Queue<Integer> blockedspace, int[] visited, int[] board, int index) {
-		if (visited[index] == 0) {
-			visited[index] = index;
-			if(board[index] == 0) {
-				blankspace.offer(index);
-			}else {
-				blockedspace.offer(index);
+		for (int pos: neighbours) {
+			while(!(pos == 0)) {
+				if (visited[pos] == 0) {
+					visited[pos] = pos;
+					int tileValue = board.ReadTile(pos);
+					if(tileValue == 0) {
+						blankspace.offer(pos);
+					}else {
+						blockedspace.offer(pos);
+					}
+				}
 			}
+
 		}
 	}
 
