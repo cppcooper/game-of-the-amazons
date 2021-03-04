@@ -6,6 +6,7 @@ import structures.LocalState;
 import structures.Move;
 import tools.RandomGen;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MonteCarlo {
@@ -20,15 +21,20 @@ public class MonteCarlo {
 
     public void RunSimulation(LocalState board, int player, SimPolicy sim_policy) {
         RandomGen rng = new RandomGen();
+        GameTreeNode sim_root = GameTree.get(board);
         RunSimulation(rng, board, player, sim_policy.branches, sim_policy.depth);
+        if(sim_root == null){
+            //maybe we just don't worry about it?
+        }
     }
 
-    protected void RunSimulation(RandomGen rng, LocalState board, int player, int branches, int depth){
+    protected ArrayList<GameTreeNode> RunSimulation(RandomGen rng, LocalState board, int player, int branches, int depth){
         /* Simulate X branches at Y depths
          * simulate X branches
          ** On each branch simulate X branches
          * repeat until at Y depth
          * */
+        ArrayList<GameTreeNode> simulated_nodes = new ArrayList<>(branches);
         if(depth > 0) {
             player = player == 1 ? 2 : 1;
             List<Move> moves = MoveCompiler.GetMoveList(board, player == 1 ? board.GetP1Pieces() : board.GetP2Pieces());
@@ -52,10 +58,14 @@ public class MonteCarlo {
                     node = new GameTreeNode(m);
                     GameTree.put(state, node);
                 }
+                simulated_nodes.add(node);
 
                 //todo: figure out how to link this GameTreeNode with the ones made inside this call (all the way up the stack and beyond)
-                RunSimulation(rng, state, player, branches, depth - 1);
+                var children = RunSimulation(rng, state, player, branches, depth - 1);
+                node.adoptAll(children);
             }
+            return simulated_nodes;
         }
+        return null;
     }
 }
