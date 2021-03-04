@@ -36,7 +36,12 @@ public class MonteCarlo {
             for (int b = 0; b < branches; ++b) {
                 /* Copy board
                  * Perform move on board's copy
-                 * Create new node for move
+                 * Check if GameTree has this board state already
+                 * + retrieve existing node
+                 * - make new node
+                 * - update GameTree
+                 * Perform simulation on this board state
+                 * Update node according to simulations run under it
                  * */
                 LocalState state = new LocalState(board);
                 Move m = moves.get(rng_set.get(b));
