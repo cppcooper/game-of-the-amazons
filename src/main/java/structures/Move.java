@@ -6,6 +6,7 @@ public class Move {
     public int start = -1;
     public int piece = -1;
     public int arrow = -1;
+    public Move(){}
     public Move(int start, int piece, int arrow){
         this.start = start;
         this.piece = piece;
