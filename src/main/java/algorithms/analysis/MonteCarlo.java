@@ -6,7 +6,6 @@ import structures.LocalState;
 import structures.Move;
 import tools.RandomGen;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MonteCarlo {
@@ -48,6 +47,8 @@ public class MonteCarlo {
                     node = new GameTreeNode(m);
                     GameTree.put(state, node);
                 }
+
+                //todo: figure out how to link this GameTreeNode with the ones made inside this call (all the way up the stack)
                 RunSimulation(rng, state, player, branches, depth - 1);
             }
         }
