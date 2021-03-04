@@ -48,7 +48,7 @@ public class MonteCarlo {
                     GameTree.put(state, node);
                 }
 
-                //todo: figure out how to link this GameTreeNode with the ones made inside this call (all the way up the stack)
+                //todo: figure out how to link this GameTreeNode with the ones made inside this call (all the way up the stack and beyond)
                 RunSimulation(rng, state, player, branches, depth - 1);
             }
         }
