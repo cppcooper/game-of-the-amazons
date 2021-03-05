@@ -1,10 +1,9 @@
 package ubc.cosc322;
 
 import structures.Move;
-import structures.Position;
 import ygraph.ai.smartfox.games.BaseGameGUI;
 
-public class Game {
+public class Main {
     private static Player player = null;
 
     public static void main(String[] args){
@@ -16,14 +15,24 @@ public class Game {
                     player.Go();
                 }
             });
-            // todo: launch AI thread to constantly generate and explore move options
+            Thread ai_thread = new Thread(() -> AICore.run());
+            ai_thread.run();
+
             // todo: write game loop
-            /* While our turn //todo: write code to signal/detect player turn
-             * wait 60 seconds (maybe 55 to be safe)
-             * then GetBestMove() and send message to server
-             * wait for our turn
-            * */
-            //player.getGameClient().sendMoveMessage(...);
+            //while(...)
+            // todo: determine game over condition/event/etc.
+            // todo: figure out how to wait/start new game after game over
+            while(player.our_turn.get()){
+                //todo: sleep up to 29.5s
+                Move m = AICore.GetBestMove();
+                //todo: 1) construct move message. 2) send move message
+                //player.getGameClient().sendMoveMessage(...);
+            }
+            try {
+                ai_thread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } else {
             System.out.println("Command line arguments missing.");
         }
