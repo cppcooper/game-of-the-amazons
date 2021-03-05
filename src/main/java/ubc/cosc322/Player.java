@@ -3,6 +3,8 @@ package ubc.cosc322;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import ygraph.ai.smartfox.games.BaseGameGUI;
 import ygraph.ai.smartfox.games.GameClient;
@@ -18,6 +20,10 @@ public class Player extends GamePlayer{
 
     private GameClient gameClient = null; 
     private BaseGameGUI gamegui = null;
+    public AtomicBoolean our_turn = new AtomicBoolean(false);
+    public AtomicInteger player_num = new AtomicInteger(-1);
+
+
 	
     private String userName = null;
     private String passwd = null;
@@ -35,8 +41,6 @@ public class Player extends GamePlayer{
     	//and implement the method getGameGUI() accordingly
     	this.gamegui = new BaseGameGUI(this);
     }
- 
-
 
     @Override
     public void onLogin() {
@@ -56,15 +60,20 @@ public class Player extends GamePlayer{
     	//For a detailed description of the message types and format, 
     	//see the method GamePlayer.handleGameMessage() in the game-client-api document.
 		//
-		if (messageType.equals("cosc322.game-state.board")) {
+		if (messageType.equals("cosc322.game-action.move")) {
+			//todo: test if this executes for both player's turns
+			//our_turn.set(true);
+			AICore.UpdateState(msgDetails);
+			gamegui.updateGameState(msgDetails);
+		} else if (messageType.equals("cosc322.game-state.board")) {
 			ArrayList<Integer> state = (ArrayList<Integer>) msgDetails.get("game-state");
 			AICore.SetState(state);
 			gamegui.setGameState(state);
-		}
-		if (messageType.equals("cosc322.game-action.move")) {
-			AICore.UpdateState(msgDetails);
-			gamegui.updateGameState(msgDetails);
-			//gamegui.get
+		} else {
+			if(userName.equals(msgDetails.get("player-white"))){
+				our_turn.set(true);
+			}
+			player_num.set(our_turn.get() ? 1 : 2);
 		}
     	return true;
     }
