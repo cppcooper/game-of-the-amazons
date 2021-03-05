@@ -58,6 +58,7 @@ public class MonteCarlo {
                 if (node == null) {
                     node = new GameTreeNode(m);
                     GameTree.put(state, node);
+                    //todo: add something to concurrent queue for heuristics processing. Probably need both the state and node..
                 }
                 simulated_nodes.add(node);
 
