@@ -22,10 +22,11 @@ public class MonteCarlo {
     public void RunSimulation(LocalState board, int player, SimPolicy sim_policy) {
         RandomGen rng = new RandomGen();
         GameTreeNode sim_root = GameTree.get(board);
-        RunSimulation(rng, board, player, sim_policy.branches, sim_policy.depth);
-        if(sim_root == null){
-            //maybe we just don't worry about it?
+        var children = RunSimulation(rng, board, player, sim_policy.branches, sim_policy.depth);
+        if(sim_root != null){
+            sim_root.adoptAll(children);
         }
+        //todo: determine if we should worry about null root nodes? (it probably just means our opponent made a move, and we didn't simulate it)
     }
 
     protected ArrayList<GameTreeNode> RunSimulation(RandomGen rng, LocalState board, int player, int branches, int depth){
