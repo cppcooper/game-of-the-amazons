@@ -26,7 +26,7 @@ public class MonteCarlo {
         if(sim_root != null){
             sim_root.adoptAll(children);
         }
-        //todo: determine if we should worry about null root nodes? (it probably just means our opponent made a move, and we didn't simulate it)
+        //todo: determine if we should worry about null root nodes? (it probably just means our opponent made a move, and we had not simulated it)
     }
 
     protected ArrayList<GameTreeNode> RunSimulation(RandomGen rng, LocalState board, int player, int branches, int depth){
@@ -62,12 +62,29 @@ public class MonteCarlo {
                 }
                 simulated_nodes.add(node);
 
-                //todo: figure out how to link this GameTreeNode with the ones made inside this call (all the way up the stack and beyond)
                 var children = RunSimulation(rng, state, player, branches, depth - 1);
                 node.adoptAll(children);
             }
             return simulated_nodes;
         }
+        return null;
+    }
+
+    protected static class TreePolicy{
+
+    }
+
+    protected ArrayList<Move> PruneMoves(ArrayList<Move> moves, TreePolicy tree_policy){
+        //todo: implement tree policy stuff
+
+        /* This function should prune the move list such that we're left with X number of moves
+        * X/2 should be moves that consider the most promising branches to explore
+        * X/2 should also be moves that consider areas that haven't been explored well
+        *
+        * To implement such functionality (probably not even in the form this function intends) the algorithm above will probably need to be redesigned
+        * Additionally the GameTree will likely need refactoring
+        * Perhaps not though.
+        * */
         return null;
     }
 }
