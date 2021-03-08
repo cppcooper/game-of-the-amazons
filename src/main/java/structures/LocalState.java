@@ -38,9 +38,18 @@ public class LocalState {
 				}
 			}
 		}
-		board = state;
+		board = new ArrayList<>(state);
 		if(find_pieces) {
 			FindPieces();
+		}
+	}
+
+	public void DebugPrint(){
+		for(int i = 0; i < board.size(); ++i){
+			System.out.printf("%d ", board.get(i));
+			if((i+1) % 11 == 0){
+				System.out.println();
+			}
 		}
 	}
 
