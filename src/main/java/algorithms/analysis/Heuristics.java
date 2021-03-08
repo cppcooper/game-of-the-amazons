@@ -6,9 +6,20 @@ import java.util.Queue;
 
 public class Heuristics {
 
-	//todo: refactor int[] board => LocalState board
-	public static int GetCount(LocalState board, int startingPos, String countType) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
+	public static class Data {
+		public int blankCount;
+		public int blockedCount;
+		public int blockedTotal;
 
+		public Data() {
+
+		}
+	}
+
+	//todo: refactor int[] board => LocalState board
+	public static Data GetCount(LocalState board, int startingPos) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
+
+		Data information = new Data();
 		int x = startingPos / 11;
 		int y = startingPos - (x * 11);
 
@@ -54,35 +65,30 @@ public class Heuristics {
 			}
 		}
 
-		if (countType.equals("blank")) {
-			return blankcount;
-		}else if (countType.equals("blocked")) {
-			return blockedtotal;
-		}else {
-			return -1;
-		}
+		information.blankCount = blankcount;
+		information.blockedCount = blockedcount;
+		information.blockedTotal = blockedtotal;
+
+		return information;
+
 	}
 
 	//todo: refactor method to utilize MoveCompiler class, you'll likely want ScanAllDirections or possibly the other. If you need to operate on the tiles as you iterate, then we can add another variant of those methods and use lambda's to accomplish the end goal
+	// todo: Lambda????
+	// merge GetNeightbours function into this one
 	public static void GetNearbySpaces(Queue<Integer> blankspace, Queue<Integer> blockedspace, int[] visited, LocalState board, int startingpos){
 
-		int[] neighbours = new int[8];
-		neighbours = board.GetNeighbours(startingpos);
-
+		int[] neighbours = board.GetNeighbours(startingpos);
 		for (int pos: neighbours) {
-			while(!(pos == 0)) {
-				if (visited[pos] == 0) {
-					visited[pos] = pos;
-					int tileValue = board.ReadTile(pos);
-					if(tileValue == 0) {
-						blankspace.offer(pos);
-					}else {
-						blockedspace.offer(pos);
-					}
+			if (visited[pos] == 0) {
+				visited[pos] = pos;
+				int tileValue = board.ReadTile(pos);
+				if(tileValue == 0) {
+					blankspace.offer(pos);
+				}else {
+					blockedspace.offer(pos);
 				}
 			}
-
 		}
 	}
-
 }
