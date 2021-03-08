@@ -37,6 +37,7 @@ public class Position {
     public boolean IsValid(){
         return IsValid(x,y);
     }
+
     static public int CalculateIndex(int x, int y){
         return (x*11)+y;
     }
