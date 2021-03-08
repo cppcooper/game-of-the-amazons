@@ -8,7 +8,7 @@ import tools.RandomGen;
 
 import java.util.ArrayList;
 
-class AnalysisTest {
+class MoveCompilerTester {
     @Test
     void TestScanMoves() {
         RandomGen rng = new RandomGen();

@@ -7,21 +7,21 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class Heuristics {
-	protected static class CountingData {
+	protected static class CountingAlgorithmData {
 		public int[] visited = new int[121];
 		public Queue<Integer> blankspace = new LinkedList<>();
 		public Queue<Integer> blockedspace = new LinkedList<>();
 	}
 
-	public static class CountValues {
+	public static class CountData {
 		public int blanks;
 		public int blocks;
 		public double blocks_heuristic;
 	}
 
-	public static CountValues GetCount(LocalState board, int startingPos) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
-		CountValues counts = new CountValues();
-		CountingData data = new CountingData();
+	public static CountData GetCount(LocalState board, int startingPos) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
+		CountData counts = new CountData();
+		CountingAlgorithmData data = new CountingAlgorithmData();
 		Position start = new Position(startingPos);
 
 		data.visited[startingPos] = startingPos;
@@ -66,7 +66,7 @@ public class Heuristics {
 
 	}
 
-	protected static void QueueNeighbours(CountingData data, int index, LocalState board){
+	protected static void QueueNeighbours(CountingAlgorithmData data, int index, LocalState board){
 		Position[] neighbours = new Position[8];
 		neighbours[0] = new Position(index - 1);
 		neighbours[1] = new Position(index + 1);
