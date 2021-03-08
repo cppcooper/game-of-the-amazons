@@ -8,29 +8,22 @@ import java.util.Queue;
 
 public class Heuristics {
 
-	public static class Data {
-		public int blankCount;
-		public int blockedCount;
-		public int blockedTotal;
-
-		public Data() {
-
-		}
+	public static class CountData {
+		public int blank;
+		public int blocked;
+		public int block_heuristic;
 	}
+
 	private static Queue<Integer> blankspace = new LinkedList<>();
 	private static Queue<Integer> blockedspace = new LinkedList<>();
 	private static int[] visited = new int[121];
 
 	//todo: refactor int[] board => LocalState board
-	public static Data GetCount(LocalState board, int startingPos) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
+	public static CountData GetCount(LocalState board, int startingPos) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
 
-		Data information = new Data();
+		CountData counts = new CountData();
 		int x = startingPos / 11;
 		int y = startingPos - (x * 11);
-
-		int blankcount = 0; //count of blank spaces
-		int blockedcount = 0; //count of blocked off spaces
-		int blockedtotal = 0; //count of blocked off spaces + multipliers
 
 		visited[startingPos] = startingPos;
 		ProcessNeighbours(startingPos, board);
@@ -38,7 +31,7 @@ public class Heuristics {
 		if (!blankspace.isEmpty()) {
 			while (!blankspace.isEmpty()) {
 				int value = blankspace.poll();
-				blankcount++;
+				counts.blank++;
 				ProcessNeighbours(value, board);
 			}
 		}
@@ -48,28 +41,24 @@ public class Heuristics {
 				int value = blockedspace.poll();
 				int qx = value / 11;
 				int qy = value - (qx * 11);
-				blockedcount++;
+				counts.blocked++;
 
 				int dx = Math.abs(x - qx);
 				int dy = Math.abs(y - qy);
 				int max = Math.max(dx,  dy);
 
 				if (max == 1) {
-					blockedtotal += 100*blockedcount;
+					counts.block_heuristic += 100*counts.blocked;
 				}else if (max == 2){
-					blockedtotal += 10*blockedcount;
+					counts.block_heuristic += 10*counts.blocked;
 				}else {
-					blockedtotal += 1*blockedcount;
+					counts.block_heuristic += 1*counts.blocked;
 				}
 
 			}
 		}
 
-		information.blankCount = blankcount;
-		information.blockedCount = blockedcount;
-		information.blockedTotal = blockedtotal;
-
-		return information;
+		return counts;
 
 	}
 
