@@ -1,6 +1,8 @@
 package algorithms.analysis;
 
 import structures.LocalState;
+import structures.Position;
+
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -15,6 +17,9 @@ public class Heuristics {
 
 		}
 	}
+	private static Queue<Integer> blankspace = new LinkedList<>();
+	private static Queue<Integer> blockedspace = new LinkedList<>();
+	private static int[] visited = new int[121];
 
 	//todo: refactor int[] board => LocalState board
 	public static Data GetCount(LocalState board, int startingPos) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
@@ -27,19 +32,14 @@ public class Heuristics {
 		int blockedcount = 0; //count of blocked off spaces
 		int blockedtotal = 0; //count of blocked off spaces + multipliers
 
-		Queue<Integer> blankspace = new LinkedList<Integer>();
-		Queue<Integer> blockedspace = new LinkedList<Integer>();
-		int[] visited = new int[121];
-
 		visited[startingPos] = startingPos;
-
-		GetNearbySpaces(blankspace, blockedspace, visited, board, startingPos);
+		ProcessNeighbours(startingPos, board);
 
 		if (!blankspace.isEmpty()) {
 			while (!blankspace.isEmpty()) {
 				int value = blankspace.poll();
 				blankcount++;
-				GetNearbySpaces(blankspace, blockedspace, visited, board, value);
+				ProcessNeighbours(value, board);
 			}
 		}
 
@@ -76,17 +76,27 @@ public class Heuristics {
 	//todo: refactor method to utilize MoveCompiler class, you'll likely want ScanAllDirections or possibly the other. If you need to operate on the tiles as you iterate, then we can add another variant of those methods and use lambda's to accomplish the end goal
 	// todo: Lambda????
 	// merge GetNeightbours function into this one
-	public static void GetNearbySpaces(Queue<Integer> blankspace, Queue<Integer> blockedspace, int[] visited, LocalState board, int startingpos){
+	protected static void ProcessNeighbours(int index, LocalState board){
+		Position[] neighbours = new Position[8];
+		neighbours[0] = new Position(index - 1);
+		neighbours[1] = new Position(index + 1);
+		neighbours[2] = new Position(index - 12);
+		neighbours[3] = new Position(index - 11);
+		neighbours[4] = new Position(index - 10);
+		neighbours[5] = new Position(index + 10);
+		neighbours[6] = new Position(index + 11);
+		neighbours[7] = new Position(index + 12);
 
-		int[] neighbours = board.GetNeighbours(startingpos);
-		for (int pos: neighbours) {
-			if (visited[pos] == 0) {
-				visited[pos] = pos;
-				int tileValue = board.ReadTile(pos);
-				if(tileValue == 0) {
-					blankspace.offer(pos);
-				}else {
-					blockedspace.offer(pos);
+		for(Position p : neighbours) {
+			if (p.IsValid()) {
+				int neighbour = p.CalculateIndex();
+				if (visited[neighbour] == 0) {
+					visited[neighbour] = neighbour;
+					if (board.ReadTile(neighbour) == 0) {
+						blankspace.offer(neighbour);
+					} else {
+						blockedspace.offer(neighbour);
+					}
 				}
 			}
 		}
