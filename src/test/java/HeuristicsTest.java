@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.apache.commons.math3.util.Precision;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -31,25 +32,14 @@ public class HeuristicsTest {
 				0, 0, 0, 1, 3, 3, 0, 3, 0, 0, 0};
 		
 		int index = 72; //position 6,6
-		
-		try {
-			
-			//Creates new LocalState, sets LocalState board to board shown above
-			LocalState state = new LocalState(new ArrayList<Integer>(Arrays.asList(board)), true);
-			state.DebugPrint();
-			Heuristics.CountData info = Heuristics.GetCount(state, index);
+		Heuristics.CountData info = Heuristics.GetCount(state, index);
 
-			System.out.println(info.blanks);
-			System.out.println(info.blocks);
-			System.out.println(info.blocks_heuristic);
-			
-			assertEquals(42, info.blanks);
-			assertEquals(32, info.blocks);
-			assertEquals(15.529999999999992, info.blocks_heuristic);
-			
-		
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		System.out.println(info.blanks);
+		System.out.println(info.blocks);
+		System.out.println(info.blocks_heuristic);
+
+		assertEquals(42, info.blanks);
+		assertEquals(32, info.blocks);
+		assertEquals(Precision.equals(15.475,info.blocks_heuristic,0.001), true);
 	}
 }
