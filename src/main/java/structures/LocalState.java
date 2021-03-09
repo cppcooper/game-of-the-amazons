@@ -36,12 +36,9 @@ public class LocalState {
 			player2[i] = new BoardPiece(other.player2[i]);
 		}
 	}
-	public LocalState(ArrayList<Integer> state, boolean find_pieces, boolean copy_state) throws Exception {
-		if(state == null){
-			throw new Exception("What did you do!");
-		}
+	public LocalState(ArrayList<Integer> state, boolean find_pieces, boolean copy_state) {
 		PopulateSet();
-		if(copy_state) {
+		if(copy_state && state != null) {
 			board = new ArrayList<>(state);
 		} else {
 			board = state;
