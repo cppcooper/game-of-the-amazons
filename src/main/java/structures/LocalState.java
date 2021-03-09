@@ -14,20 +14,7 @@ public class LocalState {
 	private int hash = -1;
 	private boolean valid_hash = false;
 
-	public LocalState(LocalState other){
-		board = new ArrayList<>(other.board);
-		move_number = other.move_number;
-		valid_hash = other.valid_hash;
-		hash = other.hash;
-		for(int i = 0; i < player1.length; ++i){
-			player1[i] = new BoardPiece(other.player1[i]);
-			player2[i] = new BoardPiece(other.player2[i]);
-		}
-	}
-	public LocalState(ArrayList<Integer> state, boolean find_pieces) throws Exception {
-		if(state == null){
-			throw new Exception("What did you do!");
-		}
+	private void PopulateSet(){
 		if (always_empty == null) {
 			always_empty = new HashSet<>();
 			for(int x = 0; x < 11; ++x){
@@ -38,7 +25,24 @@ public class LocalState {
 				}
 			}
 		}
-		board = new ArrayList<>(state);
+	}
+	public LocalState(LocalState other){
+		board = new ArrayList<>(other.board);
+		move_number = other.move_number;
+		valid_hash = other.valid_hash;
+		hash = other.hash;
+		for(int i = 0; i < player1.length; ++i){
+			player1[i] = new BoardPiece(other.player1[i]);
+			player2[i] = new BoardPiece(other.player2[i]);
+		}
+	}
+	public LocalState(ArrayList<Integer> state, boolean find_pieces, boolean copy_state) {
+		PopulateSet();
+		if(copy_state && state != null) {
+			board = new ArrayList<>(state);
+		} else {
+			board = state;
+		}
 		if(find_pieces) {
 			FindPieces();
 		}
@@ -120,33 +124,6 @@ public class LocalState {
 		for(Position p : neighbours){
 			if(p.IsValid()){
 				valid_neighbours[i++] = p.CalculateIndex();
-			}
-		}
-		return valid_neighbours;
-	}
-	public int[] GetNeighbours(int index, Function<Integer,Boolean> valid_check){
-		Position[] neighbours = new Position[8];
-		neighbours[0] = new Position(index - 1);
-		neighbours[1] = new Position(index + 1);
-		neighbours[2] = new Position(index - 12);
-		neighbours[3] = new Position(index - 11);
-		neighbours[4] = new Position(index - 10);
-		neighbours[5] = new Position(index + 10);
-		neighbours[6] = new Position(index + 11);
-		neighbours[7] = new Position(index + 12);
-
-		int valid_count = 0;
-		for(Position p : neighbours){
-			if(p.IsValid()){
-				valid_count++;
-			}
-		}
-		int[] valid_neighbours = new int[valid_count];
-		int i = 0;
-		for(Position p : neighbours){
-			int idx = p.CalculateIndex(); //index was taken
-			if(p.IsValid() && valid_check.apply(idx)){
-				valid_neighbours[i++] = idx;
 			}
 		}
 		return valid_neighbours;
