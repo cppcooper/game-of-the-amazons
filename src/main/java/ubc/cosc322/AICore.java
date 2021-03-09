@@ -13,27 +13,26 @@ public class AICore {
     private static LocalState current_board_state;
 
     public static void run(){
-        int available_cores = Runtime.getRuntime().availableProcessors();
-        int available_threads = available_cores - 2;
-        ExecutorService sim_pool = Executors.newFixedThreadPool(available_threads > 2 ? available_threads : 2);
-        //todo: integrate heuristics into a processing queue, I think discord has a pin about this
-        Thread heuristics_processor = new Thread();
-        //todo: while there are more Moves to explore, we do so. If there are not, we wait for a new game to start
-        //todo: figure out how to wait for new game to start
         try {
+            int available_cores = Runtime.getRuntime().availableProcessors();
+            int available_threads = available_cores - 2;
+            ExecutorService sim_pool = Executors.newFixedThreadPool(available_threads > 2 ? available_threads : 2);
+            Thread heuristics_processor = new Thread(() -> ProcessHeuristicsQueue());
+            heuristics_processor.run();
+            //todo: figure out how to wait for new game to start
+            //todo: integrate heuristics into a processing queue, I think discord has a pin about this
+            //todo: while there are more Moves to explore, we do so. If there are not, we wait for a new game to start
+
+            //todo: need an exit condition, perhaps we should relaunch when there is a new game?
             heuristics_processor.join();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static synchronized void SetState(ArrayList<Integer> state){
-        try {
-            //todo: if this happens in the middle of a game the turn number will be incorrect, so we need to prevent that potential problem
-            current_board_state = new LocalState(state,true,false); // saves state reference instead of copying
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        //todo: if this happens in the middle of a game the turn number will be incorrect, so we need to prevent that potential problem
+        current_board_state = new LocalState(state,true,false); // saves state reference instead of copying
     }
 
     public static synchronized void UpdateState(final Map<String, Object> msgDetails) {
@@ -48,6 +47,7 @@ public class AICore {
         PruneGameTree();
     }
 
+    //todo: should this make and return a copy? I think so as it makes sense.. but let's wait til we have a use of the function
     private static synchronized LocalState GetState(){
         return current_board_state;
     }
@@ -58,5 +58,9 @@ public class AICore {
 
     private static void PruneGameTree(){
         //todo: check if we should prune the game tree
+    }
+
+    private static void ProcessHeuristicsQueue(){
+
     }
 }
