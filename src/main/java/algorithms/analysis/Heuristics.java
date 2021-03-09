@@ -43,22 +43,7 @@ public class Heuristics {
 
 				//calculate simple distance
 				int max = Math.max(Math.abs(start.x - current.x),  Math.abs(start.y - current.y));
-
-				switch(max){
-					case 1:
-						counts.blocks_heuristic += 10;
-						break;
-					case 2:
-						counts.blocks_heuristic += 1;
-						break;
-					case 3:
-						counts.blocks_heuristic += 0.1;
-						break;
-					default:
-						counts.blocks_heuristic += 0.01;
-						break;
-				}
-
+				counts.blocks_heuristic += 10.0/Math.pow(10,max-1);
 			}
 		}
 
