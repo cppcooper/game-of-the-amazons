@@ -14,20 +14,7 @@ public class LocalState {
 	private int hash = -1;
 	private boolean valid_hash = false;
 
-	public LocalState(LocalState other){
-		board = new ArrayList<>(other.board);
-		move_number = other.move_number;
-		valid_hash = other.valid_hash;
-		hash = other.hash;
-		for(int i = 0; i < player1.length; ++i){
-			player1[i] = new BoardPiece(other.player1[i]);
-			player2[i] = new BoardPiece(other.player2[i]);
-		}
-	}
-	public LocalState(ArrayList<Integer> state, boolean find_pieces) throws Exception {
-		if(state == null){
-			throw new Exception("What did you do!");
-		}
+	private void PopulateSet(){
 		if (always_empty == null) {
 			always_empty = new HashSet<>();
 			for(int x = 0; x < 11; ++x){
@@ -38,7 +25,27 @@ public class LocalState {
 				}
 			}
 		}
-		board = new ArrayList<>(state);
+	}
+	public LocalState(LocalState other){
+		board = new ArrayList<>(other.board);
+		move_number = other.move_number;
+		valid_hash = other.valid_hash;
+		hash = other.hash;
+		for(int i = 0; i < player1.length; ++i){
+			player1[i] = new BoardPiece(other.player1[i]);
+			player2[i] = new BoardPiece(other.player2[i]);
+		}
+	}
+	public LocalState(ArrayList<Integer> state, boolean find_pieces, boolean copy_state) throws Exception {
+		if(state == null){
+			throw new Exception("What did you do!");
+		}
+		PopulateSet();
+		if(copy_state) {
+			board = new ArrayList<>(state);
+		} else {
+			board = state;
+		}
 		if(find_pieces) {
 			FindPieces();
 		}

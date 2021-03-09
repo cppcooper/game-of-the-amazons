@@ -32,7 +32,7 @@ public class HeuristicsTest {
 				0, 0, 0, 1, 3, 3, 0, 3, 0, 0, 0};
 
 		//Creates new LocalState, sets LocalState board to board shown above
-		LocalState state = new LocalState(new ArrayList<Integer>(Arrays.asList(board)), true);
+		LocalState state = new LocalState(new ArrayList<Integer>(Arrays.asList(board)), true, false);
 		state.DebugPrint();
 
 		int index = 72; //position 6,6
