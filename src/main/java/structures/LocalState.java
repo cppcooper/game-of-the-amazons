@@ -124,33 +124,6 @@ public class LocalState {
 		}
 		return valid_neighbours;
 	}
-	public int[] GetNeighbours(int index, Function<Integer,Boolean> valid_check){
-		Position[] neighbours = new Position[8];
-		neighbours[0] = new Position(index - 1);
-		neighbours[1] = new Position(index + 1);
-		neighbours[2] = new Position(index - 12);
-		neighbours[3] = new Position(index - 11);
-		neighbours[4] = new Position(index - 10);
-		neighbours[5] = new Position(index + 10);
-		neighbours[6] = new Position(index + 11);
-		neighbours[7] = new Position(index + 12);
-
-		int valid_count = 0;
-		for(Position p : neighbours){
-			if(p.IsValid()){
-				valid_count++;
-			}
-		}
-		int[] valid_neighbours = new int[valid_count];
-		int i = 0;
-		for(Position p : neighbours){
-			int idx = p.CalculateIndex(); //index was taken
-			if(p.IsValid() && valid_check.apply(idx)){
-				valid_neighbours[i++] = idx;
-			}
-		}
-		return valid_neighbours;
-	}
 
 	public void MakeMove(Move move, boolean update_pieces) {
 		if(move.IsValidFor(this)) {
