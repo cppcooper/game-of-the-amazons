@@ -14,7 +14,7 @@ class MoveCompilerTester {
         RandomGen rng = new RandomGen();
         ArrayList<Integer> arr = rng.GetRandomState();
         try {
-            LocalState board = new LocalState(arr,false);
+            LocalState board = new LocalState(arr,false,false);
             board.SetTile(3,3,1);
             board.SetTile(4,4,1);
             board.SetTile(6,5,1);

@@ -30,7 +30,7 @@ public class AICore {
     public static synchronized void SetState(ArrayList<Integer> state){
         try {
             //todo: if this happens in the middle of a game the turn number will be incorrect, so we need to prevent that potential problem
-            current_board_state = new LocalState(state,true);
+            current_board_state = new LocalState(state,true,false); // saves state reference instead of copying
         } catch (Exception e) {
             e.printStackTrace();
         }

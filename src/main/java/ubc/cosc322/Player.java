@@ -63,12 +63,12 @@ public class Player extends GamePlayer{
 		if (messageType.equals("cosc322.game-action.move")) {
 			//todo: test if this executes for both player's turns
 			//our_turn.set(true);
-			AICore.UpdateState(msgDetails);
 			gamegui.updateGameState(msgDetails);
+			AICore.UpdateState(msgDetails);
 		} else if (messageType.equals("cosc322.game-state.board")) {
 			ArrayList<Integer> state = (ArrayList<Integer>) msgDetails.get("game-state");
-			AICore.SetState(state);
-			gamegui.setGameState(state);
+			gamegui.setGameState(state); //doesn't keep the state reference
+			AICore.SetState(state); //should be fine if we have this call stack save the state reference
 		} else {
 			if(userName.equals(msgDetails.get("player-white"))){
 				our_turn.set(true);
