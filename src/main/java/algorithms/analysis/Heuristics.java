@@ -46,9 +46,7 @@ public class Heuristics {
 				counts.blocks_heuristic += 10.0/Math.pow(10,max-1);
 			}
 		}
-
 		return counts;
-
 	}
 
 	protected static void QueueNeighbours(CountingAlgorithmData data, int index, LocalState board){
