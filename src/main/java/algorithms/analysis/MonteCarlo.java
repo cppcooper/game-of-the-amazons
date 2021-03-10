@@ -38,7 +38,8 @@ public class MonteCarlo {
         ArrayList<GameTreeNode> simulated_nodes = new ArrayList<>(branches);
         if(depth > 0) {
             player = player == 1 ? 2 : 1;
-            List<Move> moves = MoveCompiler.GetMoveList(board, player == 1 ? board.GetP1Pieces() : board.GetP2Pieces());
+            ArrayList<Move> moves = MoveCompiler.GetMoveList(board, player == 1 ? board.GetP1Pieces() : board.GetP2Pieces());
+            moves = PruneMoves(moves,new TreePolicy(0,0));
             List<Integer> rng_set = rng.GetSequenceShuffled(0, moves.size(), branches);
             for (int b = 0; b < branches; ++b) {
                 /* Copy board
@@ -71,7 +72,7 @@ public class MonteCarlo {
     }
 
     protected static class TreePolicy{
-
+        TreePolicy(float a,int b){}
     }
 
     protected ArrayList<Move> PruneMoves(ArrayList<Move> moves, TreePolicy tree_policy){
