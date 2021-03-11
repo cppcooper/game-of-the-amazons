@@ -61,7 +61,7 @@ public class Player extends GamePlayer{
     	//see the method GamePlayer.handleGameMessage() in the game-client-api document.
 		//
 		if (messageType.equals("cosc322.game-action.move")) {
-			//todo: test if this executes for both player's turns
+			// todo (3): test if this executes for both player's turns
 			//our_turn.set(true);
 			gamegui.updateGameState(msgDetails);
 			AICore.UpdateState(msgDetails);
