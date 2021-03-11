@@ -19,11 +19,11 @@ public class AICore {
             ExecutorService sim_pool = Executors.newFixedThreadPool(available_threads > 2 ? available_threads : 2);
             Thread heuristics_processor = new Thread(() -> ProcessHeuristicsQueue());
             heuristics_processor.run();
-            //todo (3): figure out how to wait for new game to start
-            //todo (2): integrate heuristics into a processing queue, I think discord has a pin about this
-            //todo (1): while there are more Moves to explore, we do so. If there are not, we wait for a new game to start
+            // todo (3): figure out how to wait for new game to start
+            // todo (2): integrate heuristics into a processing queue, I think discord has a pin about this
+            // todo (1): while there are more Moves to explore, we do so. If there are not, we wait for a new game to start
 
-            //todo (3): need an exit condition, perhaps we should relaunch when there is a new game?
+            // todo (3): need an exit condition, perhaps we should relaunch when there is a new game?
             heuristics_processor.join();
         } catch (Exception e) {
             e.printStackTrace();
@@ -31,7 +31,7 @@ public class AICore {
     }
 
     public static synchronized void SetState(ArrayList<Integer> state){
-        //todo (3): if this happens in the middle of a game the turn number will be incorrect, so we need to prevent that potential problem
+        // todo (3): if this happens in the middle of a game the turn number will be incorrect, so we need to prevent that potential problem
         current_board_state = new LocalState(state,true,false); // saves state reference instead of copying
     }
 
@@ -47,9 +47,9 @@ public class AICore {
         PruneGameTree();
     }
 
-    //todo: should this make and return a copy? I think so as it makes sense.. but let's wait til we have a use of the function
+    // todo (6): verify this needs to return a copy of the state
     private static synchronized LocalState GetState(){
-        return current_board_state;
+        return new LocalState(current_board_state);
     }
 
     public static Move GetBestMove(){
@@ -57,7 +57,7 @@ public class AICore {
     }
 
     private static void PruneGameTree(){
-        //todo: check if we should prune the game tree
+        // todo (4): implement/ check if we should prune the game tree
     }
 
     private static void ProcessHeuristicsQueue(){

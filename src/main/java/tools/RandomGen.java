@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 public class RandomGen extends Random {
 
     public List<Integer> GetSequenceShuffled(int min, int max, int N){
-        //todo: benchmark versus simpler sequence generator/shuffler
+        // todo (10): benchmark versus simpler sequence generator/shuffler. This isn't useful to the AI, so this is purely after the fact for funsies
         return ints(min,max).distinct()
                 .limit(N).boxed().collect(Collectors.toList());
     }

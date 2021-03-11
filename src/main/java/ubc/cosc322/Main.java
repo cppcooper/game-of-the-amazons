@@ -19,16 +19,16 @@ public class Main {
                 Thread ai_thread = new Thread(() -> AICore.run());
                 ai_thread.run();
 
-                /* todo comments have a numeric priority
+                /* todo-comments have a numeric priority
                 * the highest priority tasks have a value of 1
                 * */
 
                 // todo (1): write game loop
                 //while(...)
-                // todo: determine game over condition/event/etc.
-                // todo: figure out how to wait/start new game after game over
+                // todo (4): determine game over condition/event/etc.
+                // todo (4): figure out how to wait/start new game after game over
                 while(player.our_turn.get()){
-                    // todo(2): sleep up to 29.5s
+                    // todo (2): sleep up to 29.5s
                     Move m = AICore.GetBestMove();
                     // todo (2): 1) construct move message. 2) send move message
                     //player.getGameClient().sendMoveMessage(...);
