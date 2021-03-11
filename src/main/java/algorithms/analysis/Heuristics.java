@@ -19,6 +19,8 @@ public class Heuristics {
 		public double blocks_heuristic;
 	}
 
+	// todo (4): implement improved heuristics
+
 	public static CountData GetCount(LocalState board, int startingPos) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
 		CountData counts = new CountData();
 		CountingAlgorithmData data = new CountingAlgorithmData();

@@ -19,11 +19,11 @@ public class AICore {
             ExecutorService sim_pool = Executors.newFixedThreadPool(available_threads > 2 ? available_threads : 2);
             Thread heuristics_processor = new Thread(() -> ProcessHeuristicsQueue());
             heuristics_processor.run();
-            //todo: figure out how to wait for new game to start
-            //todo: integrate heuristics into a processing queue, I think discord has a pin about this
-            //todo: while there are more Moves to explore, we do so. If there are not, we wait for a new game to start
+            //todo (3): figure out how to wait for new game to start
+            //todo (2): integrate heuristics into a processing queue, I think discord has a pin about this
+            //todo (1): while there are more Moves to explore, we do so. If there are not, we wait for a new game to start
 
-            //todo: need an exit condition, perhaps we should relaunch when there is a new game?
+            //todo (3): need an exit condition, perhaps we should relaunch when there is a new game?
             heuristics_processor.join();
         } catch (Exception e) {
             e.printStackTrace();
@@ -31,7 +31,7 @@ public class AICore {
     }
 
     public static synchronized void SetState(ArrayList<Integer> state){
-        //todo: if this happens in the middle of a game the turn number will be incorrect, so we need to prevent that potential problem
+        //todo (3): if this happens in the middle of a game the turn number will be incorrect, so we need to prevent that potential problem
         current_board_state = new LocalState(state,true,false); // saves state reference instead of copying
     }
 
