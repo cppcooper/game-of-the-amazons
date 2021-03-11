@@ -26,7 +26,7 @@ public class MonteCarlo {
         if(sim_root != null){
             sim_root.adoptAll(children);
         }
-        //todo: determine if we should worry about null root nodes? (it probably just means our opponent made a move, and we had not simulated it)
+        //todo (5): determine if we should worry about null root nodes? (it probably just means our opponent made a move, and we had not simulated it)
     }
 
     protected ArrayList<GameTreeNode> RunSimulation(RandomGen rng, LocalState board, int player, int branches, int depth){
@@ -59,7 +59,7 @@ public class MonteCarlo {
                 if (node == null) {
                     node = new GameTreeNode(m);
                     GameTree.put(state, node);
-                    //todo: add something to concurrent queue for heuristics processing. Probably need both the state and node..
+                    //todo (2): add something to concurrent queue for heuristics processing. Probably need both the state and node..
                 }
                 simulated_nodes.add(node);
 
@@ -76,7 +76,7 @@ public class MonteCarlo {
     }
 
     protected ArrayList<Move> PruneMoves(ArrayList<Move> moves, TreePolicy tree_policy){
-        //todo: implement tree policy stuff
+        //todo (4): implement tree policy and stuff (ie. this function)
 
         /* This function should prune the move list such that we're left with X number of moves
         * X/2 should be moves that consider the most promising branches to explore
