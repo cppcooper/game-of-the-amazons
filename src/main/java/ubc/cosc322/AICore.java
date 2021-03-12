@@ -20,8 +20,10 @@ public class AICore {
             Thread heuristics_processor = new Thread(() -> ProcessHeuristicsQueue());
             heuristics_processor.run();
             // todo (3): figure out how to wait for new game to start
-            // todo (2): integrate heuristics into a processing queue, I think discord has a pin about this
-            // todo (1): while there are more Moves to explore, we do so. If there are not, we wait for a new game to start
+            // todo (3): find a faster way to: while there are more Moves to explore, we do so. If there are not, we wait for a new game to start
+            while(PlayersHaveMoves()){
+
+            }
 
             // todo (3): need an exit condition, perhaps we should relaunch when there is a new game?
             heuristics_processor.join();
@@ -52,6 +54,10 @@ public class AICore {
         return new LocalState(current_board_state);
     }
 
+    private static synchronized boolean PlayersHaveMoves(){
+        return !current_board_state.IsGameOver();
+    }
+
     public static Move GetBestMove(){
         return null;
     }
@@ -61,6 +67,6 @@ public class AICore {
     }
 
     private static void ProcessHeuristicsQueue(){
-
+        // todo (2): integrate heuristics into a processing queue, I think discord has a pin about this
     }
 }

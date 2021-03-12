@@ -10,6 +10,9 @@ public class LocalState {
 	private final ArrayList<Integer> board;
 	private final BoardPiece[] player1 = new BoardPiece[4];
 	private final BoardPiece[] player2 = new BoardPiece[4];
+	private boolean state_analyzed = false;
+	private boolean p1_has_moves = true;
+	private boolean p2_has_moves = true;
 	private int move_number = 1;
 	private int hash = -1;
 	private boolean valid_hash = false;
@@ -127,6 +130,51 @@ public class LocalState {
 			}
 		}
 		return valid_neighbours;
+	}
+
+	public void SetHasMoves(boolean p1, boolean p2){
+		p1_has_moves = p1;
+		p2_has_moves = p2;
+		state_analyzed = true;
+	}
+
+	public boolean PlayerHasMoves(int player_num){
+		if(state_analyzed){
+			if(player_num == 1){
+				return p1_has_moves;
+			} else {
+				return p2_has_moves;
+			}
+		}
+		Function<Integer, Boolean> has_a_move = index -> {
+			Position[] neighbours = new Position[8];
+			neighbours[0] = new Position(index - 1);
+			neighbours[1] = new Position(index + 1);
+			neighbours[2] = new Position(index - 12);
+			neighbours[3] = new Position(index - 11);
+			neighbours[4] = new Position(index - 10);
+			neighbours[5] = new Position(index + 10);
+			neighbours[6] = new Position(index + 11);
+			neighbours[7] = new Position(index + 12);
+
+			for(Position p : neighbours){
+				if(p.IsValid() && ReadTile(p.CalculateIndex()) == 0){
+					return true;
+				}
+			}
+			return false;
+		};
+		var pieces = player_num == 1 ? player1 : player2;
+		for(int i = 0; i < pieces.length; ++i){
+			if(has_a_move.apply(pieces[i].pos.CalculateIndex())){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean IsGameOver(){
+		return !PlayerHasMoves(1) || !PlayerHasMoves(2);
 	}
 
 	public void MakeMove(Move move, boolean update_pieces) {
