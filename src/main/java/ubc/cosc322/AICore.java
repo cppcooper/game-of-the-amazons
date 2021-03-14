@@ -3,16 +3,57 @@ package ubc.cosc322;
 import structures.LocalState;
 import structures.Move;
 import structures.Position;
+import ygraph.ai.smartfox.games.BaseGameGUI;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class AICore {
-    private static LocalState current_board_state;
+    private static LocalState current_board_state = null;
+    private static Player player = null;
 
-    public static void run(){
+    public static void main(String[] args){
+        if(args.length >= 2) {
+            try {
+                player = new Player(args[0], args[1]);
+                BaseGameGUI.sys_setup();
+                java.awt.EventQueue.invokeLater(new Runnable() {
+                    public void run() {
+                        player.Go();
+                    }
+                });
+                Thread ai_thread = new Thread(() -> AICore.run());
+                ai_thread.run();
+
+                while(true){
+                    // todo (4): figure out how to wait/start new game after game over
+                    // todo (4): verify game over condition/event/etc.
+                    while(PlayersHaveMoves()){
+                        if(player.our_turn.get()) {
+                            Thread.sleep(749*40); // 749ms x 40 = 29.96 seconds
+                            player.getGameClient().sendMoveMessage(MakeMessage(AICore.GetBestMove()));
+                        }
+                        Thread.sleep(750); // 750ms x 40 = 30 seconds
+                    }
+                    // todo (4): figure out how to detect a termination condition
+                    if(false){
+                        break;
+                    }
+                }
+                ai_thread.join();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Command line arguments missing.");
+        }
+    }
+
+    private static void run(){
         try {
             int available_cores = Runtime.getRuntime().availableProcessors();
             int available_threads = available_cores - 2;
@@ -30,6 +71,10 @@ public class AICore {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static void ProcessHeuristicsQueue(){
+        // todo (2): integrate heuristics into a processing queue, I think discord has a pin about this
     }
 
     public static synchronized void SetState(ArrayList<Integer> state){
@@ -58,15 +103,25 @@ public class AICore {
         return !current_board_state.IsGameOver();
     }
 
-    public static Move GetBestMove(){
+    private static Move GetBestMove(){
         return null;
+    }
+
+    private static Map<String,Object> MakeMessage(Move move){
+        Position start = new Position(move.start);
+        Position next = new Position(move.piece);
+        Position arrow = new Position(move.arrow);
+        ArrayList<Integer> msg_start = new ArrayList(Arrays.asList(new int[]{start.x,start.y}));//)msgDetails.get("queen-position-current");
+        ArrayList<Integer> msg_next = new ArrayList(Arrays.asList(new int[]{next.x,next.y}));;//("queen-position-next");
+        ArrayList<Integer> msg_arrow = new ArrayList(Arrays.asList(new int[]{arrow.x,arrow.y}));//("arrow-position");
+        Map<String, Object> msg = new HashMap<>();
+        msg.put("queen-position-current",msg_start);
+        msg.put("queen-position-next",msg_next);
+        msg.put("arrow-position",msg_arrow);
+        return msg;
     }
 
     private static void PruneGameTree(){
         // todo (4): implement/ check if we should prune the game tree
-    }
-
-    private static void ProcessHeuristicsQueue(){
-        // todo (2): integrate heuristics into a processing queue, I think discord has a pin about this
     }
 }
