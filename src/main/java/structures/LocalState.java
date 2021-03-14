@@ -14,6 +14,7 @@ public class LocalState {
 	private boolean p1_has_moves = true;
 	private boolean p2_has_moves = true;
 	private int move_number = 1;
+	private int player_turn = 1;
 	private int hash = -1;
 	private boolean valid_hash = false;
 
@@ -182,12 +183,16 @@ public class LocalState {
 			int player = ReadTile(move.start);
 			if (update_pieces) {
 				BoardPiece[] arr = null;
-				if (player == 1) {
-					arr = player1;
-				} else if (player == 2) {
-					arr = player2;
+				switch(player) {
+					case 1:
+						arr = player1;
+						break;
+					case 2:
+						arr = player2;
+						break;
+					default:
+						return;
 				}
-				assert arr != null;
 				for (BoardPiece p : arr) {
 					if (p.pos.CalculateIndex() == move.start) {
 						p.pos = new Position(move.piece);
@@ -198,6 +203,7 @@ public class LocalState {
 			SetTile(move.start, 0);
 			SetTile(move.arrow, 3);
 			move_number++;
+			player_turn = (move_number % 2) + 1;
 			if(valid_hash){
 				valid_hash = false;
 			}
@@ -206,6 +212,16 @@ public class LocalState {
 
 	public int GetMoveNumber(){
 		return move_number;
+	}
+
+	public BoardPiece[] GetTurnPieces(){
+		switch(player_turn){
+			case 1:
+				return player1;
+			case 2:
+				return player2;
+		}
+		return null;
 	}
 
 	public int hashCode(){

@@ -6,9 +6,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import ygraph.ai.smartfox.games.BaseGameGUI;
-import ygraph.ai.smartfox.games.GameClient;
-import ygraph.ai.smartfox.games.GamePlayer;
+import ygraph.ai.smartfox.games.*;
 
 /**
  * An example illustrating how to implement a GamePlayer
@@ -16,12 +14,12 @@ import ygraph.ai.smartfox.games.GamePlayer;
  * Jan 5, 2021
  *
  */
-public class Player extends GamePlayer{
+public class AIPlayer extends GamePlayer{
 
     private GameClient gameClient = null; 
     private BaseGameGUI gamegui = null;
-    public AtomicBoolean our_turn = new AtomicBoolean(false);
-    public AtomicInteger player_num = new AtomicInteger(-1);
+    final public AtomicBoolean our_turn = new AtomicBoolean(false);
+    final public AtomicInteger player_num = new AtomicInteger(-1);
 
 
 	
@@ -33,7 +31,7 @@ public class Player extends GamePlayer{
      * @param userName
       * @param passwd
      */
-    public Player(String userName, String passwd) {
+    public AIPlayer(String userName, String passwd) {
     	this.userName = userName;
     	this.passwd = passwd;
     	
@@ -54,29 +52,28 @@ public class Player extends GamePlayer{
 
     @Override
     public boolean handleGameMessage(String messageType, Map<String, Object> msgDetails) {
-    	//This method will be called by the GameClient when it receives a game-related message
-    	//from the server.
-
-    	//For a detailed description of the message types and format, 
-    	//see the method GamePlayer.handleGameMessage() in the game-client-api document.
-		//
-		if (messageType.equals("cosc322.game-action.move")) {
-			// todo (3): test if this executes for both player's turns
-			//our_turn.set(true);
+		System.out.printf("message type: %s\n",messageType);
+		if (messageType.equals(GameMessage.GAME_ACTION_MOVE)) {
+			our_turn.set(true);
 			gamegui.updateGameState(msgDetails);
 			AICore.UpdateState(msgDetails);
-		} else if (messageType.equals("cosc322.game-state.board")) {
+			// todo (1): start new simulation, and interrupt AICore::run thread (needs to restart from current state, and also avoid re-simulating)
+			// todo (2): detect if game is over, if yes then terminate necessary threads
+		} else if (messageType.equals(GameMessage.GAME_STATE_BOARD)) {
 			ArrayList<Integer> state = (ArrayList<Integer>) msgDetails.get("game-state");
 			gamegui.setGameState(state); //doesn't keep the state reference
 			AICore.SetState(state); //should be fine if we have this call stack save the state reference
-		} else {
+			// todo (1): start AICore::run (should perform exhaustive breadth first search)
+		} else if (messageType.equals(GameMessage.GAME_ACTION_START)) {
 			if(userName.equals(msgDetails.get("player-white"))){
 				our_turn.set(true);
 			}
 			player_num.set(our_turn.get() ? 1 : 2);
+		} else if (messageType.equals("user-count-change")) {
+			gamegui.setRoomInformation(this.gameClient.getRoomList());
 		}
-    	return true;
-    }
+		return true;
+	}
     
     
     @Override
