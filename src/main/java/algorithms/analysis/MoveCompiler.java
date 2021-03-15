@@ -17,15 +17,24 @@ public class MoveCompiler {
         }
         // Getting the available positions for a piece to move to
         int [][] open_piece_positions = GetOpenPositions(board,piece_indices); //values of -1 are invalid elements, to be ignored
+        if(Thread.currentThread().isInterrupted()) {
+            return null; // there are no moves to return yet
+        }
         for(int piece_i = 0; piece_i < piece_indices.length; ++piece_i){
             // Getting the available positions for an arrow from all the positions a piece could shoot from
             int[][] all_arrow_positions = GetOpenPositions(board,open_piece_positions[piece_i]);
+            if(Thread.currentThread().isInterrupted()){
+                return null; // there are no moves to return yet
+            }
             //Time to construct Moves
             //but first, check that the open positions for this piece isn't null/empty
             if(open_piece_positions[piece_i] != null) {
                 //start iterating position/arrow combinations
                 for (int position_j = 0; position_j < open_piece_positions[piece_i].length; ++position_j) {
                     for (int arrow_k = 0; arrow_k < all_arrow_positions[position_j].length; ++arrow_k) {
+                        if(Thread.currentThread().isInterrupted()){
+                            return null; // the caller is not going to be doing anything with the moves anyway
+                        }
                         //check that the arrow array for this position isn't null/empty
                         if (all_arrow_positions[position_j] != null) {
                             all_moves.add(new Move(piece_indices[piece_i], open_piece_positions[piece_i][position_j], all_arrow_positions[position_j][arrow_k]));
@@ -42,7 +51,7 @@ public class MoveCompiler {
         if(starting_positions != null) {
             int[][] all_moves = new int[starting_positions.length][];
             for (int i = 0; i < starting_positions.length; ++i) {
-                if (starting_positions[i] < 0) {
+                if (starting_positions[i] < 0 || Thread.currentThread().isInterrupted()){
                     break; // -1 marks the end of valid values
                 }
                 all_moves[i] = ScanAllDirections(board, starting_positions[i]);
@@ -78,13 +87,17 @@ public class MoveCompiler {
 
     //this has been optimized to death
     public static int ScanDirection(int[] moves, int start_index, LocalState board, int x, int y, int xi, int yi){
+        if(Thread.currentThread().isInterrupted()){
+            return 0;
+        }
         x += xi;
         y += yi;
         int i = start_index;
-        Function<Integer, Boolean> check_in_range = (v) -> {
-            return (v < 11 && v > 0);
-        }; //JVM should inline this =)
+        Function<Integer, Boolean> check_in_range = (v) -> (v < 11 && v > 0); //JVM should inline this =)
         while(check_in_range.apply(x) && check_in_range.apply(y)){
+            if(Thread.currentThread().isInterrupted()){
+                break;
+            }
             int index = Position.CalculateIndex(x,y);
             if(board.ReadTile(index) != 0){
                 break;
