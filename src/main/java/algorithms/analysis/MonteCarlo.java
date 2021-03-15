@@ -13,35 +13,42 @@ public class MonteCarlo {
     public static class SimPolicy{
         public int branches = 1;
         public int depth = 1;
-        SimPolicy(int branches, int depth){
+        public SimPolicy(int branches, int depth){
             this.branches = branches;
             this.depth = depth;
         }
     }
 
-    public void RunSimulation(LocalState board, int player, SimPolicy sim_policy) {
+    public static boolean RunSimulation(LocalState board, int player, SimPolicy sim_policy) {
         RandomGen rng = new RandomGen();
         GameTreeNode sim_root = GameTree.get(board);
         var children = RunSimulation(rng, board, player, sim_policy.branches, sim_policy.depth);
         if(sim_root != null){
+            // todo (5): determine if we should worry about null root nodes? (it probably just means our opponent made a move, and we had not simulated it)
             sim_root.adoptAll(children);
         }
-        // todo (5): determine if we should worry about null root nodes? (it probably just means our opponent made a move, and we had not simulated it)
+        return !Thread.interrupted(); //Assuming execution was interrupted then we need to clear that flag, and restart from the current LocalState
     }
 
-    protected ArrayList<GameTreeNode> RunSimulation(RandomGen rng, LocalState board, int player, int branches, int depth){
+    protected static ArrayList<GameTreeNode> RunSimulation(RandomGen rng, LocalState board, int player, int branches, int depth){
         /* Simulate X branches at Y depths
          * simulate X branches
          ** On each branch simulate X branches
          * repeat until at Y depth
          * */
         ArrayList<GameTreeNode> simulated_nodes = new ArrayList<>(branches);
-        if(depth > 0) {
+        if(depth > 0 && !board.IsGameOver() && !Thread.currentThread().isInterrupted()) {
             player = player == 1 ? 2 : 1;
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, player == 1 ? board.GetP1Pieces() : board.GetP2Pieces());
             moves = PruneMoves(moves,new TreePolicy(0,0));
-            List<Integer> rng_set = rng.GetSequenceShuffled(0, moves.size(), branches);
-            for (int b = 0; b < branches; ++b) {
+            if(moves == null){
+                return null;
+            }
+            List<Integer> rng_set = rng.GetSequenceShuffled(0, moves.size(), Math.min(branches, moves.size()));
+            for (int b = 0; b < branches && b < moves.size(); ++b) {
+                if(Thread.currentThread().isInterrupted()){
+                    break;
+                }
                 /* Copy board
                  * Perform move on board's copy
                  * Check if GameTree has this board state already
@@ -55,7 +62,7 @@ public class MonteCarlo {
                 Move m = moves.get(rng_set.get(b));
                 state.MakeMove(m, true);
 
-                GameTreeNode node = GameTree.get(state);
+                GameTreeNode node = GameTree.get(state); // GameTreeNode might already exist for this state [original_state + move]
                 if (node == null) {
                     node = new GameTreeNode(m);
                     GameTree.put(state, node);
@@ -75,7 +82,7 @@ public class MonteCarlo {
         TreePolicy(float a,int b){}
     }
 
-    protected ArrayList<Move> PruneMoves(ArrayList<Move> moves, TreePolicy tree_policy){
+    protected static ArrayList<Move> PruneMoves(ArrayList<Move> moves, TreePolicy tree_policy){
         // todo (4): implement tree policy and stuff (ie. this function)
 
         /* This function should prune the move list such that we're left with X number of moves
@@ -86,6 +93,6 @@ public class MonteCarlo {
         * Additionally the GameTree will likely need refactoring
         * Perhaps not though.
         * */
-        return null;
+        return moves;
     }
 }
