@@ -3,7 +3,6 @@ package ubc.cosc322;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import ygraph.ai.smartfox.games.*;
@@ -60,7 +59,7 @@ public class AIPlayer extends GamePlayer{
 			AICore.InterruptSimulations();
 
 			// queue sending a move (this new thread will wait for 29.96 seconds and then send a move to the server)
-			Thread move_sender_orphan = new Thread(AICore::SendMessage);
+			Thread move_sender_orphan = new Thread(AICore::SendDelayedMessage);
 			move_sender_orphan.start(); //orphan will clean itself up (as a good orphan should) when execution is done, no joining or stopping necessary
 		} else if (messageType.equals(GameMessage.GAME_STATE_BOARD)) {
 			ArrayList<Integer> state = (ArrayList<Integer>) msgDetails.get("game-state");
@@ -74,7 +73,7 @@ public class AIPlayer extends GamePlayer{
 			boolean our_turn = false;
 			if(userName.equals(msgDetails.get("player-white"))){
 				our_turn = true;
-				Thread move_sender_orphan = new Thread(AICore::SendMessage);
+				Thread move_sender_orphan = new Thread(AICore::SendDelayedMessage);
 				move_sender_orphan.start(); //orphan will clean itself up (as a good orphan should) when execution is done, no joining or stopping necessary
 			}
 			player_num.set(our_turn ? 1 : 2);
