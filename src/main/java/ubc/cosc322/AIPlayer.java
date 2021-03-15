@@ -18,7 +18,6 @@ public class AIPlayer extends GamePlayer{
 
     private GameClient gameClient = null; 
     private BaseGameGUI gamegui = null;
-    final public AtomicBoolean our_turn = new AtomicBoolean(false);
     final public AtomicInteger player_num = new AtomicInteger(-1);
 
 
@@ -54,21 +53,31 @@ public class AIPlayer extends GamePlayer{
     public boolean handleGameMessage(String messageType, Map<String, Object> msgDetails) {
 		System.out.printf("message type: %s\n",messageType);
 		if (messageType.equals(GameMessage.GAME_ACTION_MOVE)) {
-			our_turn.set(true);
 			gamegui.updateGameState(msgDetails);
 			AICore.UpdateState(msgDetails);
-			// todo (1): start new simulation, and interrupt AICore::run thread (needs to restart from current state, and also avoid re-simulating)
-			// todo (2): detect if game is over, if yes then terminate necessary threads
+
+			// interrupt the monte carlo algorithms to restart from our current state
+			AICore.InterruptSimulations();
+
+			// queue sending a move (this new thread will wait for 29.96 seconds and then send a move to the server)
+			Thread move_sender_orphan = new Thread(AICore::SendMessage);
+			move_sender_orphan.start(); //orphan will clean itself up (as a good orphan should) when execution is done, no joining or stopping necessary
 		} else if (messageType.equals(GameMessage.GAME_STATE_BOARD)) {
 			ArrayList<Integer> state = (ArrayList<Integer>) msgDetails.get("game-state");
-			gamegui.setGameState(state); //doesn't keep the state reference
-			AICore.SetState(state); //should be fine if we have this call stack save the state reference
-			// todo (1): start AICore::run (should perform exhaustive breadth first search)
+			gamegui.setGameState(state); //doesn't save the state reference
+			AICore.SetState(state); //saves the state reference
+
+			// we have a board, doesn't matter if the game has started.. we can start the monte carlo simulations
+			AICore.TerminateThreads();
+			AICore.LaunchThreads();
 		} else if (messageType.equals(GameMessage.GAME_ACTION_START)) {
+			boolean our_turn = false;
 			if(userName.equals(msgDetails.get("player-white"))){
-				our_turn.set(true);
+				our_turn = true;
+				Thread move_sender_orphan = new Thread(AICore::SendMessage);
+				move_sender_orphan.start(); //orphan will clean itself up (as a good orphan should) when execution is done, no joining or stopping necessary
 			}
-			player_num.set(our_turn.get() ? 1 : 2);
+			player_num.set(our_turn ? 1 : 2);
 		} else if (messageType.equals("user-count-change")) {
 			gamegui.setRoomInformation(this.gameClient.getRoomList());
 		}
