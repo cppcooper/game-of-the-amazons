@@ -6,7 +6,7 @@ public class GameTree {
     private static final ConcurrentHashMap<Integer,
             ConcurrentHashMap<LocalState,GameTreeNode>> game_tree = new ConcurrentHashMap<>();
 
-    /* todo (2): provide way to find Best Move, (read more below)
+    /* todo (1): provide way to find Best Move, (read more below)
     * There are basically two primary ways to go about this
     *  1) provide pre-processing which allows fast lookup of the Best Move
     *  2) search the game tree for the Best Move

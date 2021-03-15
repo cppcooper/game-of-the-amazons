@@ -96,12 +96,14 @@ public class AICore {
     }
 
     private static void ProcessHeuristicsQueue() {
-        // todo (2): integrate heuristics into a processing queue, I think discord has a pin about this
+        // todo (1): implement queue and processor's control structures (including thread interrupt handling)
+        // todo (1): integrate heuristic calculations with.. GameTree? with something (this involves the GetBestMove task)
+        // todo (1): integrate queue with suppliers (ie. monte carlo simulations)
     }
 
     public static void SendMessage() {
         try {
-            // todo (3): refactor GetBestMove/SendMessage.. perhaps instead of waiting for 29.96 seconds we should constantly run GetBestMove (timing it) and then send the best move we can find moments before our time runs out.. this might be good if GetBestMove takes a fair amount of time to execute
+            // todo (2): refactor GetBestMove/SendMessage..? perhaps instead of waiting for 29.96 seconds we should constantly run GetBestMove (timing it) and then send the best move we can find moments before our time runs out.. this might be good if GetBestMove takes a fair amount of time to execute
             Thread.sleep(749 * 40);
             player.getGameClient().sendMoveMessage(MakeMessage(GetBestMove()));
         } catch (Exception e) {
@@ -150,7 +152,7 @@ public class AICore {
         PruneGameTree();
     }
 
-    // todo (6): verify this needs to return a copy of the state
+    // todo (3): verify this needs to return a copy of the state, (find usages) -> (do usages modify internal state)
     private static synchronized LocalState GetStateCopy() {
         return new LocalState(current_board_state);
     }
