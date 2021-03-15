@@ -214,6 +214,10 @@ public class LocalState {
 		return move_number;
 	}
 
+	public int GetPlayerTurn(){
+		return player_turn;
+	}
+
 	public BoardPiece[] GetTurnPieces(){
 		switch(player_turn){
 			case 1:

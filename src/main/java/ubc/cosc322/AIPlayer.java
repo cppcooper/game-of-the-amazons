@@ -78,6 +78,8 @@ public class AIPlayer extends GamePlayer{
 				move_sender_orphan.start(); //orphan will clean itself up (as a good orphan should) when execution is done, no joining or stopping necessary
 			}
 			player_num.set(our_turn ? 1 : 2);
+		} else if (messageType.equals(GameMessage.GAME_STATE_PLAYER_LOST)) {
+			AICore.TerminateThreads();
 		} else if (messageType.equals("user-count-change")) {
 			gamegui.setRoomInformation(this.gameClient.getRoomList());
 		}
