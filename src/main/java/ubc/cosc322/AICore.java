@@ -1,5 +1,6 @@
 package ubc.cosc322;
 
+import algorithms.analysis.MonteCarlo;
 import structures.LocalState;
 import structures.Move;
 import structures.Position;
@@ -9,12 +10,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AICore {
     private static LocalState current_board_state = null;
     private static AIPlayer player = null;
+    private static Thread mc_sim_thread1 = null;
+    private static Thread mc_sim_thread2 = null;
+    private static Thread heuristics_thread = null;
+    private static AtomicBoolean terminate_threads = new AtomicBoolean(false);
 
     public static void main(String[] args) {
         if (args.length >= 2) {
@@ -26,23 +30,7 @@ public class AICore {
                         player.Go();
                     }
                 });
-                Thread ai_thread = new Thread(AICore::run);
-                ai_thread.run();
 
-                while (!IsTerminating()) {
-                    // todo (4): figure out how to wait/start new game after game over
-                    // todo (4): verify game over condition/event/etc.
-                    while (PlayersHaveMoves()) {
-                        if (player.our_turn.get()) {
-                            Thread.sleep(749 * 40); // 749ms x 40 = 29.96 seconds
-                            player.getGameClient().sendMoveMessage(MakeMessage(GetBestMove()));
-                        }
-                        Thread.sleep(750); // 750ms x 40 = 30 seconds
-                    }
-                    // todo (4): figure out how to detect a termination condition
-                }
-
-                ai_thread.join();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -51,35 +39,59 @@ public class AICore {
         }
     }
 
-    public static void LaunchExhaustiveSearch() {
-
-    }
-
-    private static void run() {
+    public static void TerminateThreads() {
+        terminate_threads.set(true);
+        if (mc_sim_thread1 != null && mc_sim_thread1.isAlive()) {
+            mc_sim_thread1.interrupt();
+        }
+        if (mc_sim_thread2 != null && mc_sim_thread2.isAlive()) {
+            mc_sim_thread2.interrupt();
+        }
+        if (heuristics_thread != null && heuristics_thread.isAlive()) {
+            heuristics_thread.interrupt();
+        }
         try {
-            int available_cores = Runtime.getRuntime().availableProcessors();
-            int available_threads = available_cores - 2;
-            ExecutorService sim_pool = Executors.newFixedThreadPool(available_threads > 2 ? available_threads : 2);
-            // todo (3): figure out how to wait for new game to start
-            // todo (3): find a faster way to: while there are more Moves to explore, we do so. If there are not, we wait for a new game to start
-            while (!PlayersHaveMoves()) {
+            while (
+                    (mc_sim_thread1 != null && mc_sim_thread1.isAlive())
+                    || (mc_sim_thread2 != null && mc_sim_thread2.isAlive())
+                    || (heuristics_thread != null && heuristics_thread.isAlive())
+            ) {
                 Thread.sleep(100);
-                if (PlayersHaveMoves()) {
-                    Thread heuristics_processor = new Thread(() -> ProcessHeuristicsQueue());
-                    heuristics_processor.run();
-                    while (PlayersHaveMoves()) {
-                    }
-                    heuristics_processor.join();
-                }
-                if (IsTerminating()) {
-                    break;
-                }
             }
-
-            // todo (3): need an exit condition, perhaps we should relaunch when there is a new game?
-
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        terminate_threads.set(false);
+    }
+
+    public static void InterruptSimulations(){
+        mc_sim_thread1.interrupt();
+        mc_sim_thread2.interrupt();
+    }
+
+    public static void LaunchThreads(){
+        mc_sim_thread1 = new Thread(AICore::ExhaustiveMonteCarlo);
+        mc_sim_thread2 = new Thread(AICore::NonExhaustiveMonteCarlo);
+        heuristics_thread = new Thread(AICore::ProcessHeuristicsQueue);
+
+        mc_sim_thread1.start();
+        mc_sim_thread2.start();
+        heuristics_thread.start();
+    }
+
+    private static void ExhaustiveMonteCarlo() {
+        LocalState copy = GetStateCopy();
+        while (!copy.IsGameOver() && !terminate_threads.get()) {
+            MonteCarlo.RunSimulation(copy, copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE));
+            copy = GetStateCopy();
+        }
+    }
+
+    private static void NonExhaustiveMonteCarlo(){
+        LocalState copy = GetStateCopy();
+        while (!copy.IsGameOver() && !terminate_threads.get()) {
+            MonteCarlo.RunSimulation(copy, copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(3,10));
+            copy = GetStateCopy();
         }
     }
 
@@ -87,37 +99,14 @@ public class AICore {
         // todo (2): integrate heuristics into a processing queue, I think discord has a pin about this
     }
 
-    public static synchronized void SetState(ArrayList<Integer> state) {
-        // todo (3): if this happens in the middle of a game the turn number will be incorrect, so we need to prevent that potential problem
-        current_board_state = new LocalState(state, true, false); // saves state reference instead of copying
-    }
-
-    public static synchronized void UpdateState(final Map<String, Object> msgDetails) {
-        ArrayList<Integer> qcurr = (ArrayList) msgDetails.get("queen-position-current");
-        ArrayList<Integer> qnew = (ArrayList) msgDetails.get("queen-position-next");
-        ArrayList<Integer> arrow = (ArrayList) msgDetails.get("arrow-position");
-        Move move = new Move(
-                Position.CalculateIndex(qcurr.get(0), qcurr.get(1)),
-                Position.CalculateIndex(qnew.get(0), qnew.get(1)),
-                Position.CalculateIndex(arrow.get(0), arrow.get(1)));
-        current_board_state.MakeMove(move, true);
-        PruneGameTree();
-    }
-
-    // todo (6): verify this needs to return a copy of the state
-    private static synchronized LocalState GetState() {
-        return new LocalState(current_board_state);
-    }
-
-    private static synchronized boolean PlayersHaveMoves() {
-        if (current_board_state != null) {
-            return !current_board_state.IsGameOver();
+    public static void SendMessage() {
+        try {
+            // todo (3): refactor GetBestMove/SendMessage.. perhaps instead of waiting for 29.96 seconds we should constantly run GetBestMove (timing it) and then send the best move we can find moments before our time runs out.. this might be good if GetBestMove takes a fair amount of time to execute
+            Thread.sleep(749 * 40);
+            player.getGameClient().sendMoveMessage(MakeMessage(GetBestMove()));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return false;
-    }
-
-    private static Move GetBestMove() {
-        return null;
     }
 
     private static Map<String, Object> MakeMessage(Move move) {
@@ -137,11 +126,32 @@ public class AICore {
         return null;
     }
 
-    private static boolean IsTerminating() {
-        return false;
+    private static Move GetBestMove() {
+        return null;
     }
 
     private static void PruneGameTree() {
         // todo (4): implement/ check if we should prune the game tree
+    }
+
+    public static synchronized void SetState(ArrayList<Integer> state) {
+        current_board_state = new LocalState(state, true, false); // saves state reference instead of copying
+    }
+
+    public static synchronized void UpdateState(final Map<String, Object> msgDetails) {
+        ArrayList<Integer> qcurr = (ArrayList) msgDetails.get("queen-position-current");
+        ArrayList<Integer> qnew = (ArrayList) msgDetails.get("queen-position-next");
+        ArrayList<Integer> arrow = (ArrayList) msgDetails.get("arrow-position");
+        Move move = new Move(
+                Position.CalculateIndex(qcurr.get(0), qcurr.get(1)),
+                Position.CalculateIndex(qnew.get(0), qnew.get(1)),
+                Position.CalculateIndex(arrow.get(0), arrow.get(1)));
+        current_board_state.MakeMove(move, true);
+        PruneGameTree();
+    }
+
+    // todo (6): verify this needs to return a copy of the state
+    private static synchronized LocalState GetStateCopy() {
+        return new LocalState(current_board_state);
     }
 }
