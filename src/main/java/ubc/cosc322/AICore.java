@@ -58,6 +58,9 @@ public class AICore {
             ) {
                 Thread.sleep(100);
             }
+            mc_sim_thread1 = null;
+            mc_sim_thread2 = null;
+            heuristics_thread = null;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -70,9 +73,17 @@ public class AICore {
     }
 
     public static void LaunchThreads(){
+        if(mc_sim_thread1 != null && mc_sim_thread1.isAlive() && !mc_sim_thread1.isInterrupted()){
+            mc_sim_thread1.interrupt();
+        }
+        if(mc_sim_thread2 != null && mc_sim_thread2.isAlive() && !mc_sim_thread2.isInterrupted()){
+            mc_sim_thread2.interrupt();
+        }
         mc_sim_thread1 = new Thread(AICore::ExhaustiveMonteCarlo);
         mc_sim_thread2 = new Thread(AICore::NonExhaustiveMonteCarlo);
-        heuristics_thread = new Thread(AICore::ProcessHeuristicsQueue);
+        if(heuristics_thread == null) {
+            heuristics_thread = new Thread(AICore::ProcessHeuristicsQueue);
+        }
 
         mc_sim_thread1.start();
         mc_sim_thread2.start();
