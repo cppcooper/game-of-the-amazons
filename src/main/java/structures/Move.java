@@ -1,7 +1,7 @@
 package structures;
 
 //Stores indices of a piece and arrow, can be used to represent a structures.
-// todo (3): implement synchronization? I don't remember why I thought this was necessary. Can probably just look at the diagram to see if it is. worse comes to worse we run it, if it crashes.. then we add it? that's a dumb idea let's not do that.
+// todo (4): implement synchronization? I don't remember why I thought this was necessary. Can probably just look at the diagram to see if it is. worse comes to worse we run it, if it crashes.. then we add it? that's a dumb idea let's not do that.
 public class Move {
     public int start = -1;
     public int piece = -1;
