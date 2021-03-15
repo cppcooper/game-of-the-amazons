@@ -112,7 +112,7 @@ public class AICore {
         // todo (1): integrate queue with suppliers (ie. monte carlo simulations)
     }
 
-    public static void SendMessage() {
+    public static void SendDelayedMessage() {
         try {
             // todo (2): refactor GetBestMove/SendMessage..? perhaps instead of waiting for 29.96 seconds we should constantly run GetBestMove (timing it) and then send the best move we can find moments before our time runs out.. this might be good if GetBestMove takes a fair amount of time to execute
             Thread.sleep(749 * 40);
