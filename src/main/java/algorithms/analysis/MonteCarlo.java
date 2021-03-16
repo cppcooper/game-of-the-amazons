@@ -67,6 +67,10 @@ public class MonteCarlo {
                     node = new GameTreeNode(m, parent);
                     GameTree.put(new_state, node);
                     // todo (1,dan): add something to concurrent queue for heuristics processing. Probably need both the state and node..
+                } else {
+                    // node already exists, we should assume that its branch is unreachable. ie. we should update its parent
+                    node.super_node = parent;
+                    // todo (1,dan): (conditionally) add something to concurrent queue for heuristics processing. Probably need both the state and node..
                 }
                 RunSimulation(rng, new_state, node, player, branches, depth - 1);
             }
