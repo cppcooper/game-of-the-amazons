@@ -19,19 +19,20 @@ class MoveCompilerTester {
                 positions[i++] = new BoardPiece(x,y,1);
             }
         }
-        ArrayList<Long> times = new ArrayList<>(25);
+        final int trials = 5;
+        ArrayList<Long> times = new ArrayList<>(trials);
         long total = 0;
-        for(i = 0; i < 64000; ++i){
+        for(i = 0; i < trials; ++i){
             times.add(RandomizedMoveCompilerTest(positions));
-            System.out.printf("run #%d: %d ns\n",i+1,times.get(i));
+            System.out.printf("run #%d: %d ms\n",i+1,times.get(i));
             total += times.get(i);
         }
-        System.out.printf("Average: %d ns\n", total/times.size());
+        System.out.printf("Average: %d ms\n", total/trials);
     }
 
     long RandomizedMoveCompilerTest(BoardPiece[] pieces){
         RandomGen rng = new RandomGen();
-        LocalState board = new LocalState(rng.GetRandomState(),false,false);
+        LocalState board = new LocalState(rng.GetRandomState(0.35),false,false);
         board.SetTile(3,3,1);
         board.SetTile(4,4,1);
         board.SetTile(6,5,1);
@@ -47,6 +48,6 @@ class MoveCompilerTester {
         B.Start();
         MoveCompiler.GetMoveList(board,pieces);
         B.Stop();
-        return B.ElapsedNano();
+        return B.Elapsed();
     }
 }
