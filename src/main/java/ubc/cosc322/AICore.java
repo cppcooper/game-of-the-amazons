@@ -17,6 +17,7 @@ public class AICore {
     private static Thread mc_sim_thread2 = null;
     private static Thread heuristics_thread = null;
     private static AtomicBoolean terminate_threads = new AtomicBoolean(false);
+    private static AtomicBoolean game_tree_is_explored = new AtomicBoolean(false);
 
     public static void main(String[] args) {
         if (args.length >= 2) {
@@ -90,17 +91,34 @@ public class AICore {
 
     private static void ExhaustiveMonteCarlo() {
         LocalState copy = GetStateCopy();
-        while (!copy.IsGameOver() && !terminate_threads.get()) {
-            MonteCarlo.RunSimulation(copy, copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE));
+        while (!game_tree_is_explored.get() && !copy.IsGameOver() && !terminate_threads.get()) {
+            if(MonteCarlo.RunSimulation(copy, copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE))){
+                game_tree_is_explored.set(true);
+                return;
+            }
             copy = GetStateCopy();
         }
     }
 
     private static void NonExhaustiveMonteCarlo(){
+        final int initial_branches = 3;
+        final int initial_depth = 3;
+        final float binc = 0.333f;
+        final float dinc = 1.5f;
+        float branches = initial_branches;
+        float depth = initial_depth;
         LocalState copy = GetStateCopy();
-        while (!copy.IsGameOver() && !terminate_threads.get()) {
-            MonteCarlo.RunSimulation(copy, copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(3,10));
-            copy = GetStateCopy();
+        while (!game_tree_is_explored.get() && !copy.IsGameOver() && !terminate_threads.get()) {
+            if(MonteCarlo.RunSimulation(copy, copy.GetPlayerTurn(), new MonteCarlo.SimPolicy((int)branches,(int)depth))){
+                branches += binc;
+                depth += dinc;
+            } else {
+                branches = initial_branches;
+                depth = initial_depth;
+            }
+            if(copy.GetMoveNumber() != GetState().GetMoveNumber()) {
+                copy = GetStateCopy();
+            }
         }
     }
 
@@ -165,6 +183,7 @@ public class AICore {
 
     public static synchronized void SetState(ArrayList<Integer> state) {
         current_board_state = new LocalState(state, true, false); // saves state reference instead of copying
+        game_tree_is_explored.set(false);
     }
 
     public static synchronized void UpdateState(final Map<String, Object> msgDetails) {
