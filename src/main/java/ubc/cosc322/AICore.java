@@ -166,8 +166,7 @@ public class AICore {
         PruneGameTree();
     }
 
-    // todo (3): verify this needs to return a copy of the state, (find usages) -> (do usages modify internal state)
     private static synchronized LocalState GetState() {
-        return new LocalState(current_board_state);
+        return current_board_state;
     }
 }
