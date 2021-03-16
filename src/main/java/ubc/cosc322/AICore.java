@@ -89,18 +89,18 @@ public class AICore {
     }
 
     private static void ExhaustiveMonteCarlo() {
-        LocalState ref_copy = GetState();
-        while (!ref_copy.IsGameOver() && !terminate_threads.get()) {
-            MonteCarlo.RunSimulation(ref_copy, ref_copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE));
-            ref_copy = GetState();
+        LocalState copy = GetStateCopy();
+        while (!copy.IsGameOver() && !terminate_threads.get()) {
+            MonteCarlo.RunSimulation(copy, copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE));
+            copy = GetStateCopy();
         }
     }
 
     private static void NonExhaustiveMonteCarlo(){
-        LocalState ref_copy = GetState();
-        while (!ref_copy.IsGameOver() && !terminate_threads.get()) {
-            MonteCarlo.RunSimulation(ref_copy, ref_copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(3,10));
-            ref_copy = GetState();
+        LocalState copy = GetStateCopy();
+        while (!copy.IsGameOver() && !terminate_threads.get()) {
+            MonteCarlo.RunSimulation(copy, copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(3,10));
+            copy = GetStateCopy();
         }
     }
 
@@ -179,6 +179,7 @@ public class AICore {
         current_board_state.MakeMove(move, true);
         GameTreeNode child = GameTree.get(current_board_state);
         if(child == null){
+            //we copy the state, because it's going to change.. and we don't want to invalidate the key we use in the hash map (game tree)
             LocalState copy = new LocalState(current_board_state);
             child = new GameTreeNode(move,parent);
             GameTree.put(copy,child);
@@ -188,5 +189,8 @@ public class AICore {
 
     private static synchronized LocalState GetState() {
         return current_board_state;
+    }
+    private static synchronized LocalState GetStateCopy() {
+        return new LocalState(current_board_state);
     }
 }
