@@ -21,7 +21,7 @@ class MoveCompilerTester {
         }
         ArrayList<Long> times = new ArrayList<>(25);
         long total = 0;
-        for(i = 0; i < 25; ++i){
+        for(i = 0; i < 64000; ++i){
             times.add(RandomizedMoveCompilerTest(positions));
             System.out.printf("run #%d: %d ns\n",i+1,times.get(i));
             total += times.get(i);
