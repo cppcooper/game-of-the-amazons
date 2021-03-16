@@ -138,7 +138,25 @@ public class AICore {
     }
 
     private static Move GetBestMove() {
-        return null;
+        // todo (1): verify GetBestMove implementation
+        Move move = null;
+        double best;
+        int index;
+        do {
+            GameTreeNode current_node = GameTree.get(GetStateCopy());
+            best = -1;
+            index = -1;
+            for(int i = 0; i < current_node.edges(); ++i){
+                GameTreeNode sub_node = current_node.get(i);
+                if(sub_node.aggregate > best){
+                    index = i;
+                }
+            }
+            if(index > 0 && current_node.edges() > 0) {
+                move = current_node.get(index).move;
+            }
+        } while (move == null);
+        return move;
     }
 
     private static void PruneGameTree() {
