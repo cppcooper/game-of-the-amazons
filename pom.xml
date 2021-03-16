@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
  
     <groupId>ubc.cosc322</groupId>
-    <artifactId>team-00</artifactId>
+    <artifactId>coopai</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
      
 
-    <name>COSC322-Team-00</name>
+    <name>COSC322-Team-22</name>
     <description>COSC 322 Game Player Project</description>
     <inceptionYear>2021</inceptionYear>
     
@@ -24,6 +24,11 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.2</version>
         </dependency>
     </dependencies>
 	
@@ -41,15 +46,15 @@
     <url>https:people.ok.uc.ca/yongg</url>
     <developers>
         <developer>
-            <id>Team-00</id>
+            <id>Team-22</id>
             <name>Team members</name>
             <email></email>
-        </developer> 
+        </developer>
         <developer>
-            <id>yg</id>
-            <name>Yong Gao</name>
-            <email>yong.gao@ubc.ca</email>
-        </developer> 
+            <id>Team-22</id>
+            <name>Josh Cooper</name>
+            <email>cooper.s.josh@outlook.com</email>
+        </developer>
     </developers>
 
     <build>
