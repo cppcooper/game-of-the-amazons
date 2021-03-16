@@ -11,6 +11,7 @@ public class MovePool {
     private static ImmutableTriple<Integer, Integer, Integer> make_key(int start, int next, int arrow){
         return new ImmutableTriple<>(start, next, arrow);
     }
+    
     public static Move get(int start, int next, int arrow) {
         return pool.get(make_key(start, next, arrow));
     }
