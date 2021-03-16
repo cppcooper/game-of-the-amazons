@@ -37,7 +37,10 @@ public class MoveCompiler {
                         }
                         //check that the arrow array for this position isn't null/empty
                         if (all_arrow_positions[position_j] != null) {
-                            all_moves.add(MovePool.get(piece_indices[piece_i], open_piece_positions[piece_i][position_j], all_arrow_positions[position_j][arrow_k]));
+                            int start = piece_indices[piece_i];
+                            int next = open_piece_positions[piece_i][position_j];
+                            int arrow = all_arrow_positions[position_j][arrow_k];
+                            all_moves.add(MovePool.get(start, next, arrow));
                         }
                     }
                 }
