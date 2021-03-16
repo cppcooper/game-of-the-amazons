@@ -81,11 +81,11 @@ public class AICore {
         mc_sim_thread2 = new Thread(AICore::NonExhaustiveMonteCarlo);
         if(heuristics_thread == null) {
             heuristics_thread = new Thread(AICore::ProcessHeuristicsQueue);
+            heuristics_thread.start();
         }
 
         mc_sim_thread1.start();
         mc_sim_thread2.start();
-        heuristics_thread.start();
     }
 
     private static void ExhaustiveMonteCarlo() {
