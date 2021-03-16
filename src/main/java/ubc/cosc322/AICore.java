@@ -157,11 +157,13 @@ public class AICore {
                 Position.CalculateIndex(qcurr.get(0), qcurr.get(1)),
                 Position.CalculateIndex(qnew.get(0), qnew.get(1)),
                 Position.CalculateIndex(arrow.get(0), arrow.get(1)));
+        GameTreeNode parent = GameTree.get(current_board_state);
         current_board_state.MakeMove(move, true);
-        GameTreeNode current_node = GameTree.get(current_board_state);
-        if(current_node == null){
-            current_node = new GameTreeNode(move);
-            GameTree.put(current_board_state,current_node);
+        GameTreeNode child = GameTree.get(current_board_state);
+        if(child == null){
+            LocalState copy = new LocalState(current_board_state);
+            child = new GameTreeNode(move,parent);
+            GameTree.put(copy,child);
         }
         PruneGameTree();
     }

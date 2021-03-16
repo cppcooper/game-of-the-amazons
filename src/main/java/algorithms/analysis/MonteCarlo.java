@@ -22,28 +22,27 @@ public class MonteCarlo {
     public static boolean RunSimulation(LocalState board, int player, SimPolicy sim_policy) {
         RandomGen rng = new RandomGen();
         GameTreeNode sim_root = GameTree.get(board);
-        var children = RunSimulation(rng, board, player, sim_policy.branches, sim_policy.depth);
         if(sim_root == null){
-            sim_root = new GameTreeNode(new Move());
-            GameTree.put(board,sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
+            sim_root = new GameTreeNode(new Move(),null);
+            LocalState copy = new LocalState(board);
+            GameTree.put(copy,sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
         }
-        sim_root.adoptAll(children);
+        RunSimulation(rng, board, sim_root, player, sim_policy.branches, sim_policy.depth);
         return !Thread.interrupted(); //Assuming execution was interrupted then we need to clear that flag, and restart from the current LocalState
     }
 
-    protected static ArrayList<GameTreeNode> RunSimulation(RandomGen rng, LocalState board, int player, int branches, int depth){
+    protected static void RunSimulation(RandomGen rng, LocalState board, GameTreeNode parent, int player, int branches, int depth){
         /* Simulate X branches at Y depths
          * simulate X branches
          ** On each branch simulate X branches
          * repeat until at Y depth
          * */
-        ArrayList<GameTreeNode> simulated_nodes = new ArrayList<>(branches);
         if(depth > 0 && !board.IsGameOver() && !Thread.currentThread().isInterrupted()) {
             player = player == 1 ? 2 : 1;
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, player == 1 ? board.GetP1Pieces() : board.GetP2Pieces());
             moves = PruneMoves(moves,new TreePolicy(0,0));
             if(moves == null){
-                return null;
+                return;
             }
             List<Integer> rng_set = rng.GetSequenceShuffled(0, moves.size(), Math.min(branches, moves.size()));
             for (int b = 0; b < branches && b < moves.size(); ++b) {
@@ -59,24 +58,19 @@ public class MonteCarlo {
                  * Perform simulation on this board state
                  * Update node according to simulations run under it
                  * */
-                LocalState state = new LocalState(board);
+                LocalState new_state = new LocalState(board);
                 Move m = moves.get(rng_set.get(b));
-                state.MakeMove(m, true);
+                new_state.MakeMove(m, true);
 
-                GameTreeNode node = GameTree.get(state); // GameTreeNode might already exist for this state [original_state + move]
+                GameTreeNode node = GameTree.get(new_state); // GameTreeNode might already exist for this state [original_state + move]
                 if (node == null) {
-                    node = new GameTreeNode(m);
-                    GameTree.put(state, node);
+                    node = new GameTreeNode(m, parent);
+                    GameTree.put(new_state, node);
                     // todo (1,dan): add something to concurrent queue for heuristics processing. Probably need both the state and node..
                 }
-                simulated_nodes.add(node);
-
-                var children = RunSimulation(rng, state, player, branches, depth - 1);
-                node.adoptAll(children);
+                RunSimulation(rng, new_state, node, player, branches, depth - 1);
             }
-            return simulated_nodes;
         }
-        return null;
     }
 
     protected static class TreePolicy{
