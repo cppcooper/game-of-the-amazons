@@ -12,37 +12,31 @@ import java.util.ArrayList;
 class MoveCompilerTester {
     @Test
     void BenchmarkGetMoveList() {
-        BoardPiece[] positions = new BoardPiece[100];
-        int i = 0;
-        for(int x = 1; x < 11; ++x){
-            for(int y = 1; y < 11; ++y){
-                positions[i++] = new BoardPiece(x,y,1);
-            }
-        }
-        final int trials = 5;
+        RandomGen rng = new RandomGen();
+        final int trials = 100;
         ArrayList<Long> times = new ArrayList<>(trials);
         long total = 0;
-        for(i = 0; i < trials; ++i){
-            times.add(RandomizedMoveCompilerTest(positions));
+        for(int i = 0; i < trials; ++i){
+            times.add(RandomizedMoveCompilerTest(GetRandomBoardPieces(rng),rng));
             System.out.printf("run #%d: %d ms\n",i+1,times.get(i));
             total += times.get(i);
         }
         System.out.printf("Average: %d ms\n", total/trials);
     }
 
-    long RandomizedMoveCompilerTest(BoardPiece[] pieces){
-        RandomGen rng = new RandomGen();
-        LocalState board = new LocalState(rng.GetRandomState(0.35),false,false);
-        board.SetTile(3,3,1);
-        board.SetTile(4,4,1);
-        board.SetTile(6,5,1);
-        board.SetTile(5,5,1);
+    BoardPiece[] GetRandomBoardPieces(RandomGen rng){
+        final int N = 4;
+        BoardPiece[] positions = new BoardPiece[N];
+        var X = rng.GetSequenceShuffled(1,11,N);
+        var Y = rng.GetSequenceShuffled(1,11,N);
+        for(int i = 0; i < N; ++i){
+            positions[i] = new BoardPiece(X.get(i), Y.get(i),1);
+        }
+        return positions;
+    }
 
-        board.SetTile(7,7,2);
-        board.SetTile(8,8,2);
-        board.SetTile(4,5,2);
-        board.SetTile(5,4,2);
-        board.FindPieces();
+    long RandomizedMoveCompilerTest(BoardPiece[] pieces, RandomGen rng){
+        LocalState board = new LocalState(rng.GetRandomState(0.35),false,false);
         BoardPiece p = new BoardPiece(4,4,2);
         Benchmarker B = new Benchmarker();
         B.Start();
