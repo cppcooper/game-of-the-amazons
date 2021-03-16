@@ -31,7 +31,13 @@ public class MoveCompiler {
             if(open_piece_positions[piece_i] != null) {
                 //start iterating position/arrow combinations
                 for (int position_j = 0; position_j < open_piece_positions[piece_i].length; ++position_j) {
+                    if(open_piece_positions[piece_i][position_j] < 0){
+                        break;
+                    }
                     for (int arrow_k = 0; arrow_k < all_arrow_positions[position_j].length; ++arrow_k) {
+                        if(all_arrow_positions[position_j][arrow_k] < 0){
+                            break;
+                        }
                         if(Thread.currentThread().isInterrupted()){
                             return null; // the caller is not going to be doing anything with the moves anyway
                         }
