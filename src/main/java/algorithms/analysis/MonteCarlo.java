@@ -24,8 +24,7 @@ public class MonteCarlo {
         GameTreeNode sim_root = GameTree.get(board);
         if(sim_root == null){
             sim_root = new GameTreeNode(new Move(),null);
-            LocalState copy = new LocalState(board);
-            GameTree.put(copy,sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
+            GameTree.put(board,sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
         }
         RunSimulation(rng, board, sim_root, player, sim_policy.branches, sim_policy.depth);
         return !Thread.interrupted(); //Assuming execution was interrupted then we need to clear that flag, and restart from the current LocalState
