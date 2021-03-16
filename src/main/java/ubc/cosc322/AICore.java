@@ -1,9 +1,7 @@
 package ubc.cosc322;
 
 import algorithms.analysis.MonteCarlo;
-import structures.LocalState;
-import structures.Move;
-import structures.Position;
+import structures.*;
 import ygraph.ai.smartfox.games.BaseGameGUI;
 
 import java.util.ArrayList;
@@ -91,18 +89,18 @@ public class AICore {
     }
 
     private static void ExhaustiveMonteCarlo() {
-        LocalState copy = GetStateCopy();
-        while (!copy.IsGameOver() && !terminate_threads.get()) {
-            MonteCarlo.RunSimulation(copy, copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE));
-            copy = GetStateCopy();
+        LocalState ref_copy = GetState();
+        while (!ref_copy.IsGameOver() && !terminate_threads.get()) {
+            MonteCarlo.RunSimulation(ref_copy, ref_copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE));
+            ref_copy = GetState();
         }
     }
 
     private static void NonExhaustiveMonteCarlo(){
-        LocalState copy = GetStateCopy();
-        while (!copy.IsGameOver() && !terminate_threads.get()) {
-            MonteCarlo.RunSimulation(copy, copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(3,10));
-            copy = GetStateCopy();
+        LocalState ref_copy = GetState();
+        while (!ref_copy.IsGameOver() && !terminate_threads.get()) {
+            MonteCarlo.RunSimulation(ref_copy, ref_copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(3,10));
+            ref_copy = GetState();
         }
     }
 
@@ -160,11 +158,16 @@ public class AICore {
                 Position.CalculateIndex(qnew.get(0), qnew.get(1)),
                 Position.CalculateIndex(arrow.get(0), arrow.get(1)));
         current_board_state.MakeMove(move, true);
+        GameTreeNode current_node = GameTree.get(current_board_state);
+        if(current_node == null){
+            current_node = new GameTreeNode(move);
+            GameTree.put(current_board_state,current_node);
+        }
         PruneGameTree();
     }
 
     // todo (3): verify this needs to return a copy of the state, (find usages) -> (do usages modify internal state)
-    private static synchronized LocalState GetStateCopy() {
+    private static synchronized LocalState GetState() {
         return new LocalState(current_board_state);
     }
 }
