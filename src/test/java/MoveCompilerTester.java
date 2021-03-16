@@ -12,6 +12,7 @@ import java.util.ArrayList;
 class MoveCompilerTester {
     @Test
     void BenchmarkGetMoveList() {
+        //This isn't a full picture, as it does not involve building the GameTree
         RandomGen rng = new RandomGen();
         final int trials = 100;
         ArrayList<Long> times = new ArrayList<>(trials);
