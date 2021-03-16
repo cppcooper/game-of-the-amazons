@@ -15,12 +15,11 @@ class MoveCompilerTester {
         //This isn't a full picture, as it does not involve building the GameTree
         RandomGen rng = new RandomGen();
         final int trials = 100;
-        ArrayList<Long> times = new ArrayList<>(trials);
         long total = 0;
         for(int i = 0; i < trials; ++i){
-            times.add(RandomizedMoveCompilerTest(GetRandomBoardPieces(rng),rng));
-            System.out.printf("run #%d: %d ms\n",i+1,times.get(i));
-            total += times.get(i);
+            long time = RandomizedMoveCompilerTest(GetRandomBoardPieces(rng),rng);
+            System.out.printf("run #%d: %d ms\n",i+1,time);
+            total += time;
         }
         System.out.printf("Average: %d ms\n", total/trials);
     }
