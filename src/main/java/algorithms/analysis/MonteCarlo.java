@@ -23,10 +23,11 @@ public class MonteCarlo {
         RandomGen rng = new RandomGen();
         GameTreeNode sim_root = GameTree.get(board);
         var children = RunSimulation(rng, board, player, sim_policy.branches, sim_policy.depth);
-        if(sim_root != null){
-            // todo (5): determine if we should worry about null root nodes? (it probably just means our opponent made a move, and we had not simulated it)
-            sim_root.adoptAll(children);
+        if(sim_root == null){
+            sim_root = new GameTreeNode(new Move());
+            GameTree.put(board,sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
         }
+        sim_root.adoptAll(children);
         return !Thread.interrupted(); //Assuming execution was interrupted then we need to clear that flag, and restart from the current LocalState
     }
 
@@ -66,7 +67,7 @@ public class MonteCarlo {
                 if (node == null) {
                     node = new GameTreeNode(m);
                     GameTree.put(state, node);
-                    // todo (2): add something to concurrent queue for heuristics processing. Probably need both the state and node..
+                    // todo (1,dan): add something to concurrent queue for heuristics processing. Probably need both the state and node..
                 }
                 simulated_nodes.add(node);
 
@@ -83,7 +84,7 @@ public class MonteCarlo {
     }
 
     protected static ArrayList<Move> PruneMoves(ArrayList<Move> moves, TreePolicy tree_policy){
-        // todo (4): implement tree policy and stuff (ie. this function)
+        // todo (2): implement tree policy and stuff (ie. this function [PruneMoves])
 
         /* This function should prune the move list such that we're left with X number of moves
         * X/2 should be moves that consider the most promising branches to explore

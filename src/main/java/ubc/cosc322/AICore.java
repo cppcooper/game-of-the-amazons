@@ -1,9 +1,7 @@
 package ubc.cosc322;
 
 import algorithms.analysis.MonteCarlo;
-import structures.LocalState;
-import structures.Move;
-import structures.Position;
+import structures.*;
 import ygraph.ai.smartfox.games.BaseGameGUI;
 
 import java.util.ArrayList;
@@ -58,6 +56,9 @@ public class AICore {
             ) {
                 Thread.sleep(100);
             }
+            mc_sim_thread1 = null;
+            mc_sim_thread2 = null;
+            heuristics_thread = null;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -70,38 +71,48 @@ public class AICore {
     }
 
     public static void LaunchThreads(){
+        if(mc_sim_thread1 != null && mc_sim_thread1.isAlive() && !mc_sim_thread1.isInterrupted()){
+            mc_sim_thread1.interrupt();
+        }
+        if(mc_sim_thread2 != null && mc_sim_thread2.isAlive() && !mc_sim_thread2.isInterrupted()){
+            mc_sim_thread2.interrupt();
+        }
         mc_sim_thread1 = new Thread(AICore::ExhaustiveMonteCarlo);
         mc_sim_thread2 = new Thread(AICore::NonExhaustiveMonteCarlo);
-        heuristics_thread = new Thread(AICore::ProcessHeuristicsQueue);
+        if(heuristics_thread == null) {
+            heuristics_thread = new Thread(AICore::ProcessHeuristicsQueue);
+            heuristics_thread.start();
+        }
 
         mc_sim_thread1.start();
         mc_sim_thread2.start();
-        heuristics_thread.start();
     }
 
     private static void ExhaustiveMonteCarlo() {
-        LocalState copy = GetStateCopy();
-        while (!copy.IsGameOver() && !terminate_threads.get()) {
-            MonteCarlo.RunSimulation(copy, copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE));
-            copy = GetStateCopy();
+        LocalState ref_copy = GetState();
+        while (!ref_copy.IsGameOver() && !terminate_threads.get()) {
+            MonteCarlo.RunSimulation(ref_copy, ref_copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE));
+            ref_copy = GetState();
         }
     }
 
     private static void NonExhaustiveMonteCarlo(){
-        LocalState copy = GetStateCopy();
-        while (!copy.IsGameOver() && !terminate_threads.get()) {
-            MonteCarlo.RunSimulation(copy, copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(3,10));
-            copy = GetStateCopy();
+        LocalState ref_copy = GetState();
+        while (!ref_copy.IsGameOver() && !terminate_threads.get()) {
+            MonteCarlo.RunSimulation(ref_copy, ref_copy.GetPlayerTurn(), new MonteCarlo.SimPolicy(3,10));
+            ref_copy = GetState();
         }
     }
 
     private static void ProcessHeuristicsQueue() {
-        // todo (2): integrate heuristics into a processing queue, I think discord has a pin about this
+        // todo (1,dan): implement queue and processor's control structures (including thread interrupt handling)
+        // todo (1,dan): integrate heuristic calculations with.. GameTree? with something (this involves the GetBestMove task)
+        // todo (1,dan): integrate queue with suppliers (ie. monte carlo simulations)
     }
 
-    public static void SendMessage() {
+    public static void SendDelayedMessage() {
         try {
-            // todo (3): refactor GetBestMove/SendMessage.. perhaps instead of waiting for 29.96 seconds we should constantly run GetBestMove (timing it) and then send the best move we can find moments before our time runs out.. this might be good if GetBestMove takes a fair amount of time to execute
+            // todo (2,josh): refactor GetBestMove/SendMessage..? perhaps instead of waiting for 29.96 seconds we should constantly run GetBestMove (timing it) and then send the best move we can find moments before our time runs out.. this might be good if GetBestMove takes a fair amount of time to execute
             Thread.sleep(749 * 40);
             player.getGameClient().sendMoveMessage(MakeMessage(GetBestMove()));
         } catch (Exception e) {
@@ -147,11 +158,15 @@ public class AICore {
                 Position.CalculateIndex(qnew.get(0), qnew.get(1)),
                 Position.CalculateIndex(arrow.get(0), arrow.get(1)));
         current_board_state.MakeMove(move, true);
+        GameTreeNode current_node = GameTree.get(current_board_state);
+        if(current_node == null){
+            current_node = new GameTreeNode(move);
+            GameTree.put(current_board_state,current_node);
+        }
         PruneGameTree();
     }
 
-    // todo (6): verify this needs to return a copy of the state
-    private static synchronized LocalState GetStateCopy() {
-        return new LocalState(current_board_state);
+    private static synchronized LocalState GetState() {
+        return current_board_state;
     }
 }
