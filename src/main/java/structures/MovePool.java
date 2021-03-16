@@ -12,13 +12,7 @@ public class MovePool {
         return new ImmutableTriple<>(start, next, arrow);
     }
     public static Move get(int start, int next, int arrow) {
-        var key = make_key(start, next, arrow);
-        var move = pool.get(key);
-        if(move == null){
-            move = new Move(start,next,arrow);
-            pool.put(key,move);
-        }
-        return move;
+        return pool.get(make_key(start, next, arrow));
     }
 
     public static void put(int start, int next, int arrow, Move move) {
