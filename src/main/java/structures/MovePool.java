@@ -13,7 +13,13 @@ public class MovePool {
     }
     
     public static Move get(int start, int next, int arrow) {
-        return pool.get(make_key(start, next, arrow));
+        int key = make_key(start, next, arrow);
+        Move move = pool.get(key);
+        if(move == null){
+            move = new Move(start,next,arrow);
+            pool.put(key,move);
+        }
+        return move;
     }
 
     public static void put(int start, int next, int arrow, Move move) {
