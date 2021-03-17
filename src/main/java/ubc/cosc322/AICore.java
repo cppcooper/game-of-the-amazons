@@ -166,7 +166,8 @@ public class AICore {
             index = -1;
             for(int i = 0; i < current_node.edges(); ++i){
                 GameTreeNode sub_node = current_node.get(i);
-                if(sub_node.aggregate > best){
+                float aggregate = Float.intBitsToFloat(sub_node.aggregate.get());
+                if(aggregate > best){
                     index = i;
                 }
             }
