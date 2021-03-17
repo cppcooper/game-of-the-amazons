@@ -38,7 +38,7 @@ public class MonteCarlo {
          * */
         if(depth > 0 && !board.IsGameOver() && !Thread.currentThread().isInterrupted()) {
             player = player == 1 ? 2 : 1;
-            ArrayList<Move> moves = MoveCompiler.GetMoveList(board, player == 1 ? board.GetP1Pieces() : board.GetP2Pieces());
+            ArrayList<Move> moves = MoveCompiler.GetMoveList(board, player == 1 ? board.GetP1Pieces() : board.GetP2Pieces(), true);
             moves = PruneMoves(moves,new TreePolicy(0,0));
             if(moves == null){
                 return;
