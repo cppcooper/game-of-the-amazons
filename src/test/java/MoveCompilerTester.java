@@ -14,14 +14,14 @@ class MoveCompilerTester {
     void BenchmarkGetMoveList() {
         //This isn't a full picture, as it does not involve building the GameTree
         RandomGen rng = new RandomGen();
-        final int trials = 100;
+        final int trials = 64000;
         long total = 0;
         for(int i = 0; i < trials; ++i){
             long time = RandomizedMoveCompilerTest(GetRandomBoardPieces(rng),rng);
-            System.out.printf("run #%d: %d ms\n",i+1,time);
+            System.out.printf("run #%d: %d ns\n",i+1,time);
             total += time;
         }
-        System.out.printf("Average: %d ms\n", total/trials);
+        System.out.printf("Average: %d ns\n", total/trials);
     }
 
     BoardPiece[] GetRandomBoardPieces(RandomGen rng){
@@ -42,6 +42,6 @@ class MoveCompilerTester {
         B.Start();
         MoveCompiler.GetMoveList(board,pieces);
         B.Stop();
-        return B.Elapsed();
+        return B.ElapsedNano();
     }
 }
