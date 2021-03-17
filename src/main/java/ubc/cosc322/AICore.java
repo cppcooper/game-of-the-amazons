@@ -1,5 +1,6 @@
 package ubc.cosc322;
 
+import algorithms.analysis.Heuristics;
 import algorithms.analysis.MonteCarlo;
 import structures.*;
 import ygraph.ai.smartfox.games.BaseGameGUI;
@@ -81,7 +82,7 @@ public class AICore {
         mc_sim_thread1 = new Thread(AICore::ExhaustiveMonteCarlo);
         mc_sim_thread2 = new Thread(AICore::NonExhaustiveMonteCarlo);
         if(heuristics_thread == null) {
-            heuristics_thread = new Thread(AICore::ProcessHeuristicsQueue);
+            heuristics_thread = new Thread(Heuristics::ProcessQueue);
             heuristics_thread.start();
         }
 
@@ -120,12 +121,6 @@ public class AICore {
                 copy = GetStateCopy();
             }
         }
-    }
-
-    private static void ProcessHeuristicsQueue() {
-        // todo (1,dan): implement queue and processor's control structures (including thread interrupt handling)
-        // todo (1,dan): integrate heuristic calculations with.. GameTree? with something (this involves the GetBestMove task)
-        // todo (1,dan): integrate queue with suppliers (ie. monte carlo simulations)
     }
 
     public static void SendDelayedMessage() {
