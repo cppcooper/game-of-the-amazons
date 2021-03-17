@@ -1,7 +1,6 @@
 package structures;
 
 import algorithms.analysis.MoveCompiler;
-import tools.RandomGen;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +9,6 @@ public class MovePool {
     private static HashMap<Integer, Move> pool = new HashMap<>(64000, 3.f);
 
     public static void generate_pool(){
-        RandomGen rng = new RandomGen();
         BoardPiece[] all_positions = new BoardPiece[100];
         int i = 0;
         for(int x = 1; x < 11; ++x){
