@@ -43,7 +43,16 @@ public class MoveCompiler {
                         }
                         //check that the arrow array for this position isn't null/empty
                         if (all_arrow_positions[position_j] != null) {
-                            all_moves.add(new Move(piece_indices[piece_i], open_piece_positions[piece_i][position_j], all_arrow_positions[position_j][arrow_k]));
+                            int start = piece_indices[piece_i];
+                            int next = open_piece_positions[piece_i][position_j];
+                            int arrow = all_arrow_positions[position_j][arrow_k];
+                            Move move = MovePool.get(start, next, arrow);
+                            if(move == null){
+                                all_moves.add(new Move(start,next,arrow));
+                                MovePool.put(start,next,arrow,all_moves.get(all_moves.size()-1));
+                            } else {
+                                all_moves.add(move);
+                            }
                         }
                     }
                 }
