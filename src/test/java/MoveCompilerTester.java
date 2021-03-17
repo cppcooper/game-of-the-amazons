@@ -4,6 +4,7 @@ import algorithms.analysis.MoveCompiler;
 import org.junit.jupiter.api.Test;
 import structures.BoardPiece;
 import structures.LocalState;
+import structures.MovePool;
 import tools.Benchmarker;
 import tools.RandomGen;
 
@@ -15,8 +16,13 @@ class MoveCompilerTester {
         //This isn't a full picture, as it does not involve building the GameTree
         final int trials = 64000;
         final boolean print_intermediaries = false;
-        BenchmarkGetNonPooledMoveList(trials,print_intermediaries);
+        Benchmarker B = new Benchmarker();
+        B.Start();
+        MovePool.generate_pool();
+        B.Stop();
+        System.out.printf("Pool generation took: %d ms", B.Elapsed());
         BenchmarkGetPooledMoveList(trials,print_intermediaries);
+        BenchmarkGetNonPooledMoveList(trials,print_intermediaries);
         double x = -1.0;
         for(int i = 0; i < (trials + trials); ++i){
             x += i;
