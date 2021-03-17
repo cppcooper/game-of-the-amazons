@@ -1,10 +1,11 @@
 package structures;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameTreeNode {
-    public double heuristic = -1.0;
-    public double aggregate = -1.0;
+    public AtomicInteger heuristic = new AtomicInteger();
+    public AtomicInteger aggregate = new AtomicInteger();
     public int aggregation_depth = 0;
     public Move move = null;
     public GameTreeNode super_node = null;
@@ -13,6 +14,8 @@ public class GameTreeNode {
     public GameTreeNode(Move move, GameTreeNode parent){
         this.super_node = parent;
         this.move = move;
+        heuristic.set(Float.floatToIntBits(0.f));
+        aggregate.set(Float.floatToIntBits(0.f));
         parent.adopt(this);
     }
     private synchronized void adopt(GameTreeNode node){
