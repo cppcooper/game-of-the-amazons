@@ -16,7 +16,7 @@ import ygraph.ai.smartfox.games.*;
 public class AIPlayer extends GamePlayer{
 
     private GameClient gameClient = null; 
-    private BaseGameGUI gamegui = null;
+    private OurGameGUI gamegui = null;
     final public AtomicInteger player_num = new AtomicInteger(-1);
 
 
@@ -35,7 +35,7 @@ public class AIPlayer extends GamePlayer{
     	
     	//To make a GUI-based player, create an instance of BaseGameGUI
     	//and implement the method getGameGUI() accordingly
-    	this.gamegui = new BaseGameGUI(this);
+    	this.gamegui = new OurGameGUI(this);
     }
 
     @Override
