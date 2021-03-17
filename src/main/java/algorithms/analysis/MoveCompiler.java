@@ -8,8 +8,7 @@ import java.util.function.*;
 
 public class MoveCompiler {
     // To find all of one player's move options you calculate `pieces x positions x arrows` = 4*40*40 = 6400 max options/operations
-    public static ArrayList<Move> GetMoveList(LocalState board, BoardPiece[] player_pieces){
-        // todo (4): Can probably find a faster average way to pre-allocate. Implement Move Pool?
+    public static ArrayList<Move> GetMoveList(LocalState board, BoardPiece[] player_pieces, boolean use_pooling){
         ArrayList<Move> all_moves = new ArrayList<>(6400);
         int[] piece_indices = new int[4];
         for(int i = 0; i < piece_indices.length; ++i){
@@ -46,7 +45,11 @@ public class MoveCompiler {
                             int start = piece_indices[piece_i];
                             int next = open_piece_positions[piece_i][position_j];
                             int arrow = all_arrow_positions[position_j][arrow_k];
-                            all_moves.add(MovePool.get(start, next, arrow));
+                            if(use_pooling) {
+                                all_moves.add(MovePool.get(start, next, arrow));
+                            } else {
+                                all_moves.add(new Move(piece_indices[piece_i], open_piece_positions[piece_i][position_j], all_arrow_positions[position_j][arrow_k]));
+                            }
                         }
                     }
                 }
