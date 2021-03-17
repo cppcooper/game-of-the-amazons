@@ -1,9 +1,9 @@
 package structures;
 
 import algorithms.analysis.MoveCompiler;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
 import tools.RandomGen;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MovePool {
@@ -21,9 +21,11 @@ public class MovePool {
                 }
             }
         }
-        for(int trial = 0; trial < 6400; ++trial){ //this should get alot, if not most possible Moves
-            MoveCompiler.GetMoveList(new LocalState(rng.GetRandomState(0.35),false,true),all_positions,true);
+        ArrayList<Integer> blank_state = new ArrayList<Integer>(121);
+        for(int j = 0; j < 121; ++j){
+            blank_state.add(0);
         }
+        MoveCompiler.GetMoveList(new LocalState(blank_state,false,true),all_positions,true);
     }
 
     private static int make_key(int start, int next, int arrow){
