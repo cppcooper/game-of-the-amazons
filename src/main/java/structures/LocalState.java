@@ -228,6 +228,16 @@ public class LocalState {
 		return null;
 	}
 
+	public BoardPiece[] GetPrevTurnPieces(){
+		switch(player_turn){
+			case 2:
+				return player1;
+			case 1:
+				return player2;
+		}
+		return null;
+	}
+
 	public int hashCode(){
 		if(valid_hash){
 			return hash;
