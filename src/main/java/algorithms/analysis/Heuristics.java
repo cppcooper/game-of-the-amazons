@@ -1,10 +1,14 @@
 package algorithms.analysis;
 
+import org.apache.commons.math3.util.Pair;
+import structures.BoardPiece;
+import structures.GameTreeNode;
 import structures.LocalState;
 import structures.Position;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class Heuristics {
 	protected static class CountingAlgorithmData {
@@ -17,6 +21,45 @@ public class Heuristics {
 		public int blanks;
 		public int blocks;
 		public double blocks_heuristic;
+	}
+
+	private static ConcurrentLinkedDeque<Pair<LocalState, GameTreeNode>> queue = new ConcurrentLinkedDeque();
+
+	public static void ProcessQueue(){
+		while(!Thread.currentThread().isInterrupted()){
+			var pair = queue.poll();
+			if(pair != null) {
+				LocalState board = pair.getFirst();
+				GameTreeNode node = pair.getSecond();
+				BoardPiece[] pieces = board.GetPrevTurnPieces(); // we'll calculate heuristics for the player who got us here
+				float node_heuristic = 0.f;
+				float node_aggregate = Float.intBitsToFloat(node.aggregate.get());
+				for (int i = 0; i < 4; ++i) {
+					int index = pieces[i].pos.CalculateIndex();
+					// todo (2): integrate other heuristics (once implemented)
+					var heuristic_data = GetCount(board, index);
+					node_heuristic += heuristic_data.blanks - heuristic_data.blocks_heuristic;
+				}
+				node.aggregate.set(Float.floatToIntBits(node_heuristic + node_aggregate));
+
+				GameTreeNode parent = node.super_node;
+				float parent_heuristic = Float.intBitsToFloat(parent.aggregate.get());
+				node_heuristic = Float.intBitsToFloat(node.aggregate.get());
+				float prev_value = 0;
+				// todo (1): verify aggregation update logic
+				// todo (2): consider changing the weighting of aggregation (currently 1:1 ratio; parent:child)
+				while(parent != null){
+					float temp = parent_heuristic;
+					parent_heuristic -= prev_value;
+					parent_heuristic += node_heuristic;
+					prev_value = temp;
+					node_heuristic = parent_heuristic;
+					parent.aggregate.set(Float.floatToIntBits(parent_heuristic));
+					parent = parent.super_node;
+					parent_heuristic = Float.intBitsToFloat(parent.heuristic.get());
+				}
+			}
+		}
 	}
 
 	// todo (4): implement improved heuristics
