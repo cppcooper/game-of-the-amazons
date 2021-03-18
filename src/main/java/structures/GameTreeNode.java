@@ -23,8 +23,13 @@ public class GameTreeNode {
         return sub_nodes.get(index);
     }
 
-    private synchronized void add_parent(GameTreeNode node){
-        super_nodes.add(node);
+    private synchronized void add_parent(GameTreeNode parent){
+        super_nodes.add(parent);
+        float this_aggregate = aggregate_heuristic.get();
+        if(this_aggregate > 0.f) {
+            float parents_new_aggregate = parent.aggregate_heuristic.get() + this_aggregate;
+            parent.propagate(parents_new_aggregate);
+        }
     }
 
     public synchronized boolean adopt(GameTreeNode node){

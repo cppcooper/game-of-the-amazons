@@ -70,13 +70,10 @@ public class MonteCarlo {
                     Heuristics.enqueue(new Pair<>(new_state,node));
                     GameTree.put(new_state, node);
                 } else {
-                    if(parent.adopt(node)){
-                        float node_aggregate = node.aggregate_heuristic.get();
-                        if(node_aggregate > 0.f) {
-                            float parents_new_aggregate = parent.aggregate_heuristic.get() + node_aggregate;
-                            parent.propagate(parents_new_aggregate);
-                        }
-                    }
+                    // This LocalState + Node have already been seen once.
+                    // This might represent branches merging so..
+                    // run the adoption procedure to ensure linkage and propagation of the heuristic (only one link, and only propagates if node's heuristic is non-zero)
+                    parent.adopt(node);
                 }
                 RunSimulation(rng, new_state, node, player, branches, depth - 1);
             }
