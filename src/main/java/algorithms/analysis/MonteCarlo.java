@@ -66,9 +66,7 @@ public class MonteCarlo {
                 if (node == null) {
                     node = new GameTreeNode(m);
                     parent.adopt(node,false);
-                    if(!Heuristics.enqueue(new Pair<>(new_state,node))){
-                        System.out.println("Unable to add to the heuristics queue. We should probably throw an exception cause I have no clue what's going on.. but that'd blow up execution");
-                    }
+                    Heuristics.enqueue(new Pair<>(new_state,node));
                     GameTree.put(new_state, node);
                 } else {
                     // node already exists

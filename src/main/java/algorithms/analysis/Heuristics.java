@@ -13,6 +13,10 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class Heuristics {
 	private static ConcurrentLinkedDeque<Pair<LocalState, GameTreeNode>> queue = new ConcurrentLinkedDeque();
 
+	public static void enqueue(Pair<LocalState,GameTreeNode> job){
+		queue.push(job);
+	}
+
 	public static void ProcessQueue(){
 		while(!Thread.currentThread().isInterrupted()){
 			var pair = queue.poll();
@@ -35,10 +39,6 @@ public class Heuristics {
 				node.propogate();
 			}
 		}
-	}
-
-	public static boolean enqueue(Pair<LocalState,GameTreeNode> job){
-		return queue.offer(job);
 	}
 
 	// todo (2): implement improved heuristics
