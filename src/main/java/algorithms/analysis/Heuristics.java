@@ -32,15 +32,14 @@ public class Heuristics {
 				}
 				BoardPiece[] pieces = board.GetPrevTurnPieces(); // we'll calculate heuristics for the player who got us here
 				float node_heuristic = 0.f;
-				float node_aggregate = Float.intBitsToFloat(node.aggregate.get());
 				for (int i = 0; i < 4; ++i) {
 					int index = pieces[i].pos.CalculateIndex();
 					// todo (1): integrate other heuristics (once implemented)
 					var heuristic_data = GetCount(board, index);
 					node_heuristic += heuristic_data.blanks - heuristic_data.blocks_heuristic;
 				}
-				node.aggregate.set(Float.floatToIntBits(node_heuristic + node_aggregate));
-				node.propogate();
+				float new_aggregate = node_heuristic + node.aggregate_heuristic.get();
+				node.propagate(new_aggregate);
 			}
 		}
 	}

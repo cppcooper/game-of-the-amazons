@@ -24,7 +24,7 @@ public class MonteCarlo {
         RandomGen rng = new RandomGen();
         GameTreeNode sim_root = GameTree.get(board);
         if(sim_root == null){
-            sim_root = new GameTreeNode(new Move());
+            sim_root = new GameTreeNode(new Move(),null);
             GameTree.put(board,sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
         }
         RunSimulation(rng, board, sim_root, player, sim_policy.branches, sim_policy.depth);
@@ -65,20 +65,18 @@ public class MonteCarlo {
                 GameTreeNode node = GameTree.get(new_state); // GameTreeNode might already exist for this state [original_state + move]
                 if (node == null) {
                     // LocalState is a new position
-                    node = new GameTreeNode(m);
-                    parent.adopt(node,false);
+                    node = new GameTreeNode(m,parent);
+                    parent.adopt(node);
                     Heuristics.enqueue(new Pair<>(new_state,node));
                     GameTree.put(new_state, node);
                 } else {
-                    /** todo (0): verify the logic of the following statements:
-                     * This exact LocalState has already been reached (this includes the move that got us here)
-                     * Transpositions will each have a different LocalState.last_move
-                     * This last_move field is taken into consideration when performing lookups in the GameTree
-                     * This means that this exact LocalState and GameTreeNode have already been looked at
-                     * Therefore we can disregard changing anything about the node or game tree, aside from expanding it
-                     */
-                    //node.move = m;
-                    //parent.adopt(node,true);
+                    if(parent.adopt(node)){
+                        float node_aggregate = node.aggregate_heuristic.get();
+                        if(node_aggregate > 0.f) {
+                            float parents_new_aggregate = parent.aggregate_heuristic.get() + node_aggregate;
+                            parent.propagate(parents_new_aggregate);
+                        }
+                    }
                 }
                 RunSimulation(rng, new_state, node, player, branches, depth - 1);
             }
