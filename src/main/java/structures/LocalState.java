@@ -10,6 +10,7 @@ public class LocalState {
 	private final ArrayList<Integer> board;
 	private final BoardPiece[] player1 = new BoardPiece[4];
 	private final BoardPiece[] player2 = new BoardPiece[4];
+	private Move last_move = null;
 	private boolean p1_state_analyzed = false;
 	private boolean p2_state_analyzed = false;
 	private boolean p1_has_moves = true;
@@ -33,14 +34,19 @@ public class LocalState {
 	}
 	public LocalState(LocalState other){
 		board = new ArrayList<>(other.board);
-		move_number = other.move_number;
-		valid_hash = other.valid_hash;
-		hash = other.hash;
-
 		for(int i = 0; i < player1.length; ++i){
 			player1[i] = new BoardPiece(other.player1[i]);
 			player2[i] = new BoardPiece(other.player2[i]);
 		}
+		last_move = other.last_move;
+		p1_state_analyzed = other.p1_state_analyzed;
+		p2_state_analyzed = other.p2_state_analyzed;
+		p1_has_moves = other.p1_has_moves;
+		p2_has_moves = other.p2_has_moves;
+		move_number = other.move_number;
+		player_turn = other.player_turn;
+		hash = other.hash;
+		valid_hash = other.valid_hash;
 	}
 	public LocalState(ArrayList<Integer> state, boolean find_pieces, boolean copy_state) {
 		PopulateSet();
@@ -138,9 +144,9 @@ public class LocalState {
 			return false;
 		};
 		var pieces = player_num == 1 ? player1 : player2;
-		for(int i = 0; i < pieces.length; ++i){
-			if(has_a_move.apply(pieces[i].pos.CalculateIndex())){
-				switch(player_num){
+		for (BoardPiece piece : pieces) {
+			if (has_a_move.apply(piece.pos.CalculateIndex())) {
+				switch (player_num) {
 					case 1:
 						p1_has_moves = true;
 						p1_state_analyzed = true;
@@ -195,6 +201,7 @@ public class LocalState {
 				SetTile(move.start, 0);
 				SetTile(move.arrow, 3);
 				move_number++;
+				last_move = move;
 				switch (player_turn){
 					case 1:
 						p1_state_analyzed = false;
@@ -262,6 +269,6 @@ public class LocalState {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		LocalState that = (LocalState) o;
-		return board.equals(that.board);
+		return board.equals(that.board) && last_move.equals(that.last_move);
 	}
 }
