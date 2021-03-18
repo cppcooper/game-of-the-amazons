@@ -70,13 +70,14 @@ public class MonteCarlo {
                     Heuristics.enqueue(new Pair<>(new_state,node));
                     GameTree.put(new_state, node);
                 } else {
-                    // LocalState is a transposition
-                    // we are currently assuming this node's branch is no longer reachable, this is an invalid assumption
-
-                    // TODO (0): when a transposition is **reachable** from one or more branches we may select an invalid move
-                    // add a flag to LocalState for transpositions? shortcut the equals() if true?
-                    node.move = m;
-                    parent.adopt(node,true);
+                    /** todo (0): verify the logic of the following statements:
+                     * This exact LocalState has already been reached (this includes the move that got us here)
+                     * Transpositions will each have a different LocalState.last_move
+                     * This means that this exact state has already been looked at
+                     * Therefore we can disregard changing anything about the node or game tree, aside from expanding it
+                     */
+                    //node.move = m;
+                    //parent.adopt(node,true);
                 }
                 RunSimulation(rng, new_state, node, player, branches, depth - 1);
             }
