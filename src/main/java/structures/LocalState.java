@@ -179,33 +179,36 @@ public class LocalState {
 	}
 
 	public void MakeMove(Move move, boolean update_pieces) {
-		if(move.IsValidFor(this)) {
-			int player = ReadTile(move.start);
-			if (update_pieces) {
-				BoardPiece[] arr = null;
-				switch(player) {
-					case 1:
-						arr = player1;
-						break;
-					case 2:
-						arr = player2;
-						break;
-					default:
-						return;
-				}
-				for (BoardPiece p : arr) {
-					if (p.pos.CalculateIndex() == move.start) {
-						p.pos = new Position(move.piece);
+		//if the move doesn't include invalid indices, check if the move is valid for this state
+		if (!always_empty.contains(move.start) && !always_empty.contains(move.next) && !always_empty.contains(move.arrow)) {
+			if (move.IsValidFor(this)) {
+				int player = ReadTile(move.start);
+				if (update_pieces) {
+					BoardPiece[] arr = null;
+					switch (player) {
+						case 1:
+							arr = player1;
+							break;
+						case 2:
+							arr = player2;
+							break;
+						default:
+							return;
+					}
+					for (BoardPiece p : arr) {
+						if (p.pos.CalculateIndex() == move.start) {
+							p.pos = new Position(move.next);
+						}
 					}
 				}
-			}
-			SetTile(move.piece, player);
-			SetTile(move.start, 0);
-			SetTile(move.arrow, 3);
-			move_number++;
-			player_turn = (move_number % 2) + 1;
-			if(valid_hash){
-				valid_hash = false;
+				SetTile(move.next, player);
+				SetTile(move.start, 0);
+				SetTile(move.arrow, 3);
+				move_number++;
+				player_turn = (move_number % 2) + 1;
+				if (valid_hash) {
+					valid_hash = false;
+				}
 			}
 		}
 	}

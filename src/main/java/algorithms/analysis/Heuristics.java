@@ -27,7 +27,7 @@ public class Heuristics {
 				float node_aggregate = Float.intBitsToFloat(node.aggregate.get());
 				for (int i = 0; i < 4; ++i) {
 					int index = pieces[i].pos.CalculateIndex();
-					// todo (2): integrate other heuristics (once implemented)
+					// todo (1): integrate other heuristics (once implemented)
 					var heuristic_data = GetCount(board, index);
 					node_heuristic += heuristic_data.blanks - heuristic_data.blocks_heuristic;
 				}
@@ -41,7 +41,7 @@ public class Heuristics {
 		return queue.offer(job);
 	}
 
-	// todo (4): implement improved heuristics
+	// todo (2): implement improved heuristics
 
 	public static CountData GetCount(LocalState board, int startingPos) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
 		CountData counts = new CountData();
