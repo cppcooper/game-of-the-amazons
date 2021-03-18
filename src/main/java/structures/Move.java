@@ -1,5 +1,7 @@
 package structures;
 
+import java.util.Objects;
+
 public class Move {
     public int start = -1;
     public int next = -1;
@@ -17,5 +19,13 @@ public class Move {
             return 0 == (state.ReadTile(next) | state.ReadTile(arrow));
         }
         return false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Move move = (Move) o;
+        return start == move.start && next == move.next && arrow == move.arrow;
     }
 }
