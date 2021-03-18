@@ -49,6 +49,8 @@ public class GameTreeNode {
     }
 
     public synchronized void propagate(float new_aggregate){
+        // todo (1): consider changing the weighting of aggregation (currently 1:1 ratio; parent:child)
+        // todo (1): verify this function, and its uses ensure an unbroken chain of heuristic aggregating
         float delta_aggregate = new_aggregate - aggregate_heuristic.get();
         aggregate_heuristic.set(new_aggregate);
         for(GameTreeNode parent : super_nodes){

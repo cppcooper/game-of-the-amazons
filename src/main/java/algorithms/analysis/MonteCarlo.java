@@ -24,6 +24,7 @@ public class MonteCarlo {
         RandomGen rng = new RandomGen();
         GameTreeNode sim_root = GameTree.get(board);
         if(sim_root == null){
+            // This should only be the case if this is the beginning of the game. todo: ensure this holds true?
             sim_root = new GameTreeNode(new Move(),null);
             GameTree.put(board,sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
         }
