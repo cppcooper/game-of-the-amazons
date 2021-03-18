@@ -173,8 +173,10 @@ public class AICore {
         return move;
     }
 
-    private static void PruneGameTree() {
+    public static void PruneGameTree() {
         // todo (4): implement/ check if we should prune the game tree
+        int prev_turn_num = current_board_state.GetPlayerTurn() - 1;
+        GameTree.remove(prev_turn_num);
     }
 
     public static synchronized void SetState(ArrayList<Integer> state) {
@@ -196,10 +198,10 @@ public class AICore {
         if(child == null){
             //we copy the state, because it's going to change.. and we don't want to invalidate the key we use in the hash map (game tree)
             LocalState copy = new LocalState(current_board_state);
-            child = new GameTreeNode(move,parent);
+            child = new GameTreeNode(move);
+            parent.adopt(child,false);
             GameTree.put(copy,child);
         }
-        PruneGameTree();
     }
 
     private static synchronized LocalState GetState() {

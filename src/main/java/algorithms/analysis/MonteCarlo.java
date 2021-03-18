@@ -1,5 +1,6 @@
 package algorithms.analysis;
 
+import org.apache.commons.math3.util.Pair;
 import structures.GameTree;
 import structures.GameTreeNode;
 import structures.LocalState;
@@ -23,7 +24,7 @@ public class MonteCarlo {
         RandomGen rng = new RandomGen();
         GameTreeNode sim_root = GameTree.get(board);
         if(sim_root == null){
-            sim_root = new GameTreeNode(new Move(),null);
+            sim_root = new GameTreeNode(new Move());
             GameTree.put(board,sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
         }
         RunSimulation(rng, board, sim_root, player, sim_policy.branches, sim_policy.depth);
@@ -63,13 +64,16 @@ public class MonteCarlo {
 
                 GameTreeNode node = GameTree.get(new_state); // GameTreeNode might already exist for this state [original_state + move]
                 if (node == null) {
-                    node = new GameTreeNode(m, parent);
+                    node = new GameTreeNode(m);
+                    parent.adopt(node,false);
+                    if(!Heuristics.enqueue(new Pair<>(new_state,node))){
+                        System.out.println("Unable to add to the heuristics queue. We should probably throw an exception cause I have no clue what's going on.. but that'd blow up execution");
+                    }
                     GameTree.put(new_state, node);
                     // todo (1,dan): add something to concurrent queue for heuristics processing. Probably need both the state and node..
                 } else {
-                    // node already exists, we should assume that its branch is unreachable. ie. we should update its parent
-                    node.super_node = parent;
-                    // todo (1,dan): (conditionally) add something to concurrent queue for heuristics processing. Probably need both the state and node..
+                    // node already exists
+                    parent.adopt(node,true);
                 }
                 RunSimulation(rng, new_state, node, player, branches, depth - 1);
             }
