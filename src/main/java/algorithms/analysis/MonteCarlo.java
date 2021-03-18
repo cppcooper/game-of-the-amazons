@@ -73,7 +73,8 @@ public class MonteCarlo {
                     /** todo (0): verify the logic of the following statements:
                      * This exact LocalState has already been reached (this includes the move that got us here)
                      * Transpositions will each have a different LocalState.last_move
-                     * This means that this exact state has already been looked at
+                     * This last_move field is taken into consideration when performing lookups in the GameTree
+                     * This means that this exact LocalState and GameTreeNode have already been looked at
                      * Therefore we can disregard changing anything about the node or game tree, aside from expanding it
                      */
                     //node.move = m;
