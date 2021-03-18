@@ -125,9 +125,12 @@ public class AICore {
 
     public static void SendDelayedMessage() {
         try {
-            // todo (2,josh): refactor GetBestMove/SendMessage..? perhaps instead of waiting for 29.96 seconds we should constantly run GetBestMove (timing it) and then send the best move we can find moments before our time runs out.. this might be good if GetBestMove takes a fair amount of time to execute
             Thread.sleep(749 * 40);
-            player.getGameClient().sendMoveMessage(MakeMessage(GetBestMove()));
+            Move move = GetBestMove();
+            current_board_state.MakeMove(move,true);
+            player.getGameClient().sendMoveMessage(MakeMessage(move));
+            PruneGameTree();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -136,7 +139,7 @@ public class AICore {
     private static Map<String, Object> MakeMessage(Move move) {
         if (move != null) {
             Position start = new Position(move.start);
-            Position next = new Position(move.piece);
+            Position next = new Position(move.next);
             Position arrow = new Position(move.arrow);
             ArrayList<Integer> msg_start = new ArrayList(Arrays.asList(new int[]{start.x, start.y}));
             ArrayList<Integer> msg_next = new ArrayList(Arrays.asList(new int[]{next.x, next.y}));
@@ -174,7 +177,6 @@ public class AICore {
     }
 
     public static void PruneGameTree() {
-        // todo (4): implement/ check if we should prune the game tree
         int prev_turn_num = current_board_state.GetPlayerTurn() - 1;
         GameTree.remove(prev_turn_num);
     }

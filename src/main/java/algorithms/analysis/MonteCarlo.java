@@ -70,7 +70,6 @@ public class MonteCarlo {
                         System.out.println("Unable to add to the heuristics queue. We should probably throw an exception cause I have no clue what's going on.. but that'd blow up execution");
                     }
                     GameTree.put(new_state, node);
-                    // todo (1,dan): add something to concurrent queue for heuristics processing. Probably need both the state and node..
                 } else {
                     // node already exists
                     parent.adopt(node,true);
@@ -85,7 +84,7 @@ public class MonteCarlo {
     }
 
     protected static ArrayList<Move> PruneMoves(ArrayList<Move> moves, TreePolicy tree_policy){
-        // todo (2): implement tree policy and stuff (ie. this function [PruneMoves])
+        // todo (1): implement PruneMoves [needs tree policy and stuff]
 
         /* This function should prune the move list such that we're left with X number of moves
         * X/2 should be moves that consider the most promising branches to explore
