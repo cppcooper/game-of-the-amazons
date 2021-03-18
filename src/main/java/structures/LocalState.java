@@ -10,7 +10,8 @@ public class LocalState {
 	private final ArrayList<Integer> board;
 	private final BoardPiece[] player1 = new BoardPiece[4];
 	private final BoardPiece[] player2 = new BoardPiece[4];
-	private boolean state_analyzed = false;
+	private boolean p1_state_analyzed = false;
+	private boolean p2_state_analyzed = false;
 	private boolean p1_has_moves = true;
 	private boolean p2_has_moves = true;
 	private int move_number = 1;
@@ -35,6 +36,7 @@ public class LocalState {
 		move_number = other.move_number;
 		valid_hash = other.valid_hash;
 		hash = other.hash;
+
 		for(int i = 0; i < player1.length; ++i){
 			player1[i] = new BoardPiece(other.player1[i]);
 			player2[i] = new BoardPiece(other.player2[i]);
@@ -106,46 +108,16 @@ public class LocalState {
 		SetTile(pos.x,pos.y,value);
 	}
 
-	public int[] GetNeighbours(int index){
-		Position[] neighbours = new Position[8];
-		neighbours[0] = new Position(index - 1);
-		neighbours[1] = new Position(index + 1);
-		neighbours[2] = new Position(index - 12);
-		neighbours[3] = new Position(index - 11);
-		neighbours[4] = new Position(index - 10);
-		neighbours[5] = new Position(index + 10);
-		neighbours[6] = new Position(index + 11);
-		neighbours[7] = new Position(index + 12);
-
-		int valid_count = 0;
-		for(Position p : neighbours){
-			if(p.IsValid()){
-				valid_count++;
-			}
-		}
-		int[] valid_neighbours = new int[valid_count];
-		int i = 0;
-		for(Position p : neighbours){
-			if(p.IsValid()){
-				valid_neighbours[i++] = p.CalculateIndex();
-			}
-		}
-		return valid_neighbours;
-	}
-
-	public void SetHasMoves(boolean p1, boolean p2){
-		p1_has_moves = p1;
-		p2_has_moves = p2;
-		state_analyzed = true;
-	}
-
 	public boolean PlayerHasMoves(int player_num){
-		if(state_analyzed){
-			if(player_num == 1){
-				return p1_has_moves;
-			} else {
-				return p2_has_moves;
-			}
+		switch (player_num){
+			case 1:
+				if(p1_state_analyzed)
+					return p1_has_moves;
+				break;
+			case 2:
+				if(p2_state_analyzed)
+					return p2_has_moves;
+				break;
 		}
 		Function<Integer, Boolean> has_a_move = index -> {
 			Position[] neighbours = new Position[8];
@@ -168,8 +140,26 @@ public class LocalState {
 		var pieces = player_num == 1 ? player1 : player2;
 		for(int i = 0; i < pieces.length; ++i){
 			if(has_a_move.apply(pieces[i].pos.CalculateIndex())){
+				switch(player_num){
+					case 1:
+						p1_has_moves = true;
+						p1_state_analyzed = true;
+						break;
+					case 2:
+						p2_has_moves = true;
+						p2_state_analyzed = true;
+				}
 				return true;
 			}
+		}
+		switch(player_num){
+			case 1:
+				p1_has_moves = false;
+				p1_state_analyzed = true;
+				break;
+			case 2:
+				p2_has_moves = false;
+				p2_state_analyzed = true;
 		}
 		return false;
 	}
@@ -205,10 +195,17 @@ public class LocalState {
 				SetTile(move.start, 0);
 				SetTile(move.arrow, 3);
 				move_number++;
-				player_turn = (move_number % 2) + 1;
-				if (valid_hash) {
-					valid_hash = false;
+				switch (player_turn){
+					case 1:
+						p1_state_analyzed = false;
+						break;
+					case 2:
+						p2_state_analyzed = false;
+						break;
 				}
+				player_turn = (move_number % 2) + 1;
+				valid_hash = false;
+
 			}
 		}
 	}
