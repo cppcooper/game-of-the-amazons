@@ -31,7 +31,7 @@ public class MonteCarlo {
         return !Thread.interrupted(); //Assuming execution was interrupted then we need to clear that flag, and restart from the current LocalState
     }
 
-    protected static void RunSimulation(RandomGen rng, LocalState board, GameTreeNode parent, int player, int branches, int depth){
+    private static void RunSimulation(RandomGen rng, LocalState board, GameTreeNode parent, int player, int branches, int depth){
         /* Simulate X branches at Y depths
          * simulate X branches
          ** On each branch simulate X branches
@@ -64,12 +64,18 @@ public class MonteCarlo {
 
                 GameTreeNode node = GameTree.get(new_state); // GameTreeNode might already exist for this state [original_state + move]
                 if (node == null) {
+                    // LocalState is a new position
                     node = new GameTreeNode(m);
                     parent.adopt(node,false);
                     Heuristics.enqueue(new Pair<>(new_state,node));
                     GameTree.put(new_state, node);
                 } else {
-                    // node already exists
+                    // LocalState is a transposition
+                    // we are currently assuming this node's branch is no longer reachable, this is an invalid assumption
+
+                    // TODO (0): when a transposition is **reachable** from one or more branches we may select an invalid move
+                    // add a flag to LocalState for transpositions? shortcut the equals() if true?
+                    node.move = m;
                     parent.adopt(node,true);
                 }
                 RunSimulation(rng, new_state, node, player, branches, depth - 1);
@@ -77,11 +83,11 @@ public class MonteCarlo {
         }
     }
 
-    protected static class TreePolicy{
+    private static class TreePolicy{
         TreePolicy(float a,int b){}
     }
 
-    protected static ArrayList<Move> PruneMoves(ArrayList<Move> moves, TreePolicy tree_policy){
+    private static ArrayList<Move> PruneMoves(ArrayList<Move> moves, TreePolicy tree_policy){
         // todo (1): implement PruneMoves [needs tree policy and stuff]
 
         /* This function should prune the move list such that we're left with X number of moves
