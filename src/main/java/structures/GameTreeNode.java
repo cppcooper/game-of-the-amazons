@@ -32,13 +32,11 @@ public class GameTreeNode {
         }
     }
 
-    public synchronized boolean adopt(GameTreeNode node){
+    public synchronized void adopt(GameTreeNode node){
         if(!sub_nodes.contains(node)) {
             node.add_parent(this);
             sub_nodes.add(node);
-            return true;
         }
-        return false;
     }
 
     public synchronized void disown_children(){
