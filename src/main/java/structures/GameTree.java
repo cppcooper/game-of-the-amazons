@@ -24,4 +24,12 @@ public class GameTree {
         }
         return null;
     }
+
+    public static void remove(int move_num){
+        var inner_map = game_tree.get(move_num);
+        for(GameTreeNode node : inner_map.values()){
+            node.disown_children();
+        }
+        game_tree.remove(move_num);
+    }
 }

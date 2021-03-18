@@ -1,22 +1,44 @@
 package algorithms.analysis;
 
+import org.apache.commons.math3.util.Pair;
+import structures.BoardPiece;
+import structures.GameTreeNode;
 import structures.LocalState;
 import structures.Position;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class Heuristics {
-	protected static class CountingAlgorithmData {
-		public int[] visited = new int[121];
-		public Queue<Integer> blankspace = new LinkedList<>();
-		public Queue<Integer> blockedspace = new LinkedList<>();
+	private static ConcurrentLinkedDeque<Pair<LocalState, GameTreeNode>> queue = new ConcurrentLinkedDeque();
+
+	public static void ProcessQueue(){
+		while(!Thread.currentThread().isInterrupted()){
+			var pair = queue.poll();
+			if(pair != null) {
+				LocalState board = pair.getFirst();
+				GameTreeNode node = pair.getSecond();
+				if(board == null || node == null || node.move == null){
+					continue;
+				}
+				BoardPiece[] pieces = board.GetPrevTurnPieces(); // we'll calculate heuristics for the player who got us here
+				float node_heuristic = 0.f;
+				float node_aggregate = Float.intBitsToFloat(node.aggregate.get());
+				for (int i = 0; i < 4; ++i) {
+					int index = pieces[i].pos.CalculateIndex();
+					// todo (2): integrate other heuristics (once implemented)
+					var heuristic_data = GetCount(board, index);
+					node_heuristic += heuristic_data.blanks - heuristic_data.blocks_heuristic;
+				}
+				node.aggregate.set(Float.floatToIntBits(node_heuristic + node_aggregate));
+				node.propogate();
+			}
+		}
 	}
 
-	public static class CountData {
-		public int blanks;
-		public int blocks;
-		public double blocks_heuristic;
+	public static boolean enqueue(Pair<LocalState,GameTreeNode> job){
+		return queue.offer(job);
 	}
 
 	// todo (4): implement improved heuristics
@@ -76,4 +98,17 @@ public class Heuristics {
 			}
 		}
 	}
+
+	protected static class CountingAlgorithmData {
+		public int[] visited = new int[121];
+		public Queue<Integer> blankspace = new LinkedList<>();
+		public Queue<Integer> blockedspace = new LinkedList<>();
+	}
+
+	public static class CountData {
+		public int blanks;
+		public int blocks;
+		public double blocks_heuristic;
+	}
+
 }

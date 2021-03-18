@@ -1,5 +1,6 @@
 package ubc.cosc322;
 
+import algorithms.analysis.Heuristics;
 import algorithms.analysis.MonteCarlo;
 import structures.*;
 import ygraph.ai.smartfox.games.BaseGameGUI;
@@ -81,7 +82,7 @@ public class AICore {
         mc_sim_thread1 = new Thread(AICore::ExhaustiveMonteCarlo);
         mc_sim_thread2 = new Thread(AICore::NonExhaustiveMonteCarlo);
         if(heuristics_thread == null) {
-            heuristics_thread = new Thread(AICore::ProcessHeuristicsQueue);
+            heuristics_thread = new Thread(Heuristics::ProcessQueue);
             heuristics_thread.start();
         }
 
@@ -122,12 +123,6 @@ public class AICore {
         }
     }
 
-    private static void ProcessHeuristicsQueue() {
-        // todo (1,dan): implement queue and processor's control structures (including thread interrupt handling)
-        // todo (1,dan): integrate heuristic calculations with.. GameTree? with something (this involves the GetBestMove task)
-        // todo (1,dan): integrate queue with suppliers (ie. monte carlo simulations)
-    }
-
     public static void SendDelayedMessage() {
         try {
             // todo (2,josh): refactor GetBestMove/SendMessage..? perhaps instead of waiting for 29.96 seconds we should constantly run GetBestMove (timing it) and then send the best move we can find moments before our time runs out.. this might be good if GetBestMove takes a fair amount of time to execute
@@ -166,7 +161,8 @@ public class AICore {
             index = -1;
             for(int i = 0; i < current_node.edges(); ++i){
                 GameTreeNode sub_node = current_node.get(i);
-                if(sub_node.aggregate > best){
+                float aggregate = Float.intBitsToFloat(sub_node.aggregate.get());
+                if(aggregate > best){
                     index = i;
                 }
             }
@@ -177,8 +173,10 @@ public class AICore {
         return move;
     }
 
-    private static void PruneGameTree() {
+    public static void PruneGameTree() {
         // todo (4): implement/ check if we should prune the game tree
+        int prev_turn_num = current_board_state.GetPlayerTurn() - 1;
+        GameTree.remove(prev_turn_num);
     }
 
     public static synchronized void SetState(ArrayList<Integer> state) {
@@ -200,10 +198,10 @@ public class AICore {
         if(child == null){
             //we copy the state, because it's going to change.. and we don't want to invalidate the key we use in the hash map (game tree)
             LocalState copy = new LocalState(current_board_state);
-            child = new GameTreeNode(move,parent);
+            child = new GameTreeNode(move);
+            parent.adopt(child,false);
             GameTree.put(copy,child);
         }
-        PruneGameTree();
     }
 
     private static synchronized LocalState GetState() {
