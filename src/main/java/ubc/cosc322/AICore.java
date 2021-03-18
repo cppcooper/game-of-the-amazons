@@ -165,8 +165,9 @@ public class AICore {
             index = -1;
             for(int i = 0; i < current_node.edges(); ++i){
                 GameTreeNode sub_node = current_node.get(i);
-                float aggregate = Float.intBitsToFloat(sub_node.aggregate.get());
+                float aggregate = sub_node.aggregate_heuristic.get();
                 if(aggregate > best){
+                    best = aggregate;
                     index = i;
                 }
             }
@@ -205,8 +206,7 @@ public class AICore {
         if(child == null){
             //we copy the state, because it's going to change.. and we don't want to invalidate the key we use in the hash map (game tree)
             LocalState copy = new LocalState(current_board_state);
-            child = new GameTreeNode(move);
-            parent.adopt(child,false);
+            child = new GameTreeNode(move,parent);
             GameTree.put(copy,child);
         }
     }
