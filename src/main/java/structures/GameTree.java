@@ -10,7 +10,7 @@ public class GameTree {
         var inner_map = game_tree.get(board.GetMoveNumber());
         if(inner_map == null) {
             inner_map = new ConcurrentHashMap<>();
-            game_tree.put(board.GetMoveNumber(), inner_map);
+            game_tree.put(board.GetMoveNumber()-1, inner_map);
             inner_map.put(board,node);
         } else if(!inner_map.containsKey(board)){
             inner_map.put(board,node);
@@ -18,7 +18,7 @@ public class GameTree {
     }
 
     public static GameTreeNode get(LocalState board){
-        var inner_map = game_tree.get(board.GetMoveNumber());
+        var inner_map = game_tree.get(board.GetMoveNumber()-1);
         if(inner_map != null){
             return inner_map.get(board);
         }
