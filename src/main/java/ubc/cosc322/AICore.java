@@ -128,6 +128,7 @@ public class AICore {
             Thread.sleep(749 * 40);
             Move move = GetBestMove();
             current_board_state.MakeMove(move,true);
+            InterruptSimulations();
             player.getGameClient().sendMoveMessage(MakeMessage(move));
             PruneGameTree();
 
@@ -181,6 +182,10 @@ public class AICore {
         GameTree.remove(prev_turn_num);
     }
 
+    public static synchronized int GetCurrentTurnNumber(){
+        return current_board_state.GetMoveNumber();
+    }
+
     public static synchronized void SetState(ArrayList<Integer> state) {
         current_board_state = new LocalState(state, true, false); // saves state reference instead of copying
         game_tree_is_explored.set(false);
@@ -209,6 +214,7 @@ public class AICore {
     private static synchronized LocalState GetState() {
         return current_board_state;
     }
+
     private static synchronized LocalState GetStateCopy() {
         return new LocalState(current_board_state);
     }
