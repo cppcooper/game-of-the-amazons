@@ -5,6 +5,7 @@ import structures.BoardPiece;
 import structures.GameTreeNode;
 import structures.LocalState;
 import structures.Position;
+import ubc.cosc322.AICore;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -24,6 +25,9 @@ public class Heuristics {
 				LocalState board = pair.getFirst();
 				GameTreeNode node = pair.getSecond();
 				if(board == null || node == null || node.move == null){
+					continue;
+				}
+				if(AICore.GetCurrentTurnNumber() > board.GetMoveNumber()){
 					continue;
 				}
 				BoardPiece[] pieces = board.GetPrevTurnPieces(); // we'll calculate heuristics for the player who got us here
