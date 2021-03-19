@@ -38,7 +38,7 @@ public class Heuristics {
 					var heuristic_data = GetCount(board, index);
 					node_heuristic += heuristic_data.blanks - heuristic_data.blocks_heuristic;
 				}
-				float new_aggregate = node_heuristic + node.aggregate_heuristic.get();
+				double new_aggregate = node_heuristic + node.aggregate_heuristic.get();
 				node.propagate(new_aggregate);
 			}
 		}

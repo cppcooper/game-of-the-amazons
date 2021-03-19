@@ -165,7 +165,7 @@ public class AICore {
             index = -1;
             for(int i = 0; i < current_node.edges(); ++i){
                 GameTreeNode sub_node = current_node.get(i);
-                float aggregate = sub_node.aggregate_heuristic.get();
+                double aggregate = sub_node.aggregate_heuristic.get();
                 if(aggregate > best){
                     best = aggregate;
                     index = i;
