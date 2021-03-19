@@ -1,4 +1,4 @@
-
+package algorithms.analysis;
 
 import algorithms.analysis.MoveCompiler;
 import org.junit.jupiter.api.Test;
