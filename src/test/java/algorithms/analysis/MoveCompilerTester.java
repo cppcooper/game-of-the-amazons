@@ -41,7 +41,7 @@ class MoveCompilerTester {
         System.out.printf("\npooling with %d randomized trials\n===================\n", trials);
         for(int i = 0; i < trials; ++i){
             rng.setSeed(i);
-            long time = RandomizedMoveCompilerTest(GetRandomBoardPieces(rng),rng,true);
+            long time = RandomizedMoveCompilerTest(rng.GetRandomBoardPieces(),rng,true);
             if(print_runs) {
                 System.out.printf("(%d) %.1g ns, ", i + 1, (float) time);
             }
@@ -59,7 +59,7 @@ class MoveCompilerTester {
         System.out.printf("\nnon-pooling with %d randomized trials\n===================\n", trials);
         for(int i = 0; i < trials; ++i){
             rng.setSeed(i);
-            long time = RandomizedMoveCompilerTest(GetRandomBoardPieces(rng),rng,false);
+            long time = RandomizedMoveCompilerTest(rng.GetRandomBoardPieces(),rng,false);
             if(print_runs) {
                 System.out.printf("(%d) %.1g ns, ", i + 1, (float) time);
             }
@@ -69,17 +69,6 @@ class MoveCompilerTester {
             System.out.println();
         }
         System.out.printf("Average: %.2g ns\n", (float)(total/trials));
-    }
-
-    BoardPiece[] GetRandomBoardPieces(RandomGen rng){
-        final int N = 4;
-        BoardPiece[] positions = new BoardPiece[N];
-        var X = rng.GetSequenceShuffled(1,11,N);
-        var Y = rng.GetSequenceShuffled(1,11,N);
-        for(int i = 0; i < N; ++i){
-            positions[i] = new BoardPiece(X.get(i), Y.get(i),1);
-        }
-        return positions;
     }
 
     long RandomizedMoveCompilerTest(BoardPiece[] pieces, RandomGen rng, boolean use_pooling){
