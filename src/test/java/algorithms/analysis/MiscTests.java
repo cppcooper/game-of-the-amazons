@@ -13,20 +13,7 @@ import java.util.Arrays;
 public class MiscTests {
     @Test
     void find_first_degree_range() {
-        RandomGen rng = new RandomGen();
-        Integer[] state = {
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        LocalState board = new LocalState(new ArrayList<Integer>(Arrays.asList(state)),false,true);
+        LocalState board = new LocalState(new int[121]);
         int[] positions = new int[100];
         int j = 0;
         for(int x = 1; x < 11; ++x){
