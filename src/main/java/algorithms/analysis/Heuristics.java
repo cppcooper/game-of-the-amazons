@@ -10,6 +10,7 @@ import ubc.cosc322.AICore;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.function.BiFunction;
 
 public class Heuristics {
 	private static ConcurrentLinkedDeque<Pair<LocalState, GameTreeNode>> queue = new ConcurrentLinkedDeque();
@@ -49,7 +50,7 @@ public class Heuristics {
 			int index = pieces[i].pos.CalculateIndex();
 			total.add(GetCount(board,index));
 		}
-		total.empty_heuristic /= (4*92);
+		total.empty_heuristic /= (4*161);
 		total.nonempty_heuristic /= (4*80);
 		return total;
 	}
@@ -61,12 +62,23 @@ public class Heuristics {
 
 		data.visited[startingPos] = startingPos;
 		QueueNeighbours(data, startingPos, board);
+		BiFunction<Position,Integer,Boolean> is_first_degree = (s, index) -> {
+			Position p = new Position(index);
+			int dx = Math.abs(p.x - s.x);
+			int dy = Math.abs(p.y - s.y);
+			if(dx == 0 || dy == 0 || dx == dy){
+				return true;
+			}
+			return false;
+		};
 
 		if (!data.blankspace.isEmpty()) {
 			while (!data.blankspace.isEmpty()) {
 				int value = data.blankspace.poll();
 				counts.empty++;
 				QueueNeighbours(data, value, board);
+
+				counts.empty_heuristic += is_first_degree.apply(start,value) ? 2.8 : 1;
 			}
 		}
 

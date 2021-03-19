@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import structures.LocalState;
-import algorithms.analysis.Heuristics;
+import structures.Position;
 
 
 public class HeuristicsTest {
@@ -20,33 +20,44 @@ public class HeuristicsTest {
 		// 2 is player 2 pieces
 		// 3 is blocked space
 
-		Integer[] board = {
+		Integer[] state = {
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 2, 3, 0, 2, 0, 0, 0, 
-				0, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0, 
-				0, 0, 3, 0, 0, 3, 3, 3, 3, 0, 0, 
-				0, 2, 0, 3, 0, 0, 0, 0, 3, 3, 2, 
-				0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 3, 
-				0, 0, 0, 0, 3, 0, 1, 0, 0, 3, 3, 
-				0, 3, 0, 3, 0, 0, 0, 3, 3, 3, 3, 
-				0, 1, 3, 3, 0, 0, 0, 3, 0, 0, 1, 
-				0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0, 
+				0, 0, 0, 0, 2, 3, 0, 2, 0, 0, 0,
+				0, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0,
+				0, 0, 3, 0, 0, 3, 3, 3, 3, 0, 0,
+				0, 2, 0, 3, 0, 0, 0, 0, 3, 3, 2,
+				0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 3,
+				0, 0, 0, 0, 3, 0, 1, 0, 0, 3, 3,
+				0, 3, 0, 3, 0, 0, 0, 3, 3, 3, 3,
+				0, 1, 3, 3, 0, 0, 0, 3, 0, 0, 1,
+				0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0,
 				0, 0, 0, 1, 3, 3, 0, 3, 0, 0, 0};
 
+		LocalState board = new LocalState(new ArrayList<Integer>(Arrays.asList(state)), false, false);
+		board.DebugPrint();
 
-		//Creates new LocalState, sets LocalState board to board shown above
-		LocalState state = new LocalState(new ArrayList<Integer>(Arrays.asList(board)), true, false);
-		state.DebugPrint();
+		int index = Position.CalculateIndex(6,6); //player 1's central position
+		Heuristics.CountData info = Heuristics.GetCount(board, index);
+		int[] positions = {index};
+		int[][] first_degree_territory = MoveCompiler.GetOpenPositions(board,positions);
+		int first_degree = 0;
+		for(int x : first_degree_territory[0]){
+			if(x < 0){
+				break;
+			}
+			first_degree++;
+		}
+		System.out.println("Single piece counting heuristics..");
+		System.out.printf("empty (1st degree): %d\n", first_degree);
+		System.out.printf("empty: %d\n",info.empty);
+		System.out.printf("nonempty: %d\n", info.nonempty);
+		System.out.printf("raw empty heuristic: %.1f\n", info.empty_heuristic);
+		System.out.printf("raw nonempty heuristic: %.1f\n", info.nonempty_heuristic);
+		System.out.println("#################\nScaled heuristics");
+		System.out.printf("empty: %.3f\nnonempty: %.3f\n", info.empty_heuristic/161, info.nonempty_heuristic/80);
 
-		int index = 72; //position 6,6
-		Heuristics.CountData info = Heuristics.GetCount(state, index);
-
-		System.out.println(info.blanks);
-		System.out.println(info.blocks);
-		System.out.println(info.blocks_heuristic);
-
-		assertEquals(42, info.blanks);
-		assertEquals(32, info.blocks);
-		assertEquals(Precision.equals(15.475,info.blocks_heuristic,0.001), true);
+		assertEquals(42, info.empty);
+		assertEquals(32, info.nonempty);
+		//assertEquals(true, Precision.equals(15.475,info.nonempty_heuristic,0.001));
 	}
 }
