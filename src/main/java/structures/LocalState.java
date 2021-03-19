@@ -32,6 +32,13 @@ public class LocalState {
 			}
 		}
 	}
+	public LocalState(int[] state){
+		assert state.length >= 121;
+		board = new ArrayList<>(121);
+		for(int i = 0; i < 121; ++i){
+			board.add(state[i]);
+		}
+	}
 	public LocalState(LocalState other){
 		board = new ArrayList<>(other.board);
 		for(int i = 0; i < player1.length; ++i){

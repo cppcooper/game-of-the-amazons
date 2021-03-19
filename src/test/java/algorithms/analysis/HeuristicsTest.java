@@ -20,7 +20,7 @@ public class HeuristicsTest {
 		// 2 is player 2 pieces
 		// 3 is blocked space
 
-		Integer[] state = {
+		int[] state = {
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 				0, 0, 0, 0, 2, 3, 0, 2, 0, 0, 0,
 				0, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0,
@@ -33,7 +33,7 @@ public class HeuristicsTest {
 				0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 0,
 				0, 0, 0, 1, 3, 3, 0, 3, 0, 0, 0};
 
-		LocalState board = new LocalState(new ArrayList<Integer>(Arrays.asList(state)), false, false);
+		LocalState board = new LocalState(state);
 		board.DebugPrint();
 
 		int index = Position.CalculateIndex(6,6); //player 1's central position
