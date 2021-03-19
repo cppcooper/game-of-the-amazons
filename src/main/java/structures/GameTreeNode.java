@@ -1,11 +1,16 @@
 package structures;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GameTreeNode {
     protected ArrayList<GameTreeNode> super_nodes = new ArrayList<>();
     protected ArrayList<GameTreeNode> sub_nodes = new ArrayList<>(); //note: that there is no way to remove nodes! this is by design!
     public AtomicDouble aggregate_heuristic = new AtomicDouble();
+    public AtomicBoolean has_first_degree = new AtomicBoolean(false);
+    public AtomicBoolean has_count = new AtomicBoolean(false);
+    public AtomicBoolean has_territory = new AtomicBoolean(false);
     public Move move;
 
     public GameTreeNode(Move move, GameTreeNode parent){
@@ -54,6 +59,13 @@ public class GameTreeNode {
         for(GameTreeNode parent : super_nodes){
             double parents_new_aggregate = parent.aggregate_heuristic.get() + delta_aggregate;
             parent.propagate(parents_new_aggregate);
+        }
+    }
+
+    public static class NodeComparator implements Comparator<GameTreeNode> {
+        @Override
+        public int compare(GameTreeNode o1, GameTreeNode o2) {
+            return Double.compare(o1.aggregate_heuristic.get(), o2.aggregate_heuristic.get());
         }
     }
 }
