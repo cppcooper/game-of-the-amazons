@@ -31,13 +31,9 @@ public class Heuristics {
 					continue;
 				}
 				BoardPiece[] pieces = board.GetPrevTurnPieces(); // we'll calculate heuristics for the player who got us here
-				float node_heuristic = 0.f;
-				for (int i = 0; i < 4; ++i) {
-					int index = pieces[i].pos.CalculateIndex();
-					// todo (1): integrate other heuristics (once implemented)
-					var heuristic_data = GetCount(board, index);
-					node_heuristic += heuristic_data.blanks - heuristic_data.blocks_heuristic;
-				}
+				// todo (1): integrate other heuristics (once implemented)
+				var heuristic_data = GetCount(board);
+				double node_heuristic = heuristic_data.blanks - heuristic_data.blocks_heuristic;
 				double new_aggregate = node_heuristic + node.aggregate_heuristic.get();
 				node.propagate(new_aggregate);
 			}
@@ -46,7 +42,17 @@ public class Heuristics {
 
 	// todo (2): implement improved heuristics
 
-	public static CountData GetCount(LocalState board, int startingPos) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
+	public static CountData GetCount(LocalState board){
+		BoardPiece[] pieces = board.GetPrevTurnPieces(); // we'll calculate heuristics for the player who got us here
+		CountData total = new CountData();
+		for (int i = 0; i < 4; ++i) {
+			int index = pieces[i].pos.CalculateIndex();
+			total.add(GetCount(board,index));
+		}
+		return total;
+	}
+
+	static CountData GetCount(LocalState board, int startingPos) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
 		CountData counts = new CountData();
 		CountingAlgorithmData data = new CountingAlgorithmData();
 		Position start = new Position(startingPos);
@@ -112,6 +118,11 @@ public class Heuristics {
 		public int blanks;
 		public int blocks;
 		public double blocks_heuristic;
+		void add(CountData other){
+			blanks += other.blanks;
+			blocks += other.blocks;
+			blocks_heuristic += other.blocks_heuristic;
+		}
 	}
 
 }
