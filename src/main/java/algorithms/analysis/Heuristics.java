@@ -33,7 +33,7 @@ public class Heuristics {
 				BoardPiece[] pieces = board.GetPrevTurnPieces(); // we'll calculate heuristics for the player who got us here
 				// todo (1): integrate other heuristics (once implemented)
 				var heuristic_data = GetCount(board);
-				double node_heuristic = heuristic_data.blanks - heuristic_data.blocks_heuristic;
+				double node_heuristic = heuristic_data.empty_heuristic - heuristic_data.nonempty_heuristic;
 				double new_aggregate = node_heuristic + node.aggregate_heuristic.get();
 				node.propagate(new_aggregate);
 			}
@@ -49,6 +49,8 @@ public class Heuristics {
 			int index = pieces[i].pos.CalculateIndex();
 			total.add(GetCount(board,index));
 		}
+		total.empty_heuristic /= (4*92);
+		total.nonempty_heuristic /= (4*80);
 		return total;
 	}
 
@@ -63,7 +65,7 @@ public class Heuristics {
 		if (!data.blankspace.isEmpty()) {
 			while (!data.blankspace.isEmpty()) {
 				int value = data.blankspace.poll();
-				counts.blanks++;
+				counts.empty++;
 				QueueNeighbours(data, value, board);
 			}
 		}
@@ -72,17 +74,17 @@ public class Heuristics {
 			while (!data.blockedspace.isEmpty()) {
 				int value = data.blockedspace.poll();
 				Position current = new Position(value);
-				counts.blocks++;
+				counts.nonempty++;
 
 				//calculate simple distance
 				int max = Math.max(Math.abs(start.x - current.x),  Math.abs(start.y - current.y));
-				counts.blocks_heuristic += 10.0/Math.pow(10,max-1);
+				counts.nonempty_heuristic += 10.0/Math.pow(10,max-1);
 			}
 		}
 		return counts;
 	}
 
-	protected static void QueueNeighbours(CountingAlgorithmData data, int index, LocalState board){
+	private static void QueueNeighbours(CountingAlgorithmData data, int index, LocalState board){
 		Position[] neighbours = new Position[8];
 		neighbours[0] = new Position(index - 1);
 		neighbours[1] = new Position(index + 1);
@@ -108,20 +110,22 @@ public class Heuristics {
 		}
 	}
 
-	protected static class CountingAlgorithmData {
+	private static class CountingAlgorithmData {
 		public int[] visited = new int[121];
 		public Queue<Integer> blankspace = new LinkedList<>();
 		public Queue<Integer> blockedspace = new LinkedList<>();
 	}
 
 	public static class CountData {
-		public int blanks;
-		public int blocks;
-		public double blocks_heuristic;
+		public int empty;
+		public int nonempty;
+		public double empty_heuristic;
+		public double nonempty_heuristic;
 		void add(CountData other){
-			blanks += other.blanks;
-			blocks += other.blocks;
-			blocks_heuristic += other.blocks_heuristic;
+			empty += other.empty;
+			empty_heuristic += other.empty_heuristic;
+			nonempty += other.nonempty;
+			nonempty_heuristic += other.nonempty_heuristic;
 		}
 	}
 
