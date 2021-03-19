@@ -1,3 +1,6 @@
+package algorithms.analysis;
+
+import algorithms.analysis.Heuristics;
 import algorithms.analysis.MoveCompiler;
 import org.junit.jupiter.api.Test;
 import structures.LocalState;
@@ -25,16 +28,23 @@ public class MiscTests {
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
         LocalState board = new LocalState(new ArrayList<Integer>(Arrays.asList(state)),false,true);
         int[] positions = new int[100];
-        int index = 0;
+        int j = 0;
         for(int x = 1; x < 11; ++x){
             for(int y = 1; y < 11; ++y){
                 Position p = new Position(x,y);
                 if(p.IsValid()){
-                    positions[index++] = p.CalculateIndex();
+                    positions[j++] = p.CalculateIndex();
                 }
             }
         }
         int[][] first_degree_territory = MoveCompiler.GetOpenPositions(board,positions);
+        double max_count_heuristic = 0;
+        for(int index : positions){
+            double value = Heuristics.GetCount(board,index).empty_heuristic;
+            if(value > max_count_heuristic){
+                max_count_heuristic = value;
+            }
+        }
         int max = 0;
         int min = Integer.MAX_VALUE;
         for(int i = 0; i < first_degree_territory.length; ++i) {
@@ -53,5 +63,6 @@ public class MiscTests {
             }
         }
         System.out.printf("min: %d\nmax: %d\n",min,max);
+        System.out.printf("max empty_heuristic: %f", max_count_heuristic);
     }
 }
