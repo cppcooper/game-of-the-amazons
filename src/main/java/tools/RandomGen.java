@@ -1,6 +1,7 @@
 package tools;
 
 import algorithms.analysis.MonteCarlo;
+import structures.BoardPiece;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,17 @@ public class RandomGen extends Random {
             }
         }
         return arr;
+    }
+
+    public BoardPiece[] GetRandomBoardPieces(){
+        final int N = 4;
+        BoardPiece[] positions = new BoardPiece[N];
+        var X = GetSequenceShuffled(1,11,N);
+        var Y = GetSequenceShuffled(1,11,N);
+        for(int i = 0; i < N; ++i){
+            positions[i] = new BoardPiece(X.get(i), Y.get(i),1);
+        }
+        return positions;
     }
 
     public MonteCarlo.TreePolicy.policy_type get_random_policy(){
