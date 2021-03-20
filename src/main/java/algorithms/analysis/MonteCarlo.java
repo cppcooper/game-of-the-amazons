@@ -63,7 +63,7 @@ public class MonteCarlo {
             if (moves == null || moves.size() == 0) {
                 return;
             }
-            List<Integer> rng_set = rng.DEPRECATED_GetDistinctSequenceShuffled(0, moves.size(), Math.min(branches, moves.size()));
+            List<Integer> rng_set = rng.GetDistinctSequenceShuffled(0, moves.size(), Math.min(branches, moves.size()));
             for (int b = 0; b < branches && b < moves.size(); ++b) {
                 if (Thread.currentThread().isInterrupted()) {
                     break;
@@ -126,7 +126,7 @@ public class MonteCarlo {
         }
         RandomGen rng = new RandomGen();
         TreeSet<GameTreeNode> sample = new TreeSet<>(new GameTreeNode.NodeComparator());
-        List<Integer> selection = rng.DEPRECATED_GetDistinctSequenceShuffled(0,moves.size(),tree_policy.sample_size);
+        List<Integer> selection = rng.GetDistinctSequenceShuffled(0, moves.size(), tree_policy.sample_size);
         for(int i = 0; i < tree_policy.sample_size; ++i){
             LocalState copy = new LocalState(board);
             Move move = moves.get(selection.get(i));
@@ -156,7 +156,7 @@ public class MonteCarlo {
                 case TERRITORY:
                     // this is probably the most valuable (single) heuristic for pruning moves. It might also be the most expensive
                     if(!node.has_territory.get()) {
-                        heuristic = Heuristics.GetCountHeuristic(copy) + node.aggregate_heuristic.get();
+                        heuristic = Heuristics.GetTerritoryHeuristic(copy) + node.aggregate_heuristic.get();
                         node.propagate(heuristic);
                         node.has_territory.set(true);
                     }
