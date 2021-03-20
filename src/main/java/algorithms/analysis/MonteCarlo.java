@@ -47,16 +47,20 @@ public class MonteCarlo {
          * */
         if (depth > 0 && !board.IsGameOver() && !Thread.currentThread().isInterrupted()) {
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
+            assert moves != null;
             switch (type) {
                 case BREADTH_FIRST:
                     moves = PruneMoves(board, parent, moves, new TreePolicy(0, 0, TreePolicy.policy_type.DO_NOTHING));
                     break;
                 case MONTE_CARLO:
+                    // todo (debug): this is probably going to cause a problem.. we'll see
                     int sample_size = moves.size() >> 1;
-                    int bound = sample_size - (branches << 1);
-                    // todo (3): revisit
+                    int branches2 = branches << 1;
+                    int bound = Math.max(branches2, sample_size - branches2);
                     if(bound > 0) {
-                        moves = PruneMoves(board, parent, moves, new TreePolicy(rng.nextInt(bound) + (branches << 1), branches, rng.get_random_policy()));
+                        moves = PruneMoves(board, parent, moves, new TreePolicy(rng.nextInt(bound) + branches2, branches, rng.get_random_policy()));
+                    } else {
+                        moves = PruneMoves(board, parent, moves, new TreePolicy(branches << 1, branches, rng.get_random_policy()));
                     }
                     break;
             }
@@ -118,7 +122,6 @@ public class MonteCarlo {
     }
 
     private static ArrayList<Move> PruneMoves(LocalState board, GameTreeNode parent, ArrayList<Move> moves, TreePolicy tree_policy){
-        // todo (1): implement PruneMoves [needs tree policy and stuff]
         tree_policy.sample_size = Math.min(tree_policy.sample_size, moves.size());
         tree_policy.max_return = Math.min(tree_policy.max_return, tree_policy.sample_size);
         if(tree_policy.max_return == moves.size() || tree_policy.sample_size == 0 || tree_policy.type == TreePolicy.policy_type.DO_NOTHING){
@@ -133,7 +136,7 @@ public class MonteCarlo {
             copy.MakeMove(move,true);
             GameTreeNode node = GameTree.get(copy);
             if(node == null){
-                // todo (2): implement exploration consideration
+                // todo (10): implement exploration consideration
                 node = new GameTreeNode(move,parent);
                 parent.adopt(node);
                 GameTree.put(copy,node);

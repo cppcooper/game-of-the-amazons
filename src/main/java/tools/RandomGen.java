@@ -96,7 +96,7 @@ public class RandomGen extends Random {
     }
 
     public MonteCarlo.TreePolicy.policy_type get_random_policy(){
-        // todo (2): tune this function
+        // todo (debug): tune this function
         if (nextDouble() < 0.5) {
             // p = 0.5 ?
             return MonteCarlo.TreePolicy.policy_type.FIRST_DEGREE_MOVES;
