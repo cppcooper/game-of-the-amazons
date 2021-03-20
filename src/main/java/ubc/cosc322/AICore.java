@@ -155,7 +155,7 @@ public class AICore {
     }
 
     private static Move GetBestMove() {
-        // todo (1): verify GetBestMove implementation
+        // todo (debug): verify GetBestMove implementation
         Move move = null;
         double best;
         int index;

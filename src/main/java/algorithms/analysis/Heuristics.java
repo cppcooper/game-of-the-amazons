@@ -69,8 +69,6 @@ public class Heuristics {
 		}
 	}
 
-	// todo (2): implement improved heuristics
-
 	public static double GetFirstDegreeMoveHeuristic(LocalState board){
 		int value = GetFirstDegreeMoveCount(board);
 		return (double)value / (4*35);
