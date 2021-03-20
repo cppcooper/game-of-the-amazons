@@ -4,15 +4,50 @@ import algorithms.analysis.MonteCarlo;
 import structures.BoardPiece;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 public class RandomGen extends Random {
 
-    public List<Integer> GetSequenceShuffled(int min, int max, int N){
+    public List<Integer> DEPRECATED_GetDistinctSequenceShuffled(int min, int max, int N){
+        assert (++max-min) >= N;
         return ints(min,max).distinct()
                 .limit(N).boxed().collect(Collectors.toList());
+    }
+
+    public List<Integer> GetSimpleSequence(int min, int max){
+        assert min < max;
+        ArrayList<Integer> seq = new ArrayList<>(max-min+1);
+        for(int x = min; x <= max; ++x){
+            seq.add(x);
+        }
+        return seq;
+    }
+
+    public List<Integer> GetRandomSequenceShuffled(int min, int max, int N){
+        ArrayList<Integer> seq = new ArrayList<>(N);
+        for(int i = 0; i < N; ++i){
+            seq.add(nextInt(max-min)+min);
+        }
+        Collections.shuffle(seq);
+        return seq;
+    }
+
+    public List<Integer> GetDistinctSequenceShuffled(int min, int max, int N){
+        assert min < max;
+        List<Integer> valid_numbers = GetSimpleSequence(min,max);
+        ArrayList<Integer> seq = new ArrayList<>(N);
+        int i = 0;
+        int split_N = N / valid_numbers.size();
+        while(i < N) {
+            Collections.shuffle(valid_numbers);
+            for (int j = 0; i < N && j < split_N; ++i,++j) {
+                seq.add(valid_numbers.get(j));
+            }
+        }
+        return seq;
     }
 
     public ArrayList<Integer> GetRandomState(){
@@ -53,8 +88,8 @@ public class RandomGen extends Random {
     public BoardPiece[] GetRandomBoardPieces(){
         final int N = 4;
         BoardPiece[] positions = new BoardPiece[N];
-        var X = GetSequenceShuffled(1,11,N);
-        var Y = GetSequenceShuffled(1,11,N);
+        var X = DEPRECATED_GetDistinctSequenceShuffled(1,11,N);
+        var Y = DEPRECATED_GetDistinctSequenceShuffled(1,11,N);
         for(int i = 0; i < N; ++i){
             positions[i] = new BoardPiece(X.get(i), Y.get(i),1);
         }
