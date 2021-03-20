@@ -31,10 +31,40 @@ public class Heuristics {
 				if(AICore.GetCurrentTurnNumber() > board.GetMoveNumber()){
 					continue;
 				}
-				BoardPiece[] pieces = board.GetPrevTurnPieces(); // we'll calculate heuristics for the player who got us here
-				// todo (1): integrate other heuristics (once implemented)
-				double new_aggregate = GetCountHeuristic(board) + node.aggregate_heuristic.get();
-				node.propagate(new_aggregate);
+				int N = 0;
+				double original = node.get_heuristic();;
+				double heuristic = 0;
+				if(!node.has_first_degree.get()) {
+					N++;
+					heuristic += Heuristics.GetFirstDegreeMoveHeuristic(board);
+					node.has_first_degree.set(true);
+				}
+				if(!node.has_count.get()) {
+					N++;
+					heuristic += Heuristics.GetCountHeuristic(board);
+					node.has_count.set(true);
+				}
+				if(!node.has_territory.get()) {
+					N++;
+					heuristic += Heuristics.GetCountHeuristic(board);
+					node.has_territory.set(true);
+				}
+				// if N == 0, then we do nothing cause it's already done
+				if(N > 0) {
+					// if original == 0, then N == 3
+					if(original > 0){
+						// if original > 0 then N != 3
+						switch(N){
+							case 1:
+								heuristic = original + (heuristic - original)/3;
+								break;
+							case 2:
+								heuristic = heuristic + (original - heuristic)/3;
+								break;
+						}
+					}
+					node.set_heuristic(heuristic,3);
+				}
 			}
 		}
 	}

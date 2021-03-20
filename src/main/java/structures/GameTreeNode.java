@@ -3,18 +3,22 @@ package structures;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class GameTreeNode {
-    protected ArrayList<GameTreeNode> super_nodes = new ArrayList<>();
-    protected ArrayList<GameTreeNode> sub_nodes = new ArrayList<>(); //note: that there is no way to remove nodes! this is by design!
-    public AtomicDouble aggregate_heuristic = new AtomicDouble();
-    public AtomicBoolean has_first_degree = new AtomicBoolean(false);
-    public AtomicBoolean has_count = new AtomicBoolean(false);
-    public AtomicBoolean has_territory = new AtomicBoolean(false);
-    public Move move;
+    private final ArrayList<GameTreeNode> super_nodes = new ArrayList<>();
+    private final ArrayList<GameTreeNode> sub_nodes = new ArrayList<>(); //note: that there is no way to remove nodes! this is by design!
+
+    private int N = 0;
+    private final AtomicDouble heuristic = new AtomicDouble();
+    final public AtomicDouble aggregate_heuristic = new AtomicDouble();
+    final public AtomicBoolean has_first_degree = new AtomicBoolean(false);
+    final public AtomicBoolean has_count = new AtomicBoolean(false);
+    final public AtomicBoolean has_territory = new AtomicBoolean(false);
+    final public AtomicReference<Move> move = new AtomicReference<>(null);
 
     public GameTreeNode(Move move, GameTreeNode parent){
-        this.move = move;
+        this.move.set(move);
         if(parent != null){
             parent.adopt(this);
         }
@@ -38,6 +42,7 @@ public class GameTreeNode {
     }
 
     public synchronized void adopt(GameTreeNode node){
+        //we don't do anything with heuristics because they won't exist yet when this method is used (RunSim/PruneMoves)
         if(!sub_nodes.contains(node)) {
             node.add_parent(this);
             sub_nodes.add(node);
@@ -49,6 +54,27 @@ public class GameTreeNode {
             child.super_nodes.clear(); // we're only going to be running this during memory cleanup
             // unless that changes this incorrect looking function is actually correct
         }
+    }
+
+    public synchronized double get_heuristic(){
+        return heuristic.get();
+    }
+
+    public synchronized void add_heuristic(double new_value){
+        //newMean = oldMean + (Data - oldMean) / N;
+        double h = heuristic.get();
+        double new_aggregate = aggregate_heuristic.get() - h;
+        h = h + (new_value - h) / ++N;
+        heuristic.set(h);
+        new_aggregate += h;
+        propagate(new_aggregate);
+    }
+
+    public synchronized void set_heuristic(double new_value, int N){
+        this.N = N;
+        double new_aggregate = aggregate_heuristic.get() - heuristic.get() + new_value;
+        heuristic.set(new_value);
+        propagate(new_aggregate);
     }
 
     public synchronized void propagate(double new_aggregate){
