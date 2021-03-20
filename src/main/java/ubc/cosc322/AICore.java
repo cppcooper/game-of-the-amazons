@@ -17,8 +17,8 @@ public class AICore {
     private static Thread mc_sim_thread1 = null;
     private static Thread mc_sim_thread2 = null;
     private static Thread heuristics_thread = null;
-    private static AtomicBoolean terminate_threads = new AtomicBoolean(false);
-    private static AtomicBoolean game_tree_is_explored = new AtomicBoolean(false);
+    private static final AtomicBoolean terminate_threads = new AtomicBoolean(false);
+    private static final AtomicBoolean game_tree_is_explored = new AtomicBoolean(false);
 
     public static void main(String[] args) {
         if (args.length >= 2) {
@@ -163,16 +163,18 @@ public class AICore {
             GameTreeNode current_node = GameTree.get(GetStateCopy());
             best = -1;
             index = -1;
-            for(int i = 0; i < current_node.edges(); ++i){
-                GameTreeNode sub_node = current_node.get(i);
-                double aggregate = sub_node.aggregate_heuristic.get();
-                if(aggregate > best){
-                    best = aggregate;
-                    index = i;
+            if(current_node != null) {
+                for (int i = 0; i < current_node.edges(); ++i) {
+                    GameTreeNode sub_node = current_node.get(i);
+                    double aggregate = sub_node.aggregate_heuristic.get();
+                    if (aggregate > best) {
+                        best = aggregate;
+                        index = i;
+                    }
                 }
-            }
-            if(index > 0 && current_node.edges() > 0) {
-                move = current_node.get(index).move;
+                if (index > 0 && current_node.edges() > 0) {
+                    move = current_node.get(index).move.get();
+                }
             }
         } while (move == null);
         return move;

@@ -136,37 +136,36 @@ public class MonteCarlo {
                 // todo (2): implement exploration consideration
                 node = new GameTreeNode(move,parent);
                 parent.adopt(node);
+                GameTree.put(copy,node);
             }
-            double heuristic =  0.0;
+            sample.add(node);
+            boolean enqueue = true;
             switch(tree_policy.type){
                 case FIRST_DEGREE_MOVES:
                     if(!node.has_first_degree.get()) {
-                        heuristic = Heuristics.GetFirstDegreeMoveHeuristic(copy) + node.aggregate_heuristic.get();
-                        node.propagate(heuristic);
+                        node.add_heuristic(Heuristics.GetFirstDegreeMoveHeuristic(copy));
                         node.has_first_degree.set(true);
                     }
                     break;
                 case COUNT_HEURISTIC:
                     if(!node.has_count.get()) {
-                        heuristic = Heuristics.GetCountHeuristic(copy) + node.aggregate_heuristic.get();
-                        node.propagate(heuristic);
+                        node.add_heuristic(Heuristics.GetCountHeuristic(copy));
                         node.has_count.set(true);
                     }
                     break;
                 case TERRITORY:
                     // this is probably the most valuable (single) heuristic for pruning moves. It might also be the most expensive
                     if(!node.has_territory.get()) {
-                        heuristic = Heuristics.GetTerritoryHeuristic(copy) + node.aggregate_heuristic.get();
-                        node.propagate(heuristic);
+                        node.add_heuristic(Heuristics.GetTerritoryHeuristic(copy));
                         node.has_territory.set(true);
                     }
                     break;
                 case ALL_HEURISTICS:
                     // all of the above combined
-                    // todo (2): combine heuristics more thoughtfully
-                    double original = node.aggregate_heuristic.get();
                     int N = 0;
-                    heuristic = original;
+                    double original = node.get_heuristic();;
+                    double heuristic = 0;
+                    enqueue = false;
                     if(!node.has_first_degree.get()) {
                         N++;
                         heuristic += Heuristics.GetFirstDegreeMoveHeuristic(copy);
@@ -182,20 +181,33 @@ public class MonteCarlo {
                         heuristic += Heuristics.GetCountHeuristic(copy);
                         node.has_territory.set(true);
                     }
-                    if(heuristic > original) {
-                        node.propagate(heuristic);
+                    // if N == 0, then we do nothing cause it's already done
+                    if(N > 0) {
+                        // if original == 0, then N == 3
+                        if(original > 0){
+                            // if original > 0 then N != 3
+                            switch(N){
+                                case 1:
+                                    heuristic = original + (heuristic - original)/3;
+                                    break;
+                                case 2:
+                                    heuristic = heuristic + (original - heuristic)/3;
+                                    break;
+                            }
+                        }
+                        node.set_heuristic(heuristic,3);
                     }
                     break;
             }
-            GameTree.put(copy,node);
-            sample.add(node);
-            // todo (2): should we queue up the node for further heuristics processing?
+            if(enqueue){
+                Heuristics.enqueue(new Pair<>(board,node));
+            }
         }
         moves = new ArrayList<>(tree_policy.max_return);
         int i = 0;
         for(GameTreeNode n : sample.descendingSet()){
             if(i++ < tree_policy.max_return) {
-                moves.add(n.move);
+                moves.add(n.move.get());
             } else {
                 return moves;
             }
