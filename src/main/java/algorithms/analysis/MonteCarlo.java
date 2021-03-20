@@ -9,6 +9,7 @@ import tools.RandomGen;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 public class MonteCarlo {
     public static class SimPolicy{
@@ -26,7 +27,7 @@ public class MonteCarlo {
         }
     }
 
-    public static boolean RunSimulation(LocalState board, int player, SimPolicy sim_policy) {
+    public static boolean RunSimulation(LocalState board, SimPolicy sim_policy) {
         RandomGen rng = new RandomGen();
         GameTreeNode sim_root = GameTree.get(board);
         if(sim_root == null){
@@ -34,32 +35,35 @@ public class MonteCarlo {
             sim_root = new GameTreeNode(new Move(),null);
             GameTree.put(board,sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
         }
-        RunSimulation(rng, board, sim_root, player, sim_policy.branches, sim_policy.depth, sim_policy.type);
+        RunSimulation(rng, board, sim_root, sim_policy.branches, sim_policy.depth, sim_policy.type);
         return !Thread.interrupted(); //Assuming execution was interrupted then we need to clear that flag, and restart from the current LocalState
     }
 
-    private static void RunSimulation(RandomGen rng, LocalState board, GameTreeNode parent, int player, int branches, int depth, SimPolicy.policy_type type) {
+    private static void RunSimulation(RandomGen rng, LocalState board, GameTreeNode parent, int branches, int depth, SimPolicy.policy_type type) {
         /* Simulate X branches at Y depths
          * simulate X branches
          ** On each branch simulate X branches
          * repeat until at Y depth
          * */
         if (depth > 0 && !board.IsGameOver() && !Thread.currentThread().isInterrupted()) {
-            player = player == 1 ? 2 : 1;
-            ArrayList<Move> moves = MoveCompiler.GetMoveList(board, player == 1 ? board.GetP1Pieces() : board.GetP2Pieces(), true);
+            ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
             switch (type) {
                 case BREADTH_FIRST:
-                    moves = PruneMoves(board, moves, new TreePolicy(0, 0, TreePolicy.policy_type.DO_NOTHING));
+                    moves = PruneMoves(board, parent, moves, new TreePolicy(0, 0, TreePolicy.policy_type.DO_NOTHING));
                     break;
                 case MONTE_CARLO:
                     int sample_size = moves.size() >> 1;
-                    moves = PruneMoves(board, moves, new TreePolicy(sample_size > 0 ? sample_size : moves.size(), branches, rng.get_random_policy()));
+                    int bound = sample_size - (branches << 1);
+                    // todo (3): revisit
+                    if(bound > 0) {
+                        moves = PruneMoves(board, parent, moves, new TreePolicy(rng.nextInt(bound) + (branches << 1), branches, rng.get_random_policy()));
+                    }
                     break;
             }
             if (moves == null || moves.size() == 0) {
                 return;
             }
-            List<Integer> rng_set = rng.GetSequenceShuffled(0, moves.size(), Math.min(branches, moves.size()));
+            List<Integer> rng_set = rng.DEPRECATED_GetDistinctSequenceShuffled(0, moves.size(), Math.min(branches, moves.size()));
             for (int b = 0; b < branches && b < moves.size(); ++b) {
                 if (Thread.currentThread().isInterrupted()) {
                     break;
@@ -90,14 +94,13 @@ public class MonteCarlo {
                     // run the adoption procedure to ensure linkage and propagation of the heuristic (only one link, and only propagates if node's heuristic is non-zero)
                     parent.adopt(node);
                 }
-                RunSimulation(rng, new_state, node, player, branches, depth - 1, type);
+                RunSimulation(rng, new_state, node, branches, depth - 1, type);
             }
         }
     }
 
     public static class TreePolicy{
         public enum policy_type{
-            CHEAPEST,
             FIRST_DEGREE_MOVES,
             COUNT_HEURISTIC,
             TERRITORY,
@@ -114,39 +117,87 @@ public class MonteCarlo {
         }
     }
 
-    private static ArrayList<Move> PruneMoves(LocalState board, ArrayList<Move> moves, TreePolicy tree_policy){
+    private static ArrayList<Move> PruneMoves(LocalState board, GameTreeNode parent, ArrayList<Move> moves, TreePolicy tree_policy){
         // todo (1): implement PruneMoves [needs tree policy and stuff]
-        tree_policy.sample_size = Math.min(tree_policy.sample_size, moves.size());;
+        tree_policy.sample_size = Math.min(tree_policy.sample_size, moves.size());
         tree_policy.max_return = Math.min(tree_policy.max_return, tree_policy.sample_size);
-        if(tree_policy.sample_size == 0 || tree_policy.type == TreePolicy.policy_type.DO_NOTHING){
+        if(tree_policy.max_return == moves.size() || tree_policy.sample_size == 0 || tree_policy.type == TreePolicy.policy_type.DO_NOTHING){
             return moves;
         }
         RandomGen rng = new RandomGen();
-        ArrayList<Move> sample = new ArrayList<>();
-        List<Integer> selection = rng.GetSequenceShuffled(0,moves.size(),tree_policy.sample_size);
+        TreeSet<GameTreeNode> sample = new TreeSet<>(new GameTreeNode.NodeComparator());
+        List<Integer> selection = rng.DEPRECATED_GetDistinctSequenceShuffled(0,moves.size(),tree_policy.sample_size);
         for(int i = 0; i < tree_policy.sample_size; ++i){
             LocalState copy = new LocalState(board);
             Move move = moves.get(selection.get(i));
-            copy.MakeMove(move,false);
+            copy.MakeMove(move,true);
+            GameTreeNode node = GameTree.get(copy);
+            if(node == null){
+                // todo (2): implement exploration consideration
+                node = new GameTreeNode(move,parent);
+                parent.adopt(node);
+            }
             double heuristic =  0.0;
             switch(tree_policy.type){
-                case CHEAPEST:
-                    // use data in the move list itself? count the moves with next in it?
-                    // this gives us the number of arrow moves from that position.. which is sort of a dirty first degree moves count
-                    break;
                 case FIRST_DEGREE_MOVES:
-                    // this would be a different value than CHEAPEST, but it should actually be equivalent (multiplied by a constant)
-                    // so this is probably a redundant one to include
+                    if(!node.has_first_degree.get()) {
+                        heuristic = Heuristics.GetFirstDegreeMoveHeuristic(copy) + node.aggregate_heuristic.get();
+                        node.propagate(heuristic);
+                        node.has_first_degree.set(true);
+                    }
                     break;
                 case COUNT_HEURISTIC:
-                    var counts = Heuristics.GetCount(copy);
+                    if(!node.has_count.get()) {
+                        heuristic = Heuristics.GetCountHeuristic(copy) + node.aggregate_heuristic.get();
+                        node.propagate(heuristic);
+                        node.has_count.set(true);
+                    }
                     break;
                 case TERRITORY:
                     // this is probably the most valuable (single) heuristic for pruning moves. It might also be the most expensive
+                    if(!node.has_territory.get()) {
+                        heuristic = Heuristics.GetCountHeuristic(copy) + node.aggregate_heuristic.get();
+                        node.propagate(heuristic);
+                        node.has_territory.set(true);
+                    }
                     break;
                 case ALL_HEURISTICS:
                     // all of the above combined
+                    // todo (2): combine heuristics more thoughtfully
+                    double original = node.aggregate_heuristic.get();
+                    int N = 0;
+                    heuristic = original;
+                    if(!node.has_first_degree.get()) {
+                        N++;
+                        heuristic += Heuristics.GetFirstDegreeMoveHeuristic(copy);
+                        node.has_first_degree.set(true);
+                    }
+                    if(!node.has_count.get()) {
+                        N++;
+                        heuristic += Heuristics.GetCountHeuristic(copy);
+                        node.has_count.set(true);
+                    }
+                    if(!node.has_territory.get()) {
+                        N++;
+                        heuristic += Heuristics.GetCountHeuristic(copy);
+                        node.has_territory.set(true);
+                    }
+                    if(heuristic > original) {
+                        node.propagate(heuristic);
+                    }
                     break;
+            }
+            GameTree.put(copy,node);
+            sample.add(node);
+            // todo (2): should we queue up the node for further heuristics processing?
+        }
+        moves = new ArrayList<>(tree_policy.max_return);
+        int i = 0;
+        for(GameTreeNode n : sample.descendingSet()){
+            if(i++ < tree_policy.max_return) {
+                moves.add(n.move);
+            } else {
+                return moves;
             }
         }
         return moves;

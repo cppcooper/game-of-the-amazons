@@ -33,9 +33,7 @@ public class Heuristics {
 				}
 				BoardPiece[] pieces = board.GetPrevTurnPieces(); // we'll calculate heuristics for the player who got us here
 				// todo (1): integrate other heuristics (once implemented)
-				var heuristic_data = GetCount(board);
-				double node_heuristic = heuristic_data.empty_heuristic - heuristic_data.nonempty_heuristic;
-				double new_aggregate = node_heuristic + node.aggregate_heuristic.get();
+				double new_aggregate = GetCountHeuristic(board) + node.aggregate_heuristic.get();
 				node.propagate(new_aggregate);
 			}
 		}
@@ -43,7 +41,32 @@ public class Heuristics {
 
 	// todo (2): implement improved heuristics
 
-	public static CountData GetCount(LocalState board){
+	public static double GetFirstDegreeMoveHeuristic(LocalState board){
+		int value = GetFirstDegreeMoveCount(board);
+		return (double)value / (4*35);
+	}
+
+	public static int GetFirstDegreeMoveCount(LocalState board){
+		BoardPiece[] pieces = board.GetPrevTurnPieces(); // we'll calculate heuristics for the player who got us here
+		int[] positions = new int[pieces.length];
+		for (int i = 0; i < 4; ++i) {
+			int index = pieces[i].pos.CalculateIndex();
+			positions[i] = index;
+		}
+		int first_degree = 0;
+		int[][] first_degree_territory = MoveCompiler.GetOpenPositions(board,positions);
+		for(int i = 0; i < first_degree_territory.length; ++i){
+			for (int x : first_degree_territory[i]) {
+				if (x < 0) {
+					break;
+				}
+				first_degree++;
+			}
+		}
+		return first_degree;
+	}
+
+	public static double GetCountHeuristic(LocalState board){
 		BoardPiece[] pieces = board.GetPrevTurnPieces(); // we'll calculate heuristics for the player who got us here
 		CountData total = new CountData();
 		for (int i = 0; i < 4; ++i) {
@@ -52,7 +75,7 @@ public class Heuristics {
 		}
 		total.empty_heuristic /= (4*161);
 		total.nonempty_heuristic /= (4*80);
-		return total;
+		return total.empty_heuristic - total.nonempty_heuristic;
 	}
 
 	static CountData GetCount(LocalState board, int startingPos) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
@@ -120,6 +143,15 @@ public class Heuristics {
 				}
 			}
 		}
+	}
+
+	public static double GetTerritoryHeuristic(LocalState board){
+		final double max_value = -1.0;
+		return (double)GetTerritoryCount(board) / max_value;
+	}
+
+	public static int GetTerritoryCount(LocalState board){
+		return 0;
 	}
 
 	private static class CountingAlgorithmData {
