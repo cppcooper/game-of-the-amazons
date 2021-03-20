@@ -87,8 +87,8 @@ public class RandomGen extends Random {
     public BoardPiece[] GetRandomBoardPieces(){
         final int N = 4;
         BoardPiece[] positions = new BoardPiece[N];
-        var X = DEPRECATED_GetDistinctSequenceShuffled(1,11,N);
-        var Y = DEPRECATED_GetDistinctSequenceShuffled(1,11,N);
+        var X = GetDistinctSequenceShuffled(1,11,N);
+        var Y = GetDistinctSequenceShuffled(1,11,N);
         for(int i = 0; i < N; ++i){
             positions[i] = new BoardPiece(X.get(i), Y.get(i),1);
         }
