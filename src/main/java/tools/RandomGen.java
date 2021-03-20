@@ -17,7 +17,7 @@ public class RandomGen extends Random {
                 .limit(N).boxed().collect(Collectors.toList());
     }
 
-    public List<Integer> GetSimpleSequence(int min, int max){
+    public List<Integer> GetNumberSequence(int min, int max){
         assert min < max;
         ArrayList<Integer> seq = new ArrayList<>(max-min+1);
         for(int x = min; x <= max; ++x){
@@ -37,13 +37,12 @@ public class RandomGen extends Random {
 
     public List<Integer> GetDistinctSequenceShuffled(int min, int max, int N){
         assert min < max;
-        List<Integer> valid_numbers = GetSimpleSequence(min,max);
+        List<Integer> valid_numbers = GetNumberSequence(min,max);
         ArrayList<Integer> seq = new ArrayList<>(N);
         int i = 0;
-        int split_N = N / valid_numbers.size();
         while(i < N) {
             Collections.shuffle(valid_numbers);
-            for (int j = 0; i < N && j < split_N; ++i,++j) {
+            for (int j = 0; i < N && j < valid_numbers.size(); ++j, ++i) {
                 seq.add(valid_numbers.get(j));
             }
         }

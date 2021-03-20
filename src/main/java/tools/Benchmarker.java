@@ -24,12 +24,15 @@ public class Benchmarker {
         }
         return (System.nanoTime() - start);
     }
-    public long TestCode(Runnable code){
-        Start();
-        for(int i = 0; i < 10000; ++i) {
-            code.run();
+
+    public long AverageRuntime(Benchmarker B, int N, Runnable fn){
+        long total = 0;
+        for(int i = 0; i < N; ++i){
+            B.Start();
+            fn.run();
+            B.Stop();
+            total += B.ElapsedNano();
         }
-        Stop();
-        return ElapsedNano()/10000;
+        return total / N;
     }
 }
