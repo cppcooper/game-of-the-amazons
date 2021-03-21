@@ -124,6 +124,7 @@ public class AICore {
 
     public static void SendDelayedMessage() {
         try {
+            System.out.println("SendDelayedMessage: now waiting..");
             Thread.sleep(749 * 10);
             Move move = GetBestMove();
             current_board_state.MakeMove(move,true);

@@ -7,9 +7,7 @@ import structures.LocalState;
 import structures.Move;
 import tools.RandomGen;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 
 public class MonteCarlo {
     public static class SimPolicy{
@@ -68,6 +66,7 @@ public class MonteCarlo {
                 return;
             }
             List<Integer> rng_set = rng.GetDistinctSequenceShuffled(0, moves.size()-1, Math.min(branches, moves.size()));
+            Queue<Pair<LocalState,GameTreeNode>> branch_jobs = new LinkedList<>();
             for (int b = 0; b < branches && b < moves.size(); ++b) {
                 if (Thread.currentThread().isInterrupted()) {
                     break;
@@ -98,7 +97,11 @@ public class MonteCarlo {
                     // run the adoption procedure to ensure linkage and propagation of the heuristic (only one link, and only propagates if node's heuristic is non-zero)
                     parent.adopt(node);
                 }
-                RunSimulation(rng, new_state, node, branches, depth - 1, type);
+                branch_jobs.add(new Pair<>(new_state,node));
+            }
+            while(!branch_jobs.isEmpty()){
+                var job = branch_jobs.poll();
+                RunSimulation(rng, job.getFirst(), job.getSecond(), branches, depth - 1, type);
             }
         }
     }
