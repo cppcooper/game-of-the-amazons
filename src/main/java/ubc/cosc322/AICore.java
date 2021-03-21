@@ -3,6 +3,7 @@ package ubc.cosc322;
 import algorithms.analysis.Heuristics;
 import algorithms.analysis.MonteCarlo;
 import structures.*;
+import tools.RandomGen;
 import ygraph.ai.smartfox.games.BaseGameGUI;
 
 import java.util.ArrayList;
@@ -23,7 +24,8 @@ public class AICore {
     public static void main(String[] args) {
         try {
             MovePool.generate_pool();
-            player = new AIPlayer("coopstar2", "secure_password");
+            RandomGen rng = new RandomGen();
+            player = new AIPlayer("coopstar" + rng.nextInt(4488), "secure_password");
             BaseGameGUI.sys_setup();
             java.awt.EventQueue.invokeLater(new Runnable() {
                 public void run() {
