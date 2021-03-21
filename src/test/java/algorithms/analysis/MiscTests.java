@@ -1,10 +1,10 @@
 package algorithms.analysis;
 
 import org.junit.jupiter.api.Test;
-import structures.BoardPiece;
 import structures.LocalState;
 import structures.Position;
 import tools.RandomGen;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MiscTests {
     @Test
@@ -79,5 +79,10 @@ public class MiscTests {
             }
         }
         System.out.printf("max ours:   %d\nmax theirs: %d\n", max_ours,max_theirs);
+    }
+
+    @Test
+    void testing_infinite(){
+        assertEquals(Double.NEGATIVE_INFINITY < 0, true);
     }
 }
