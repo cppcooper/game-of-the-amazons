@@ -59,7 +59,7 @@ public class MiscTests {
         int max_ours = 0;
         int max_theirs = 0;
         for(int i = 0; i < trials; ++i){
-            LocalState board = new LocalState(new int[121]);
+            LocalState board = new LocalState(rng.GetRandomState(0.35),false,true);/*new int[121]);/**/
             var positions = rng.GetRandomPositions(8);
             int count = 0;
             int player = 1;
@@ -70,7 +70,10 @@ public class MiscTests {
                 board.SetTile(p.CalculateIndex(),player);
             }
             board.FindPieces();
+            board.DebugPrint();
+            System.out.printf("our player: %d\n######\n",board.GetPrevTurnPieces()[0].player);
             var counts = Heuristics.GetTerritoryCount(board);
+            System.out.printf("ours:   %d\ntheirs: %d\n", counts.ours,counts.theirs);
             if(counts.ours > max_ours){
                 max_ours = counts.ours;
             }

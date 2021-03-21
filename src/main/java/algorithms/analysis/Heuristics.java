@@ -185,15 +185,14 @@ public class Heuristics {
 		int[] their_positions = new int[4];
 		int[] our_degree_counts = new int[121];
 		int[] their_degree_counts = new int[121];
-		HashSet<Integer> visited = new HashSet<Integer>();
 
 		for(int i = 0; i < 4; i++) {
 			our_positions[i] = our_pieces[i].pos.CalculateIndex();
 			their_positions[i] = their_pieces[i].pos.CalculateIndex();			//element # is the index
 		}
 
-		GetTerritoryCount(board, our_positions, our_degree_counts, 1, visited);
-		GetTerritoryCount(board, their_positions, their_degree_counts, 1, visited);
+		GetTerritoryCount(board, our_positions, our_degree_counts, 1, new HashSet<Integer>());
+		GetTerritoryCount(board, their_positions, their_degree_counts, 1, new HashSet<Integer>());
 
 		int our_territory_count = 0;
 		int their_territory_count = 0;
@@ -205,6 +204,11 @@ public class Heuristics {
 				their_territory_count++;                               /* if we have a lower cost to move set to us, else set to 0 */
 			}
 		}
+		LocalState c1 = new LocalState(our_degree_counts);
+		LocalState c2 = new LocalState(their_degree_counts);
+		c1.DebugPrint();
+		System.out.println();
+		c2.DebugPrint();
 		return new TerritoryCounts(our_territory_count,their_territory_count);
 	}
 
