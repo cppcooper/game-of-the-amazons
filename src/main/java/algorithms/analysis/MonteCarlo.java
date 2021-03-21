@@ -170,19 +170,19 @@ public class MonteCarlo {
                     double heuristic = 0;
                     enqueue = false;
                     if(!node.has_first_degree.get()) {
-                        N++;
-                        heuristic += Heuristics.GetFirstDegreeMoveHeuristic(copy);
                         node.has_first_degree.set(true);
+                        heuristic += Heuristics.GetFirstDegreeMoveHeuristic(copy);
+                        N++;
                     }
                     if(!node.has_count.get()) {
-                        N++;
-                        heuristic += Heuristics.GetCountHeuristic(copy);
                         node.has_count.set(true);
+                        heuristic += Heuristics.GetCountHeuristic(copy);
+                        N++;
                     }
                     if(!node.has_territory.get()) {
-                        N++;
-                        heuristic += Heuristics.GetCountHeuristic(copy);
                         node.has_territory.set(true);
+                        heuristic += Heuristics.GetCountHeuristic(copy);
+                        N++;
                     }
                     // if N == 0, then we do nothing cause it's already done
                     if(N > 0) {

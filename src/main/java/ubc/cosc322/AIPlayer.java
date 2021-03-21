@@ -17,8 +17,6 @@ public class AIPlayer extends GamePlayer{
 
     private GameClient gameClient = null; 
     private OurGameGUI gamegui = null;
-    final public AtomicInteger player_num = new AtomicInteger(-1);
-
 
 	
     private String userName = null;
@@ -73,13 +71,10 @@ public class AIPlayer extends GamePlayer{
 			AICore.TerminateThreads();
 			AICore.LaunchThreads();
 		} else if (messageType.equals(GameMessage.GAME_ACTION_START)) {
-			boolean our_turn = false;
-			if(userName.equals(msgDetails.get("player-white"))){
-				our_turn = true;
+			if(userName.equals(msgDetails.get("player-black"))){
 				Thread move_sender_orphan = new Thread(AICore::SendDelayedMessage);
 				move_sender_orphan.start(); //orphan will clean itself up (as a good orphan should) when execution is done, no joining or stopping necessary
 			}
-			player_num.set(our_turn ? 1 : 2);
 		} else if (messageType.equals(GameMessage.GAME_STATE_PLAYER_LOST)) {
 			AICore.TerminateThreads();
 		} else if (messageType.equals("user-count-change")) {
