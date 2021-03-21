@@ -1,14 +1,10 @@
 package algorithms.analysis;
 
-import algorithms.analysis.Heuristics;
-import algorithms.analysis.MoveCompiler;
 import org.junit.jupiter.api.Test;
+import structures.BoardPiece;
 import structures.LocalState;
 import structures.Position;
 import tools.RandomGen;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MiscTests {
     @Test
@@ -51,5 +47,37 @@ public class MiscTests {
         }
         System.out.printf("min: %d\nmax: %d\n",min,max);
         System.out.printf("max empty_heuristic: %f", max_count_heuristic);
+    }
+
+    @Test
+    void find_max_territory_count(){
+        RandomGen rng = new RandomGen();
+        find_max_territory_count(rng,10000);
+    }
+
+    void find_max_territory_count(RandomGen rng, int trials){
+        int max_ours = 0;
+        int max_theirs = 0;
+        for(int i = 0; i < trials; ++i){
+            LocalState board = new LocalState(new int[121]);
+            var positions = rng.GetRandomPositions(8);
+            int count = 0;
+            int player = 1;
+            for(Position p : positions){
+                if(count++ == 4){
+                    player = 2;
+                }
+                board.SetTile(p.CalculateIndex(),player);
+            }
+            board.FindPieces();
+            var counts = Heuristics.GetTerritoryCount(board);
+            if(counts.ours > max_ours){
+                max_ours = counts.ours;
+            }
+            if(counts.theirs > max_theirs){
+                max_theirs = counts.theirs;
+            }
+        }
+        System.out.printf("max ours:   %d\nmax theirs: %d\n", max_ours,max_theirs);
     }
 }
