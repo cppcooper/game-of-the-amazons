@@ -23,7 +23,7 @@ public class AICore {
     public static void main(String[] args) {
         try {
             MovePool.generate_pool();
-            player = new AIPlayer("coopstar", "secure_password");
+            player = new AIPlayer("coopstar2", "secure_password");
             BaseGameGUI.sys_setup();
             java.awt.EventQueue.invokeLater(new Runnable() {
                 public void run() {
@@ -122,11 +122,13 @@ public class AICore {
 
     public static void SendDelayedMessage() {
         try {
-            Thread.sleep(749 * 40);
+            Thread.sleep(749 * 10);
             Move move = GetBestMove();
             current_board_state.MakeMove(move,true);
             InterruptSimulations();
-            player.getGameClient().sendMoveMessage(MakeMessage(move));
+            var msg = MakeMessage(move);
+            player.makeMove(msg);
+            player.getGameClient().sendMoveMessage(msg);
             PruneGameTree();
 
         } catch (Exception e) {
@@ -139,9 +141,9 @@ public class AICore {
             Position start = new Position(move.start);
             Position next = new Position(move.next);
             Position arrow = new Position(move.arrow);
-            ArrayList<Integer> msg_start = new ArrayList(Arrays.asList(new int[]{start.x, start.y}));
-            ArrayList<Integer> msg_next = new ArrayList(Arrays.asList(new int[]{next.x, next.y}));
-            ArrayList<Integer> msg_arrow = new ArrayList(Arrays.asList(new int[]{arrow.x, arrow.y}));
+            ArrayList<Integer> msg_start = new ArrayList<>(Arrays.asList(start.x, start.y));
+            ArrayList<Integer> msg_next = new ArrayList<>(Arrays.asList(next.x, next.y));
+            ArrayList<Integer> msg_arrow = new ArrayList<>(Arrays.asList(arrow.x, arrow.y));
             Map<String, Object> msg = new HashMap<>();
             msg.put("queen-position-current", msg_start);
             msg.put("queen-position-next", msg_next);

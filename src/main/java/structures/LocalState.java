@@ -276,6 +276,6 @@ public class LocalState {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		LocalState that = (LocalState) o;
-		return board.equals(that.board) && (last_move != null && last_move.equals(that.last_move));
+		return board.equals(that.board) && ((last_move == null && that.last_move == null) || (last_move != null && last_move.equals(that.last_move)));
 	}
 }

@@ -46,6 +46,10 @@ public class AIPlayer extends GamePlayer{
 		gameClient.joinRoom("Shannon Lake");
     }
 
+    public void makeMove(Map<String, Object> msgDetails){
+		gamegui.updateGameState(msgDetails);
+	}
+
     @Override
     public boolean handleGameMessage(String messageType, Map<String, Object> msgDetails) {
 		System.out.printf("message type: %s\n",messageType);
@@ -72,6 +76,7 @@ public class AIPlayer extends GamePlayer{
 			AICore.LaunchThreads();
 		} else if (messageType.equals(GameMessage.GAME_ACTION_START)) {
 			if(userName.equals(msgDetails.get("player-black"))){
+				System.out.printf("black: %s\n", msgDetails.get("player-black"));
 				Thread move_sender_orphan = new Thread(AICore::SendDelayedMessage);
 				move_sender_orphan.start(); //orphan will clean itself up (as a good orphan should) when execution is done, no joining or stopping necessary
 			}
