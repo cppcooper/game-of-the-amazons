@@ -16,7 +16,7 @@ public class LocalState {
 	private boolean p1_has_moves = true;
 	private boolean p2_has_moves = true;
 	private int move_number = 1;
-	private int player_turn = 1;
+	private int player_turn = 2;
 	private int hash = -1;
 	private boolean valid_hash = false;
 
@@ -217,7 +217,7 @@ public class LocalState {
 						p2_state_analyzed = false;
 						break;
 				}
-				player_turn = (move_number % 2) + 1;
+				player_turn = player_turn == 1 ? 2 : 1;
 				valid_hash = false;
 
 			}
