@@ -28,7 +28,7 @@ public class MovePool {
 
     private static int make_key(int start, int next, int arrow){
         final int bits = 8;
-        return (start << (bits << 1)) & (next << bits) & arrow;
+        return (start << (bits << 1)) | (next << bits) | arrow;
     }
     
     public static Move get(int start, int next, int arrow) {

@@ -67,7 +67,7 @@ public class MonteCarlo {
             if (moves == null || moves.size() == 0) {
                 return;
             }
-            List<Integer> rng_set = rng.GetDistinctSequenceShuffled(0, moves.size(), Math.min(branches, moves.size()));
+            List<Integer> rng_set = rng.GetDistinctSequenceShuffled(0, moves.size()-1, Math.min(branches, moves.size()));
             for (int b = 0; b < branches && b < moves.size(); ++b) {
                 if (Thread.currentThread().isInterrupted()) {
                     break;
@@ -129,7 +129,7 @@ public class MonteCarlo {
         }
         RandomGen rng = new RandomGen();
         TreeSet<GameTreeNode> sample = new TreeSet<>(new GameTreeNode.NodeComparator());
-        List<Integer> selection = rng.GetDistinctSequenceShuffled(0, moves.size(), tree_policy.sample_size);
+        List<Integer> selection = rng.GetDistinctSequenceShuffled(0, moves.size()-1, tree_policy.sample_size);
         for(int i = 0; i < tree_policy.sample_size; ++i){
             LocalState copy = new LocalState(board);
             Move move = moves.get(selection.get(i));

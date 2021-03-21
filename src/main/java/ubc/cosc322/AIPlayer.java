@@ -43,7 +43,7 @@ public class AIPlayer extends GamePlayer{
     	System.out.println("The next step is to find a room and join it: "
     			+ "the gameClient instance created in my constructor knows how!");
 		//System.out.println(gameClient.getRoomList().toString());
-		gameClient.joinRoom("Okanagan Lake");
+		gameClient.joinRoom("Shannon Lake");
     }
 
     @Override
