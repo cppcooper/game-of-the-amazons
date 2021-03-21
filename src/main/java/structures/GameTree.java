@@ -27,9 +27,11 @@ public class GameTree {
 
     public static void remove(int move_num){
         var inner_map = game_tree.get(move_num);
-        for(GameTreeNode node : inner_map.values()){
-            node.disown_children();
+        if(inner_map != null) {
+            for (GameTreeNode node : inner_map.values()) {
+                node.disown_children();
+            }
+            game_tree.remove(move_num);
         }
-        game_tree.remove(move_num);
     }
 }

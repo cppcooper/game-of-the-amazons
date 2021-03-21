@@ -162,9 +162,10 @@ public class AICore {
         Move move = null;
         double best;
         int index;
+        int null_count = 0;
         do {
             GameTreeNode current_node = GameTree.get(GetStateCopy());
-            best = -1;
+            best = Integer.MIN_VALUE;
             index = -1;
             if(current_node != null) {
                 for (int i = 0; i < current_node.edges(); ++i) {
@@ -177,14 +178,18 @@ public class AICore {
                 }
                 if (index > 0 && current_node.edges() > 0) {
                     move = current_node.get(index).move.get();
+                    System.out.println("GetBestMove: found a move");
                 }
+            } else if (null_count++ == 100) {
+                null_count = 0;
+                System.out.println("GetBestMove: GameTree can't find the state");
             }
         } while (move == null);
         return move;
     }
 
     public static void PruneGameTree() {
-        int prev_turn_num = current_board_state.GetPlayerTurn() - 1;
+        int prev_turn_num = GetState().GetMoveNumber() - 2;
         GameTree.remove(prev_turn_num);
     }
 
