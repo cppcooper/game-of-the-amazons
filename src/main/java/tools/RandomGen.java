@@ -2,6 +2,7 @@ package tools;
 
 import algorithms.analysis.MonteCarlo;
 import structures.BoardPiece;
+import structures.Position;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,15 +85,34 @@ public class RandomGen extends Random {
         return arr;
     }
 
-    public BoardPiece[] GetRandomBoardPieces(){
-        final int N = 4;
-        BoardPiece[] positions = new BoardPiece[N];
-        var X = GetDistinctSequenceShuffled(1,11,N);
-        var Y = GetDistinctSequenceShuffled(1,11,N);
-        for(int i = 0; i < N; ++i){
-            positions[i] = new BoardPiece(X.get(i), Y.get(i),1);
+    public Position[] GetRandomPositions(int N){
+        int i = 0;
+        Position[] positions = new Position[N];
+        var indices = GetDistinctSequenceShuffled(0,120,120);
+        for(int index : indices){
+            Position p = new Position(index);
+            if(p.IsValid()){
+                positions[i++] = p;
+            }
+            if(i == N){
+                break;
+            }
         }
         return positions;
+    }
+
+    public BoardPiece[] GetRandomBoardPieces(int player){
+        final int N = 4;
+        int i = 0;
+        BoardPiece[] pieces = new BoardPiece[N];
+        var positions = GetDistinctSequenceShuffled(0,120,120);
+        for(int index : positions){
+            Position p = new Position(index);
+            if(p.IsValid()){
+                pieces[i++] = new BoardPiece(index,player);
+            }
+        }
+        return pieces;
     }
 
     public MonteCarlo.TreePolicy.policy_type get_random_policy(){

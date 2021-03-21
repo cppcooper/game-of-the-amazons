@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import structures.BoardPiece;
 import structures.LocalState;
 import structures.MovePool;
+import structures.Position;
 import tools.Benchmarker;
 import tools.RandomGen;
 
@@ -41,7 +42,7 @@ class MoveCompilerTester {
         System.out.printf("\npooling with %d randomized trials\n===================\n", trials);
         for(int i = 0; i < trials; ++i){
             rng.setSeed(i);
-            long time = RandomizedMoveCompilerTest(rng.GetRandomBoardPieces(),rng,true);
+            long time = RandomizedMoveCompilerTest(rng.GetRandomPositions(4),rng,true);
             if(print_runs) {
                 System.out.printf("(%d) %.1g ns, ", i + 1, (float) time);
             }
@@ -59,7 +60,7 @@ class MoveCompilerTester {
         System.out.printf("\nnon-pooling with %d randomized trials\n===================\n", trials);
         for(int i = 0; i < trials; ++i){
             rng.setSeed(i);
-            long time = RandomizedMoveCompilerTest(rng.GetRandomBoardPieces(),rng,false);
+            long time = RandomizedMoveCompilerTest(rng.GetRandomPositions(4),rng,false);
             if(print_runs) {
                 System.out.printf("(%d) %.1g ns, ", i + 1, (float) time);
             }
@@ -71,9 +72,13 @@ class MoveCompilerTester {
         System.out.printf("Average: %.2g ns\n", (float)(total/trials));
     }
 
-    long RandomizedMoveCompilerTest(BoardPiece[] pieces, RandomGen rng, boolean use_pooling){
+    long RandomizedMoveCompilerTest(Position[] positions, RandomGen rng, boolean use_pooling){
         LocalState board = new LocalState(rng.GetRandomState(0.35),false,false);
-        BoardPiece p = new BoardPiece(4,4,2);
+        BoardPiece[] pieces = new BoardPiece[4];
+        for(int i = 0; i < 4; ++i){
+            pieces[i] = new BoardPiece(positions[i].CalculateIndex(),1);
+        }
+
         Benchmarker B = new Benchmarker();
         B.Start();
         MoveCompiler.GetMoveList(board,pieces,use_pooling);
