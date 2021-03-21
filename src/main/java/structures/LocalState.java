@@ -16,7 +16,7 @@ public class LocalState {
 	private boolean p1_has_moves = true;
 	private boolean p2_has_moves = true;
 	private int move_number = 1;
-	private int player_turn = 2;
+	private int player_turn = 1;
 	private int hash = -1;
 	private boolean valid_hash = false;
 
