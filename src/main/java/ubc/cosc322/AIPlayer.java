@@ -78,8 +78,12 @@ public class AIPlayer extends GamePlayer{
 		} else if (messageType.equals(GameMessage.GAME_ACTION_START)) {
 			if(userName.equals(msgDetails.get("player-black"))){
 				System.out.printf("black: %s\n", msgDetails.get("player-black"));
+				System.out.printf("white: %s\n", msgDetails.get("player-white"));
 				Thread move_sender_orphan = new Thread(AICore::SendDelayedMessage);
 				move_sender_orphan.start(); //orphan will clean itself up (as a good orphan should) when execution is done, no joining or stopping necessary
+			} else {
+				System.out.printf("white: %s\n", msgDetails.get("player-white"));
+				System.out.printf("black: %s\n", msgDetails.get("player-black"));
 			}
 		} else if (messageType.equals(GameMessage.GAME_STATE_PLAYER_LOST)) {
 			AICore.TerminateThreads();
