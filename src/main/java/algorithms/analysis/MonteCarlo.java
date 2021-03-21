@@ -45,7 +45,9 @@ public class MonteCarlo {
          * */
         if (depth > 0 && !board.IsGameOver() && !Thread.currentThread().isInterrupted()) {
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
-            assert moves != null;
+            if (moves == null || moves.size() == 0) {
+                return;
+            }
             switch (type) {
                 case BREADTH_FIRST:
                     moves = PruneMoves(board, parent, moves, new TreePolicy(0, 0, TreePolicy.policy_type.DO_NOTHING));
