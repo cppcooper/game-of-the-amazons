@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MovePool {
-    private static HashMap<Integer, Move> pool = new HashMap<>(64000, 3.f);
+    private static HashMap<Integer, Move> pool = new HashMap<>(1200000, 1.f);
 
     public static void generate_pool(){
         BoardPiece[] all_positions = new BoardPiece[100];
