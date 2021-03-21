@@ -106,7 +106,7 @@ public class Heuristics {
 		return total.empty_heuristic - total.nonempty_heuristic;
 	}
 
-	static CountData GetCount(LocalState board, int startingPos) { //countType is either "blank" for blank spaces, or "blocked" for blocked spaces
+	static CountData GetCount(LocalState board, int startingPos) {
 		CountData counts = new CountData();
 		CountingAlgorithmData data = new CountingAlgorithmData();
 		Position start = new Position(startingPos);
@@ -117,10 +117,7 @@ public class Heuristics {
 			Position p = new Position(index);
 			int dx = Math.abs(p.x - s.x);
 			int dy = Math.abs(p.y - s.y);
-			if(dx == 0 || dy == 0 || dx == dy){
-				return true;
-			}
-			return false;
+			return dx == 0 || dy == 0 || dx == dy;
 		};
 
 		if (!data.blankspace.isEmpty()) {
@@ -129,7 +126,8 @@ public class Heuristics {
 				counts.empty++;
 				QueueNeighbours(data, value, board);
 
-				counts.empty_heuristic += is_first_degree.apply(start,value) ? 2.8 : 1;
+				// todo (debug): tune this weighting
+				counts.empty_heuristic += is_first_degree.apply(start,value) ? 1.5 : 1;
 			}
 		}
 
