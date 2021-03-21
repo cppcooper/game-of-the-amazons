@@ -7,6 +7,7 @@ import structures.LocalState;
 import structures.Position;
 import ubc.cosc322.AICore;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -169,6 +170,77 @@ public class Heuristics {
 				}
 			}
 		}
+	}
+	
+	public static void Territory(LocalState lc) {
+		
+		BoardPiece[] oppplayer = lc.GetTurnPieces();
+		BoardPiece[] usplayer = lc.GetPrevTurnPieces();
+		int[] ourpositions = new int[4];
+		int[] otherpositions = new int[4];
+		int[] us = new int[121];
+		int[] opp = new int[121]; 
+		HashSet<Integer> been = new HashSet<Integer>();	
+		
+		for(int i = 0; i < ourpositions.length; i++) {
+			ourpositions[i] = usplayer[i].pos.CalculateIndex();  
+			otherpositions[i] = oppplayer[i].pos.CalculateIndex();			//element # is the index
+		}      
+		
+		ter(lc, ourpositions, us, 1, been);
+		ter(lc, otherpositions, opp, 1, been);
+		
+		
+		int ourtiles = 0;
+		int othertiles = 0;
+		
+		for(int i = 0; i < us.length; i++) {
+			if(us[i] < opp[i]) {
+				ourtiles++;
+			} else if(us[i] > opp[i]){
+				othertiles++;                               /* if we have a lower cost to move set to us, else set to 0 */
+			} else if(us[i] == opp[i]) {
+				continue;
+			}
+		}
+		
+		
+	}
+	
+	private static void ter(LocalState lc, int[] pos, int[] count, int level, HashSet<Integer> visited) {
+		
+		int[][] moves = MoveCompiler.GetOpenPositions(lc, pos);								//[starting index][index of open positions]	
+		
+			for(int i = 0; i < moves.length; i++) {
+				for(int j = 0; j < moves[i].length; j++) {
+					if(moves[i][j] == -1) {
+						break;
+					}
+					if(count[moves[i][j]] == 0) {  
+						count[moves[i][j]] = level;
+					}
+				}
+			}
+			
+		for(int i = 0; i < moves.length; i++) {
+			ter(lc, prune_positions(visited, moves[i]), count, level+1, visited);
+		}
+		
+	}
+	
+	private static int[] prune_positions(HashSet<Integer> scanned, int[] positions){
+	    int[] pruned_positions = new int[positions.length];
+	    int i = 0;
+	    for (int index : positions) {
+	        if (!scanned.contains(index)) {
+	            pruned_positions[i++] = index;
+	            scanned.add(index);
+	        }
+	    }
+	    if(i < pruned_positions.length){
+	        pruned_positions[i] = -1;
+	    }
+	    return pruned_positions;
 	}
 
 	public static double GetTerritoryHeuristic(LocalState board){
