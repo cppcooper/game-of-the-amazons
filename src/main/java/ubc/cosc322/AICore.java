@@ -23,7 +23,7 @@ public class AICore {
     public static void main(String[] args) {
         if (args.length >= 2) {
             try {
-                player = new AIPlayer(args[0], args[1]);
+                player = new AIPlayer("coopstar", "secure_password");
                 BaseGameGUI.sys_setup();
                 java.awt.EventQueue.invokeLater(new Runnable() {
                     public void run() {
