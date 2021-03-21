@@ -24,7 +24,7 @@ public class Heuristics {
 			if(pair != null) {
 				LocalState board = pair.getFirst();
 				GameTreeNode node = pair.getSecond();
-				if(board == null || node == null || node.move == null){
+				if(board == null || node == null || node.move.get() == null){
 					continue;
 				}
 				if(AICore.GetCurrentTurnNumber() > board.GetMoveNumber()){
@@ -100,7 +100,7 @@ public class Heuristics {
 			int index = pieces[i].pos.CalculateIndex();
 			total.add(GetCount(board,index));
 		}
-		total.empty_heuristic /= (4*161);
+		total.empty_heuristic /= (4*127);
 		total.nonempty_heuristic /= (4*80);
 		return total.empty_heuristic - total.nonempty_heuristic;
 	}
@@ -126,7 +126,7 @@ public class Heuristics {
 				QueueNeighbours(data, value, board);
 
 				// todo (debug): tune this weighting
-				counts.empty_heuristic += is_first_degree.apply(start,value) ? 1.5 : 1;
+				counts.empty_heuristic += is_first_degree.apply(start,value) ? 1.8 : 1;
 			}
 		}
 
@@ -171,9 +171,9 @@ public class Heuristics {
 	}
 	
 	public static double GetTerritoryHeuristic(LocalState board){
-		final double max_value = -1.0;
-		//return (double)GetTerritoryCount(board) / max_value;
-		return 0;
+		var counts = GetTerritoryCount(board);
+		int total = counts.ours + counts.theirs;
+		return (double)counts.ours / total;
 	}
 
 	public static TerritoryCounts GetTerritoryCount(LocalState board){
@@ -189,8 +189,8 @@ public class Heuristics {
 			their_positions[i] = their_pieces[i].pos.CalculateIndex();			//element # is the index
 		}
 
-		GetTerritoryCount(board, our_positions, our_degree_counts, 1, new HashSet<Territory>());
-		GetTerritoryCount(board, their_positions, their_degree_counts, 1, new HashSet<Territory>());
+		GetTerritoryCount(board, our_positions, our_degree_counts, 1, new TreeSet<Territory>(new Territory.TerritoryComp()));
+		GetTerritoryCount(board, their_positions, their_degree_counts, 1, new TreeSet<Territory>(new Territory.TerritoryComp()));
 
 		int our_territory_count = 0;
 		int their_territory_count = 0;
@@ -202,13 +202,11 @@ public class Heuristics {
 				their_territory_count++;                               /* if we have a lower cost to move set to us, else set to 0 */
 			}
 		}
-		new LocalState(our_degree_counts).DebugPrint();
-		System.out.println();
-		new LocalState(their_degree_counts).DebugPrint();
+
 		return new TerritoryCounts(our_territory_count,their_territory_count);
 	}
 
-	private static void GetTerritoryCount(LocalState board, int[] starting_positions, int[] degrees, int degree, HashSet<Territory> visited) {
+	private static void GetTerritoryCount(LocalState board, int[] starting_positions, int[] degrees, int degree, TreeSet<Territory> visited) {
 		int[][] new_positions = MoveCompiler.GetOpenPositions(board, starting_positions); //[starting index][index of open positions]
 
 		for (int[] position_list : new_positions) {
@@ -231,14 +229,15 @@ public class Heuristics {
 		}
 	}
 
-	private static int[] prune_positions(HashSet<Territory> visited, int[] positions, int degree){
+	private static int[] prune_positions(TreeSet<Territory> visited, int[] positions, int degree){
 		int[] pruned_positions = new int[positions.length];
 		int i = 0;
 		for (int index : positions) {
 			Territory t = new Territory(index,degree);
-			if (!visited.contains(t)) {
+			var best = visited.lower(t);
+			if(best == null || best.index != index){
 				pruned_positions[i++] = index;
-				visited.add(index);
+				visited.add(t);
 			}
 		}
 		if(i < pruned_positions.length){
@@ -266,9 +265,9 @@ public class Heuristics {
 		}
 	}
 
-	private static class Territory{
-		int index = 0;
-		int degree = 0;
+private static class Territory {
+	int index = 0;
+	int degree = 0;
 
 		Territory(int index, int degree){
 			this.index = index;
