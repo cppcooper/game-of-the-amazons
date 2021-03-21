@@ -69,7 +69,7 @@ public class LocalState {
 
 	public void DebugPrint(){
 		for(int i = 0; i < board.size(); ++i){
-			System.out.printf("%d ", board.get(i));
+			System.out.printf("%2d ", board.get(i));
 			if((i+1) % 11 == 0){
 				System.out.println();
 			}

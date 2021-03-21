@@ -55,7 +55,7 @@ public class RandomGen extends Random {
         double threshold = nextDouble() * 0.75;
         for(int i = 0; i < 121; ++i){
             if(nextDouble() < threshold){
-                int v = nextInt();
+                int v = nextInt(4);
                 if(v == 1 || v == 2){
                     arr.add(3);
                 } else {
@@ -72,7 +72,7 @@ public class RandomGen extends Random {
         ArrayList<Integer> arr = new ArrayList<>(121);
         for(int i = 0; i < 121; ++i){
             if(nextDouble() < threshold){
-                int v = nextInt();
+                int v = nextInt(4);
                 if(v == 1 || v == 2){
                     arr.add(3);
                 } else {
