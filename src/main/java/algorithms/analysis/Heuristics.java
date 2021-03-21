@@ -7,9 +7,7 @@ import structures.LocalState;
 import structures.Position;
 import ubc.cosc322.AICore;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.BiFunction;
 
@@ -191,8 +189,8 @@ public class Heuristics {
 			their_positions[i] = their_pieces[i].pos.CalculateIndex();			//element # is the index
 		}
 
-		GetTerritoryCount(board, our_positions, our_degree_counts, 1, new HashSet<Integer>());
-		GetTerritoryCount(board, their_positions, their_degree_counts, 1, new HashSet<Integer>());
+		GetTerritoryCount(board, our_positions, our_degree_counts, 1, new HashSet<Territory>());
+		GetTerritoryCount(board, their_positions, their_degree_counts, 1, new HashSet<Territory>());
 
 		int our_territory_count = 0;
 		int their_territory_count = 0;
@@ -204,15 +202,13 @@ public class Heuristics {
 				their_territory_count++;                               /* if we have a lower cost to move set to us, else set to 0 */
 			}
 		}
-		LocalState c1 = new LocalState(our_degree_counts);
-		LocalState c2 = new LocalState(their_degree_counts);
-		c1.DebugPrint();
+		new LocalState(our_degree_counts).DebugPrint();
 		System.out.println();
-		c2.DebugPrint();
+		new LocalState(their_degree_counts).DebugPrint();
 		return new TerritoryCounts(our_territory_count,their_territory_count);
 	}
 
-	private static void GetTerritoryCount(LocalState board, int[] starting_positions, int[] degrees, int current_degree, HashSet<Integer> visited) {
+	private static void GetTerritoryCount(LocalState board, int[] starting_positions, int[] degrees, int degree, HashSet<Territory> visited) {
 		int[][] new_positions = MoveCompiler.GetOpenPositions(board, starting_positions); //[starting index][index of open positions]
 
 		for (int[] position_list : new_positions) {
@@ -221,8 +217,8 @@ public class Heuristics {
 					if (position_list[j] == -1) {
 						break;
 					}
-					if (degrees[position_list[j]] == 0) {
-						degrees[position_list[j]] = current_degree;
+					if (degrees[position_list[j]] == 0 || degrees[position_list[j]] > degree) {
+						degrees[position_list[j]] = degree;
 					}
 				}
 			}
@@ -230,16 +226,17 @@ public class Heuristics {
 
 		for (int[] position_list : new_positions) {
 			if(position_list != null) {
-				GetTerritoryCount(board, prune_positions(visited, position_list), degrees, current_degree + 1, visited);
+				GetTerritoryCount(board, prune_positions(visited, position_list, degree), degrees, degree + 1, visited);
 			}
 		}
 	}
 
-	private static int[] prune_positions(HashSet<Integer> visited, int[] positions){
+	private static int[] prune_positions(HashSet<Territory> visited, int[] positions, int degree){
 		int[] pruned_positions = new int[positions.length];
 		int i = 0;
 		for (int index : positions) {
-			if (!visited.contains(index)) {
+			Territory t = new Territory(index,degree);
+			if (!visited.contains(t)) {
 				pruned_positions[i++] = index;
 				visited.add(index);
 			}
@@ -266,6 +263,37 @@ public class Heuristics {
 			empty_heuristic += other.empty_heuristic;
 			nonempty += other.nonempty;
 			nonempty_heuristic += other.nonempty_heuristic;
+		}
+	}
+
+	private static class Territory{
+		int index = 0;
+		int degree = 0;
+
+		Territory(int index, int degree){
+			this.index = index;
+			this.degree = degree;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			Territory territory = (Territory) o;
+			return index == territory.index && degree == territory.degree;
+		}
+
+		public static class TerritoryComp implements Comparator<Territory> {
+
+			@Override
+			public int compare(Territory o1, Territory o2) {
+				int index = Integer.compare(o1.index,o2.index);
+				int degree = Integer.compare(o1.degree,o2.degree);
+				if(index == 0){
+					return degree == 0 ? index : degree;
+				}
+				return index;
+			}
 		}
 	}
 
