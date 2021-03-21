@@ -21,21 +21,17 @@ public class AICore {
     private static final AtomicBoolean game_tree_is_explored = new AtomicBoolean(false);
 
     public static void main(String[] args) {
-        if (args.length >= 2) {
-            try {
-                player = new AIPlayer("coopstar", "secure_password");
-                BaseGameGUI.sys_setup();
-                java.awt.EventQueue.invokeLater(new Runnable() {
-                    public void run() {
-                        player.Go();
-                    }
-                });
+        try {
+            player = new AIPlayer("coopstar", "secure_password");
+            BaseGameGUI.sys_setup();
+            java.awt.EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                    player.Go();
+                }
+            });
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("Command line arguments missing.");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
