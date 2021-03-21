@@ -83,11 +83,13 @@ public class Heuristics {
 		int first_degree = 0;
 		int[][] first_degree_territory = MoveCompiler.GetOpenPositions(board,positions);
 		for (int[] scan_direction : first_degree_territory) {
-			for (int tile_index : scan_direction) {
-				if (tile_index < 0) {
-					break;
+			if(scan_direction != null) {
+				for (int tile_index : scan_direction) {
+					if (tile_index < 0) {
+						break;
+					}
+					first_degree++;
 				}
-				first_degree++;
 			}
 		}
 		return first_degree;
