@@ -122,6 +122,9 @@ public class MonteCarlo {
     }
 
     private static ArrayList<Move> PruneMoves(LocalState board, GameTreeNode parent, ArrayList<Move> moves, TreePolicy tree_policy){
+        if(moves == null){
+            return null;
+        }
         tree_policy.sample_size = Math.min(tree_policy.sample_size, moves.size());
         tree_policy.max_return = Math.min(tree_policy.max_return, tree_policy.sample_size);
         if(tree_policy.max_return == moves.size() || tree_policy.sample_size == 0 || tree_policy.type == TreePolicy.policy_type.DO_NOTHING){
