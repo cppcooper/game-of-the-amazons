@@ -125,7 +125,7 @@ public class AICore {
     public static void SendDelayedMessage() {
         try {
             System.out.println("SendDelayedMessage: now waiting..");
-            Thread.sleep(749 * 10);
+            Thread.sleep(749 * 40);
             Move move = GetBestMove();
             current_board_state.MakeMove(move,true);
             InterruptSimulations();
@@ -207,10 +207,11 @@ public class AICore {
                 Position.CalculateIndex(arrow.get(0), arrow.get(1)));
         GameTreeNode parent = GameTree.get(current_board_state);
         current_board_state.MakeMove(move, true);
-        GameTreeNode child = GameTree.get(current_board_state);
+        LocalState copy = GetStateCopy();
+        GameTreeNode child = GameTree.get(copy);
         if(child == null){
             //we copy the state, because it's going to change.. and we don't want to invalidate the key we use in the hash map (game tree)
-            LocalState copy = new LocalState(current_board_state);
+            System.out.println("New Move.. updating game tree now.");
             child = new GameTreeNode(move,parent);
             GameTree.put(copy,child);
         }

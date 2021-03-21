@@ -7,7 +7,7 @@ public class GameTree {
             ConcurrentHashMap<LocalState,GameTreeNode>> game_tree = new ConcurrentHashMap<>();
 
     public static void put(LocalState board, GameTreeNode node){
-        var inner_map = game_tree.get(board.GetMoveNumber());
+        var inner_map = game_tree.get(board.GetMoveNumber()-1);
         if(inner_map == null) {
             inner_map = new ConcurrentHashMap<>();
             game_tree.put(board.GetMoveNumber()-1, inner_map);
