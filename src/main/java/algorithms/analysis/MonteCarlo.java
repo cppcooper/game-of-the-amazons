@@ -153,65 +153,21 @@ public class MonteCarlo {
             boolean enqueue = true;
             switch(tree_policy.type){
                 case FIRST_DEGREE_MOVES:
-                    if(!node.has_first_degree.get()) {
-                        node.add_heuristic(Heuristics.GetFirstDegreeMoveHeuristic(copy));
-                        node.has_first_degree.set(true);
-                    }
+                    Heuristics.CalculateHeuristicFirstDegree(copy,node);
+                    Heuristics.enqueue(new Pair<>(copy,node));
                     break;
                 case COUNT_HEURISTIC:
-                    if(!node.has_count.get()) {
-                        node.add_heuristic(Heuristics.GetCountHeuristic(copy));
-                        node.has_count.set(true);
-                    }
+                    Heuristics.CalculateHeuristicCount(copy,node);
+                    Heuristics.enqueue(new Pair<>(copy,node));
                     break;
                 case TERRITORY:
-                    // this is probably the most valuable (single) heuristic for pruning moves. It might also be the most expensive
-                    if(!node.has_territory.get()) {
-                        node.add_heuristic(Heuristics.GetTerritoryHeuristic(copy));
-                        node.has_territory.set(true);
-                    }
+                    Heuristics.CalculateHeuristicTerritory(copy,node);
+                    Heuristics.enqueue(new Pair<>(copy,node));
                     break;
                 case ALL_HEURISTICS:
                     // all of the above combined
-                    int N = 0;
-                    double original = node.get_heuristic();;
-                    double heuristic = 0;
-                    enqueue = false;
-                    if(!node.has_first_degree.get()) {
-                        node.has_first_degree.set(true);
-                        heuristic += Heuristics.GetFirstDegreeMoveHeuristic(copy);
-                        N++;
-                    }
-                    if(!node.has_count.get()) {
-                        node.has_count.set(true);
-                        heuristic += Heuristics.GetCountHeuristic(copy);
-                        N++;
-                    }
-                    if(!node.has_territory.get()) {
-                        node.has_territory.set(true);
-                        heuristic += Heuristics.GetCountHeuristic(copy);
-                        N++;
-                    }
-                    // if N == 0, then we do nothing cause it's already done
-                    if(N > 0) {
-                        // if original == 0, then N == 3
-                        if(original > 0){
-                            // if original > 0 then N != 3
-                            switch(N){
-                                case 1:
-                                    heuristic = original + (heuristic - original)/3;
-                                    break;
-                                case 2:
-                                    heuristic = heuristic + (original - heuristic)/3;
-                                    break;
-                            }
-                        }
-                        node.set_heuristic(heuristic,3);
-                    }
+                    Heuristics.CalculateHeuristicsAll(copy,node);
                     break;
-            }
-            if(enqueue){
-                Heuristics.enqueue(new Pair<>(board,node));
             }
         }
         moves = new ArrayList<>(tree_policy.max_return);

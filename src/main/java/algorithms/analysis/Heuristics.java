@@ -5,6 +5,7 @@ import structures.BoardPiece;
 import structures.GameTreeNode;
 import structures.LocalState;
 import structures.Position;
+import tools.ASingleMaths;
 import ubc.cosc322.AICore;
 
 import java.util.*;
@@ -30,41 +31,67 @@ public class Heuristics {
 				if(AICore.GetCurrentTurnNumber() > board.GetMoveNumber()){
 					continue;
 				}
-				int N = 0;
-				double original = node.get_heuristic();;
-				double heuristic = 0;
-				if(!node.has_first_degree.get()) {
-					N++;
-					heuristic += Heuristics.GetFirstDegreeMoveHeuristic(board);
-					node.has_first_degree.set(true);
-				}
-				if(!node.has_count.get()) {
-					N++;
-					heuristic += Heuristics.GetCountHeuristic(board);
-					node.has_count.set(true);
-				}
-				if(!node.has_territory.get()) {
-					N++;
-					heuristic += Heuristics.GetCountHeuristic(board);
-					node.has_territory.set(true);
-				}
-				// if N == 0, then we do nothing cause it's already done
-				if(N > 0) {
-					// if original == 0, then N == 3
-					if(original > 0){
-						// if original > 0 then N != 3
-						switch(N){
-							case 1:
-								heuristic = original + (heuristic - original)/3;
-								break;
-							case 2:
-								heuristic = heuristic + (original - heuristic)/3;
-								break;
-						}
-					}
-					node.set_heuristic(heuristic,3);
+				CalculateHeuristicsAll(board,node);
+			}
+		}
+	}
+
+	public static void CalculateHeuristicsAll(LocalState board, GameTreeNode node){
+		int N = 0;
+		double original = node.get_heuristic();;
+		double heuristic = 0;
+		if(!node.has_first_degree.get()) {
+			N++;
+			heuristic += Heuristics.GetFirstDegreeMoveHeuristic(board);
+			node.has_first_degree.set(true);
+		}
+		if(!node.has_count.get()) {
+			N++;
+			heuristic += Heuristics.GetCountHeuristic(board);
+			node.has_count.set(true);
+		}
+		if(!node.has_territory.get()) {
+			N++;
+			heuristic += Heuristics.GetCountHeuristic(board);
+			node.has_territory.set(true);
+		}
+		// if N == 0, then we do nothing cause it's already done
+		if(N > 0) {
+			// if original == 0, then N == 3
+			if(original > 0){
+				// if original > 0 then N != 3
+				switch(N){
+					case 1:
+						heuristic = original + (heuristic - original)/3;
+						break;
+					case 2:
+						heuristic = heuristic + (original - heuristic)/3;
+						break;
 				}
 			}
+			node.set_heuristic(heuristic,3);
+		}
+	}
+
+	public static void CalculateHeuristicFirstDegree(LocalState board, GameTreeNode node){
+		if(!node.has_first_degree.get()) {
+			node.add_heuristic(Heuristics.GetFirstDegreeMoveHeuristic(board));
+			node.has_first_degree.set(true);
+		}
+	}
+
+	public static void CalculateHeuristicCount(LocalState board, GameTreeNode node){
+		if(!node.has_count.get()) {
+			node.add_heuristic(Heuristics.GetCountHeuristic(board));
+			node.has_count.set(true);
+		}
+	}
+
+	public static void CalculateHeuristicTerritory(LocalState board, GameTreeNode node){
+		// this is probably the most valuable (single) heuristic for pruning moves. It might also be the most expensive
+		if(!node.has_territory.get()) {
+			node.add_heuristic(Heuristics.GetTerritoryHeuristic(board));
+			node.has_territory.set(true);
 		}
 	}
 
@@ -104,7 +131,7 @@ public class Heuristics {
 		}
 		total.empty_heuristic /= (4*127);
 		total.nonempty_heuristic /= (4*80);
-		return total.empty_heuristic - total.nonempty_heuristic;
+		return ASingleMaths.remap_value(total.empty_heuristic - total.nonempty_heuristic,-1,1,0,1);
 	}
 
 	static CountData GetCount(LocalState board, int startingPos) {
