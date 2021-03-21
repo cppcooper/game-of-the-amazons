@@ -43,7 +43,7 @@ public class GameTreeNode {
 
     public synchronized void adopt(GameTreeNode node){
         //we don't do anything with heuristics because they won't exist yet when this method is used (RunSim/PruneMoves)
-        if(!sub_nodes.contains(node)) {
+        if (!sub_nodes.contains(node)) {
             node.add_parent(this);
             sub_nodes.add(node);
         }
