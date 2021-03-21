@@ -54,6 +54,7 @@ public class AIPlayer extends GamePlayer{
     public boolean handleGameMessage(String messageType, Map<String, Object> msgDetails) {
 		System.out.printf("message type: %s\n",messageType);
 		if (messageType.equals(GameMessage.GAME_ACTION_MOVE)) {
+			System.out.println("Move received from server.");
 			gamegui.updateGameState(msgDetails);
 			AICore.UpdateState(msgDetails);
 

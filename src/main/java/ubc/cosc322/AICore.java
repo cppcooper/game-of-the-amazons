@@ -131,6 +131,7 @@ public class AICore {
             var msg = MakeMessage(move);
             player.makeMove(msg);
             player.getGameClient().sendMoveMessage(msg);
+            System.out.println("Move sent to server.");
             PruneGameTree();
 
         } catch (Exception e) {
