@@ -22,6 +22,7 @@ public class AICore {
 
     public static void main(String[] args) {
         try {
+            MovePool.generate_pool();
             player = new AIPlayer("coopstar", "secure_password");
             BaseGameGUI.sys_setup();
             java.awt.EventQueue.invokeLater(new Runnable() {
