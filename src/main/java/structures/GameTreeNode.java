@@ -80,15 +80,15 @@ public class GameTreeNode {
         update_aggregate(new_aggregate_total, new_aggregate_count);
     }
 
-    public void set_heuristic(double new_value, int N){
+    public void set_heuristic(double new_value, int new_N){
         assert new_value >= 0;
         int old_N = this.N.get();
         int current_aggregate_count = aggregate_count.get();
-        int new_aggregate_count = current_aggregate_count - old_N + N;
+        int new_aggregate_count = current_aggregate_count - old_N + new_N;
         // avg * N = total; (total - sub_total + new_sub_total) = new_total
         double new_aggregate_total = (aggregate_heuristic.get() * current_aggregate_count) - heuristic_sum.get() + new_value;
         // make updates
-        this.N.set(N);
+        this.N.set(new_N);
         heuristic_sum.set(new_value);
         update_aggregate(new_aggregate_total,new_aggregate_count);
     }
