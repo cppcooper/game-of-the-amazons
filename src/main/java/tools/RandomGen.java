@@ -2,6 +2,7 @@ package tools;
 
 import algorithms.analysis.MonteCarlo;
 import structures.BoardPiece;
+import structures.LocalState;
 import structures.Position;
 
 import java.util.ArrayList;
@@ -65,6 +66,15 @@ public class RandomGen extends Random {
                 arr.add(0);
             }
         }
+        var pieces = GetRandomPositions(8);
+        int count = 0;
+        int player = 1;
+        for(Position p : pieces){
+            if(count++ == 4){
+                player = 2;
+            }
+            arr.set(p.CalculateIndex(),player);
+        }
         return arr;
     }
 
@@ -72,17 +82,29 @@ public class RandomGen extends Random {
         ArrayList<Integer> arr = new ArrayList<>(121);
         for(int i = 0; i < 121; ++i){
             if(nextDouble() < threshold){
-                int v = nextInt(4);
-                if(v == 1 || v == 2){
-                    arr.add(3);
-                } else {
-                    arr.add(v);
-                }
+                arr.add(3);
             } else {
                 arr.add(0);
             }
         }
+        var pieces = GetRandomPositions(8);
+        int count = 0;
+        int player = 1;
+        for(Position p : pieces){
+            if(count++ == 4){
+                player = 2;
+            }
+            arr.set(p.CalculateIndex(),player);
+        }
         return arr;
+    }
+
+    public LocalState GetRandomBoard(){
+        return new LocalState(GetRandomState(),true,true);
+    }
+
+    public LocalState GetRandomBoard(double threshold){
+        return new LocalState(GetRandomState(threshold),true,true);
     }
 
     public Position[] GetRandomPositions(int N){
@@ -117,21 +139,22 @@ public class RandomGen extends Random {
 
     public MonteCarlo.TreePolicy.policy_type get_random_policy(){
         // todo (debug): tune this function
-        return MonteCarlo.TreePolicy.policy_type.TERRITORY;
-        /*if (nextDouble() < 0.5) {
-            // p = 0.5 ?
-        } else if (nextDouble() < 0.75) {
-            // p = 0.25 ?
-            return MonteCarlo.TreePolicy.policy_type.COUNT_HEURISTIC;
-        } else if (nextDouble() < 0.5) {
-            // p = 0.125 ?
+        double p1 = 0.35;
+        double p2 = 0.45;
+        double p3 = 0.15;
+        double p4 = 0.04;
+        assert (p1+p2+p3+p4) <= 1;
+        double x = nextDouble();
+        if (x < p1) { // p = 0.35 ?
             return MonteCarlo.TreePolicy.policy_type.FIRST_DEGREE_MOVES;
-        } else if (nextDouble() < 0.5){
-            // p = 0.0625 ?
+        } else if (x < p1+p2) { // p = 0.25 ?
+            return MonteCarlo.TreePolicy.policy_type.COUNT_HEURISTIC;
+        } else if (x < p1+p2+p3) { // p = 0.125 ?
+            return MonteCarlo.TreePolicy.policy_type.TERRITORY;
+        } else if (x < p1+p2+p3+p4){ // p = 0.0625 ?
             return MonteCarlo.TreePolicy.policy_type.ALL_HEURISTICS;
-        } else {
-            // p = 0.0625 ?
+        } else { // p = 0.0625 ?
             return MonteCarlo.TreePolicy.policy_type.DO_NOTHING;
-        }*/
+        }/**/
     }
 }
