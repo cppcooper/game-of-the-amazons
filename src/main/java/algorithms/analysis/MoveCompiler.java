@@ -21,7 +21,9 @@ public class MoveCompiler {
         }
         for(int piece_i = 0; piece_i < piece_indices.length; ++piece_i){
             // Getting the available positions for an arrow from all the positions a piece could shoot from
-            int[][] all_arrow_positions = GetOpenPositions(board,open_piece_positions[piece_i]);
+            LocalState copy = new LocalState(board);
+            copy.SetTile(piece_indices[piece_i],0);
+            int[][] all_arrow_positions = GetOpenPositions(copy,open_piece_positions[piece_i]);
             if(Thread.currentThread().isInterrupted()){
                 return null; // there are no moves to return yet
             }
@@ -102,6 +104,7 @@ public class MoveCompiler {
         if(Thread.currentThread().isInterrupted()){
             return 0;
         }
+
         x += xi;
         y += yi;
         int i = start_index;

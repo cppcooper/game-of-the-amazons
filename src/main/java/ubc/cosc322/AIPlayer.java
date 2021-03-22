@@ -37,14 +37,13 @@ public class AIPlayer extends GamePlayer{
     }
 
     @Override
-    public void onLogin() {
-    	System.out.println("Congratualations!!! "
-    			+ "I am called because the server indicated that the login is successfully");
-    	System.out.println("The next step is to find a room and join it: "
-    			+ "the gameClient instance created in my constructor knows how!");
-		//System.out.println(gameClient.getRoomList().toString());
-		gameClient.joinRoom("Shannon Lake");
-    }
+	public void onLogin() {
+		userName = gameClient.getUserName();
+		if(gamegui != null) {
+			gamegui.setRoomInformation(gameClient.getRoomList());
+		}
+	}
+
 
     public void makeMove(Map<String, Object> msgDetails){
 		gamegui.updateGameState(msgDetails);

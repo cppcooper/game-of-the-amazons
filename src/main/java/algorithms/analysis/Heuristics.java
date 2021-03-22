@@ -20,31 +20,40 @@ public class Heuristics {
 	}
 
 	public static void ProcessQueue(){
-		while(!Thread.currentThread().isInterrupted()){
-			var pair = queue.poll();
-			if(pair != null) {
-				LocalState board = pair.getFirst();
-				GameTreeNode node = pair.getSecond();
-				if(board == null || node == null || node.move.get() == null){
-					continue;
+		try {
+			int i = 0;
+			while (!Thread.currentThread().isInterrupted()) {
+				var pair = queue.poll();
+				if (pair != null) {
+					LocalState board = pair.getFirst();
+					GameTreeNode node = pair.getSecond();
+					if (board == null || node == null || node.move.get() == null) {
+						continue;
+					}
+					if (AICore.GetCurrentTurnNumber() > board.GetMoveNumber()) {
+						continue;
+					}
+					CalculateHeuristicsAll(board, node);
+					i = Math.max(0,i-1);
+				} else {
+					Thread.sleep(++i * 100);
 				}
-				if(AICore.GetCurrentTurnNumber() > board.GetMoveNumber()){
-					continue;
-				}
-				CalculateHeuristicsAll(board,node);
 			}
+		} catch (Exception e){
+			e.printStackTrace();
 		}
 	}
 
 	public static void CalculateHeuristicsAll(LocalState board, GameTreeNode node){
+		final int max_N = 1;
 		int N = 0;
 		double original = node.get_heuristic();;
 		double heuristic = 0;
-		if(!node.has_first_degree.get()) {
+		/*if(!node.has_first_degree.get()) {
 			N++;
 			heuristic += Heuristics.GetFirstDegreeMoveHeuristic(board);
 			node.has_first_degree.set(true);
-		}
+		}*/
 		if(!node.has_count.get()) {
 			N++;
 			heuristic += Heuristics.GetCountHeuristic(board);
@@ -57,34 +66,23 @@ public class Heuristics {
 		}
 		// if N == 0, then we do nothing cause it's already done
 		if(N > 0) {
-			// if original == 0, then N == 3
-			if(original > 0){
-				// if original > 0 then N != 3
-				switch(N){
-					case 1:
-						heuristic = original + (heuristic - original)/3;
-						break;
-					case 2:
-						heuristic = heuristic + (original - heuristic)/3;
-						break;
-				}
-			}
-			node.set_heuristic(heuristic,3);
+			node.set_heuristic(original + heuristic,max_N);
 		}
 	}
 
 	public static void CalculateHeuristicFirstDegree(LocalState board, GameTreeNode node){
-		if(!node.has_first_degree.get()) {
+		/*if(!node.has_first_degree.get()) {
 			node.add_heuristic(Heuristics.GetFirstDegreeMoveHeuristic(board));
 			node.has_first_degree.set(true);
-		}
+		}*/
 	}
 
 	public static void CalculateHeuristicCount(LocalState board, GameTreeNode node){
+		/*
 		if(!node.has_count.get()) {
 			node.add_heuristic(Heuristics.GetCountHeuristic(board));
 			node.has_count.set(true);
-		}
+		}*/
 	}
 
 	public static void CalculateHeuristicTerritory(LocalState board, GameTreeNode node){
@@ -202,7 +200,10 @@ public class Heuristics {
 	public static double GetTerritoryHeuristic(LocalState board){
 		var counts = GetTerritoryCount(board);
 		int total = counts.ours + counts.theirs;
-		return (double)counts.ours / total;
+		double heuristic = 3 * ((double)counts.ours / total);
+		heuristic = Math.pow(heuristic,2);
+		heuristic /= 9;
+		return Math.max(0,Math.min(heuristic,1));
 	}
 
 	public static TerritoryCounts GetTerritoryCount(LocalState board){

@@ -125,7 +125,7 @@ public class AICore {
     public static void SendDelayedMessage() {
         try {
             System.out.println("SendDelayedMessage: now waiting..");
-            Thread.sleep(749 * 40);
+            Thread.sleep(749 * 6);
             Move move = GetBestMove();
             current_board_state.MakeMove(move,true);
             InterruptSimulations();
@@ -164,19 +164,22 @@ public class AICore {
         int index;
         int null_count = 0;
         do {
-            GameTreeNode current_node = GameTree.get(GetStateCopy());
-            best = Integer.MIN_VALUE;
+            GameTreeNode current_node = GameTree.get(GetState());
+            best = Double.NEGATIVE_INFINITY;
             index = -1;
             if(current_node != null) {
+                System.out.printf("GetBestMove: found a node with %d edges, now to find the best one\n", current_node.edges());
                 for (int i = 0; i < current_node.edges(); ++i) {
                     GameTreeNode sub_node = current_node.get(i);
                     double aggregate = sub_node.aggregate_heuristic.get();
+                    //System.out.printf("GetBestMove: node %d with a heuristic of %.3f\n", i, aggregate);
                     if (aggregate > best) {
+                        //System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", aggregate, sub_node.move.get());
                         best = aggregate;
                         index = i;
                     }
                 }
-                if (index > 0 && current_node.edges() > 0) {
+                if (index > 0) {
                     move = current_node.get(index).move.get();
                     System.out.println("GetBestMove: found a move");
                 }

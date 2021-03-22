@@ -181,7 +181,7 @@ public class LocalState {
 		return !PlayerHasMoves(1) || !PlayerHasMoves(2);
 	}
 
-	public void MakeMove(Move move, boolean update_pieces) {
+	public boolean MakeMove(Move move, boolean update_pieces) {
 		//if the move doesn't include invalid indices, check if the move is valid for this state
 		if (!always_empty.contains(move.start) && !always_empty.contains(move.next) && !always_empty.contains(move.arrow)) {
 			if (move.IsValidFor(this)) {
@@ -196,7 +196,7 @@ public class LocalState {
 							arr = player2;
 							break;
 						default:
-							return;
+							return false;
 					}
 					for (BoardPiece p : arr) {
 						if (p.pos.CalculateIndex() == move.start) {
@@ -219,9 +219,10 @@ public class LocalState {
 				}
 				player_turn = player_turn == 1 ? 2 : 1;
 				valid_hash = false;
-
+				return true;
 			}
 		}
+		return false;
 	}
 
 	public int GetMoveNumber(){
