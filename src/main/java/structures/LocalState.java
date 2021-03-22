@@ -44,6 +44,9 @@ public class LocalState {
 			}
 		}
 	}
+	public LocalState(){
+		this(new int[121]);
+	}
 	public LocalState(int[] state){
 		assert state.length >= 121;
 		board = new ArrayList<>(121);
