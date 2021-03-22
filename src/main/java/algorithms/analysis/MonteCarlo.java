@@ -1,10 +1,7 @@
 package algorithms.analysis;
 
 import org.apache.commons.math3.util.Pair;
-import structures.GameTree;
-import structures.GameTreeNode;
-import structures.LocalState;
-import structures.Move;
+import structures.*;
 import tools.RandomGen;
 
 import java.util.*;
@@ -45,6 +42,7 @@ public class MonteCarlo {
          * */
         if (depth < policy.depth && !board.IsGameOver() && !Thread.currentThread().isInterrupted()) {
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
+            DebugFlags.DebugBreakPoint();
             if (moves == null || moves.size() == 0) {
                 return;
             }
@@ -143,33 +141,34 @@ public class MonteCarlo {
         for(int i = 0; i < tree_policy.sample_size; ++i){
             LocalState copy = new LocalState(board);
             Move move = moves.get(selection.get(i));
-            copy.MakeMove(move,true, false);
-            GameTreeNode node = GameTree.get(copy);
-            if(node == null){
-                // todo (10): implement exploration consideration
-                node = new GameTreeNode(move,parent);
-                parent.adopt(node);
-                GameTree.put(copy,node);
-            }
-            sample.add(node);
-            boolean enqueue = true;
-            switch(tree_policy.type){
-                case FIRST_DEGREE_MOVES:
-                    Heuristics.CalculateHeuristicFirstDegree(copy,node);
-                    Heuristics.enqueue(new Pair<>(copy,node));
-                    break;
-                case COUNT_HEURISTIC:
-                    Heuristics.CalculateHeuristicCount(copy,node);
-                    Heuristics.enqueue(new Pair<>(copy,node));
-                    break;
-                case TERRITORY:
-                    Heuristics.CalculateHeuristicTerritory(copy,node);
-                    Heuristics.enqueue(new Pair<>(copy,node));
-                    break;
-                case ALL_HEURISTICS:
-                    // all of the above combined
-                    Heuristics.CalculateHeuristicsAll(copy,node);
-                    break;
+            if(copy.MakeMove(move,true, false)) {
+                GameTreeNode node = GameTree.get(copy);
+                if (node == null) {
+                    // todo (10): implement exploration consideration
+                    node = new GameTreeNode(move, parent);
+                    parent.adopt(node);
+                    GameTree.put(copy, node);
+                }
+                sample.add(node);
+                boolean enqueue = true;
+                switch (tree_policy.type) {
+                    case FIRST_DEGREE_MOVES:
+                        Heuristics.CalculateHeuristicFirstDegree(copy, node);
+                        Heuristics.enqueue(new Pair<>(copy, node));
+                        break;
+                    case COUNT_HEURISTIC:
+                        Heuristics.CalculateHeuristicCount(copy, node);
+                        Heuristics.enqueue(new Pair<>(copy, node));
+                        break;
+                    case TERRITORY:
+                        Heuristics.CalculateHeuristicTerritory(copy, node);
+                        Heuristics.enqueue(new Pair<>(copy, node));
+                        break;
+                    case ALL_HEURISTICS:
+                        // all of the above combined
+                        Heuristics.CalculateHeuristicsAll(copy, node);
+                        break;
+                }
             }
         }
         moves = new ArrayList<>(tree_policy.max_return);
