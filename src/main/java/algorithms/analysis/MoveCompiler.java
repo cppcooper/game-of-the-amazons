@@ -8,12 +8,16 @@ import java.util.function.*;
 
 public class MoveCompiler {
     // To find all of one player's move options you calculate `pieces x positions x arrows` = 4*40*40 = 6400 max options/operations
-    public static ArrayList<Move> GetMoveList(LocalState board, BoardPiece[] player_pieces, boolean use_pooling){
-        ArrayList<Move> all_moves = new ArrayList<>(6400);
+    public static ArrayList<Move> GetMoveList(LocalState board, BoardPiece[] player_pieces, boolean use_pooling) {
         int[] piece_indices = new int[4];
-        for(int i = 0; i < piece_indices.length; ++i){
+        for (int i = 0; i < piece_indices.length; ++i) {
             piece_indices[i] = player_pieces[i].pos.CalculateIndex();
         }
+        return GetMoveList(board,piece_indices,use_pooling);
+    }
+
+    public static ArrayList<Move> GetMoveList(LocalState board, int[] piece_indices, boolean use_pooling){
+        ArrayList<Move> all_moves = new ArrayList<>(6400);
         // Getting the available positions for a piece to move to
         int [][] open_piece_positions = GetOpenPositions(board,piece_indices); //values of -1 are invalid elements, to be ignored
         if(Thread.currentThread().isInterrupted()) {
