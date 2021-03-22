@@ -1,6 +1,7 @@
 package algorithms.analysis;
 
 import org.junit.jupiter.api.Test;
+import structures.Debug;
 import structures.LocalState;
 import structures.Position;
 import tools.RandomGen;
@@ -9,25 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MiscTests {
     @Test
     void find_first_degree_range() {
-        LocalState board = new LocalState(new int[121]);
-        int[] positions = new int[100];
-        int j = 0;
-        for(int x = 1; x < 11; ++x){
-            for(int y = 1; y < 11; ++y){
-                Position p = new Position(x,y);
-                if(p.IsValid()){
-                    positions[j++] = p.CalculateIndex();
-                }
-            }
-        }
+        LocalState board = new LocalState();
+        int[] positions = Debug.GetAllPositions();
         int[][] first_degree_territory = MoveCompiler.GetOpenPositions(board,positions);
-        double max_count_heuristic = 0;
-        for(int index : positions){
-            double value = Heuristics.GetCount(board,index).empty_heuristic;
-            if(value > max_count_heuristic){
-                max_count_heuristic = value;
-            }
-        }
         int max = 0;
         int min = Integer.MAX_VALUE;
         for(int i = 0; i < first_degree_territory.length; ++i) {
@@ -46,43 +31,88 @@ public class MiscTests {
             }
         }
         System.out.printf("min: %d\nmax: %d\n",min,max);
-        System.out.printf("max empty_heuristic: %f", max_count_heuristic);
+    }
+
+    @Test
+    void find_max_count_heuristic(){
+        final RandomGen rng = new RandomGen();
+        final int trials = 100000;
+        double max = Double.NEGATIVE_INFINITY;
+        double min = Double.POSITIVE_INFINITY;
+        for(int i = 0; i < trials; ++i){
+            LocalState board = rng.GetRandomBoard(0.9);
+            double heuristic = Heuristics.GetCountHeuristic(board);
+            if(heuristic > max){
+                max = heuristic;
+            }
+            if(heuristic < min){
+                min = heuristic;
+            }
+        }
+        System.out.printf("min: %.3f\nmax: %.3f\n",min,max);
     }
 
     @Test
     void find_max_territory_count(){
-        RandomGen rng = new RandomGen();
-        find_max_territory_count(rng,1000);
-    }
-
-    void find_max_territory_count(RandomGen rng, int trials){
-        int max_ours = 0;
-        int max_theirs = 0;
+        final RandomGen rng = new RandomGen();
+        final int trials = 100000;
+        double max = Double.NEGATIVE_INFINITY;
+        double min = Double.POSITIVE_INFINITY;
         for(int i = 0; i < trials; ++i){
-            LocalState board = new LocalState(new int[121]);/*new int[121]);/**/
-            var positions = rng.GetRandomPositions(8);
-            int count = 0;
-            int player = 1;
-            for(Position p : positions){
-                if(count++ == 4){
-                    player = 2;
-                }
-                board.SetTile(p.CalculateIndex(),player);
+            LocalState board = new LocalState(rng.GetRandomState(),true,true);/*new int[121]);/**/
+            double heuristic = Heuristics.GetTerritoryHeuristic(board);
+            boolean new_value = false;
+            if(heuristic > max){
+                new_value = true;
+                max = heuristic;
             }
-            board.FindPieces();
-            var counts = Heuristics.GetTerritoryCount(board);
-            if(counts.ours > max_ours){
-                max_ours = counts.ours;
+            if(heuristic < min){
+                new_value = true;
+                min = heuristic;
             }
-            if(counts.theirs > max_theirs){
-                max_theirs = counts.theirs;
+            if(new_value){
+                System.out.printf("--------\nnew min: %.3f\nnew max: %.3f\n",min,max);
             }
         }
-        System.out.printf("max ours:   %d\nmax theirs: %d\n", max_ours,max_theirs);
+        System.out.printf("min: %.3f\nmax: %.3f\n",min,max);
     }
 
     @Test
     void testing_infinite(){
         assertEquals(Double.NEGATIVE_INFINITY < 0, true);
+    }
+
+    @Test
+    void probability_test(){
+        final int trials = 1000000;
+        int[] counts = new int[5];
+        double[] p_values = new double[5];
+        RandomGen rng = new RandomGen();
+        for(int i = 0; i < trials; ++i){
+            switch(rng.get_random_policy()){
+                case FIRST_DEGREE_MOVES:
+                    counts[0]++;
+                    break;
+                case COUNT_HEURISTIC:
+                    counts[1]++;
+                    break;
+                case TERRITORY:
+                    counts[2]++;
+                    break;
+                case ALL_HEURISTICS:
+                    counts[3]++;
+                    break;
+                case DO_NOTHING:
+                    counts[4]++;
+                    break;
+            }
+        }
+        for(int i = 0; i < counts.length; ++i){
+            System.out.printf("counts[%d] = %d\n", i, counts[i]);
+            p_values[i] = (double)counts[i] / trials;
+        }
+        for(int i = 0; i < counts.length; ++i) {
+            System.out.printf("p_value[%d] = %.2f\n", i, p_values[i]);
+        }
     }
 }
