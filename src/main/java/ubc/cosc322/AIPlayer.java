@@ -2,9 +2,11 @@ package ubc.cosc322;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import structures.LocalState;
 import ygraph.ai.smartfox.games.*;
 
 /**
@@ -68,6 +70,7 @@ public class AIPlayer extends GamePlayer{
 
 		} else if (messageType.equals(GameMessage.GAME_STATE_BOARD)) {
 			ArrayList<Integer> state = (ArrayList<Integer>) msgDetails.get("game-state");
+			//ArrayList<Integer> state = new ArrayList<>(Arrays.asList(LocalState.late_state));
 			gamegui.setGameState(state); //doesn't save the state reference
 			AICore.SetState(state); //saves the state reference
 
