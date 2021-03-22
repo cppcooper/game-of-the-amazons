@@ -18,4 +18,17 @@ public class Debug {
             fn.run();
         }
     }
+    public static int[] GetAllPositions(){
+        int[] positions = new int[100];
+        int j = 0;
+        for(int x = 1; x < 11; ++x){
+            for(int y = 1; y < 11; ++y){
+                Position p = new Position(x,y);
+                if(p.IsValid()){
+                    positions[j++] = p.CalculateIndex();
+                }
+            }
+        }
+        return positions;
+    }
 }
