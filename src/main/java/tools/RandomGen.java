@@ -117,21 +117,21 @@ public class RandomGen extends Random {
 
     public MonteCarlo.TreePolicy.policy_type get_random_policy(){
         // todo (debug): tune this function
-        if (nextDouble() < 0.5) {
+        return MonteCarlo.TreePolicy.policy_type.TERRITORY;
+        /*if (nextDouble() < 0.5) {
             // p = 0.5 ?
-            return MonteCarlo.TreePolicy.policy_type.FIRST_DEGREE_MOVES;
-        } else if (nextDouble() < 0.5) {
+        } else if (nextDouble() < 0.75) {
             // p = 0.25 ?
             return MonteCarlo.TreePolicy.policy_type.COUNT_HEURISTIC;
         } else if (nextDouble() < 0.5) {
             // p = 0.125 ?
-            return MonteCarlo.TreePolicy.policy_type.TERRITORY;
+            return MonteCarlo.TreePolicy.policy_type.FIRST_DEGREE_MOVES;
         } else if (nextDouble() < 0.5){
             // p = 0.0625 ?
             return MonteCarlo.TreePolicy.policy_type.ALL_HEURISTICS;
         } else {
             // p = 0.0625 ?
             return MonteCarlo.TreePolicy.policy_type.DO_NOTHING;
-        }
+        }*/
     }
 }

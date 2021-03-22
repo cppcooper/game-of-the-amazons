@@ -10,7 +10,7 @@ public class GameTreeNode {
     private final SynchronizedArrayList<GameTreeNode> sub_nodes = new SynchronizedArrayList<>(); //note: that there is no way to remove nodes! this is by design!
 
     private final AtomicInteger N = new AtomicInteger(0);
-    private final AtomicDouble heuristic = new AtomicDouble();
+    private final AtomicDouble heuristic_sum = new AtomicDouble();
     final public AtomicDouble aggregate_heuristic = new AtomicDouble();
     final public AtomicInteger aggregate_count = new AtomicInteger(0);
     final public AtomicBoolean has_first_degree = new AtomicBoolean(false);
@@ -45,9 +45,11 @@ public class GameTreeNode {
 
     public void adopt(GameTreeNode node){
         //we don't do anything with heuristics because they won't exist yet when this method is used (RunSim/PruneMoves)
-        if (!sub_nodes.contains(node)) {
-            node.add_parent(this);
-            sub_nodes.add(node);
+        if(this != node) { //no idea why node == this (other than it happens in the MonteCarlo else)
+            if (!sub_nodes.contains(node)) {
+                node.add_parent(this);
+                sub_nodes.add(node);
+            }
         }
     }
 
@@ -59,42 +61,52 @@ public class GameTreeNode {
     }
 
     public double get_heuristic(){
-        return heuristic.get();
+        return heuristic_sum.get();
     }
 
     public void add_heuristic(double new_value){
         //newMean = oldMean + (Data - oldMean) / N;
         assert new_value >= 0;
-        double h = heuristic.get();
-        double new_aggregate = aggregate_heuristic.get() - h;
-        int new_aggregate_count = aggregate_count.get() + (this.N.get() == 0 ? 1 : 0);
-        h = h + (new_value - h) / N.incrementAndGet();
-        heuristic.set(h);
-        new_aggregate += h;
-        update_aggregate(new_aggregate, new_aggregate_count);
+        int current_aggregate_count = aggregate_count.get();
+        int new_aggregate_count = current_aggregate_count + 1;
+        // avg * N = total; (total+X) = new_total
+        double new_aggregate_total = (aggregate_heuristic.get() * current_aggregate_count) + new_value;
+        // make updates
+        heuristic_sum.set(heuristic_sum.get() + new_value);
+        update_aggregate(new_aggregate_total, new_aggregate_count);
     }
 
     public void set_heuristic(double new_value, int N){
         assert new_value >= 0;
-        int new_aggregate_count = aggregate_count.get() + (this.N.get() == 0 ? 1 : 0);
-        double new_aggregate = aggregate_heuristic.get() - heuristic.get() + new_value;
+        int old_N = this.N.get();
+        int current_aggregate_count = aggregate_count.get();
+        int new_aggregate_count = current_aggregate_count - old_N + N;
+        // avg * N = total; (total - sub_total + new_sub_total) = new_total
+        double new_aggregate_total = (aggregate_heuristic.get() * current_aggregate_count) - heuristic_sum.get() + new_value;
+        // make updates
         this.N.set(N);
-        heuristic.set(new_value);
-        update_aggregate(new_aggregate,new_aggregate_count);
+        heuristic_sum.set(new_value);
+        update_aggregate(new_aggregate_total,new_aggregate_count);
     }
 
-    public void update_aggregate(double new_aggregate, int new_aggregate_count){
+    public void update_aggregate(double new_aggregate_total, int new_aggregate_count){
         // todo (1): consider changing the weighting of aggregation (currently 1:1 ratio; parent:child)
         // todo (debug): verify this function, and its uses ensure an unbroken chain of heuristic aggregating
+        // current_avg * current_N = current_total
+        double old_aggregate_total = aggregate_heuristic.get() * aggregate_count.get();
         int delta_count = new_aggregate_count - aggregate_count.get();
-        double delta_aggregate = new_aggregate - aggregate_heuristic.get();
-        aggregate_heuristic.set(new_aggregate);
+        double delta_aggregate_total = new_aggregate_total - old_aggregate_total;
+        // "current" (^^^) is now old
+        aggregate_heuristic.set(new_aggregate_total/new_aggregate_count);
         aggregate_count.set(new_aggregate_count);
         for(int i = 0; i < super_nodes.size(); ++i){
             GameTreeNode parent = super_nodes.get(i);
-            double parents_new_aggregate = parent.aggregate_heuristic.get() + delta_aggregate;
-            int parents_new_aggregate_count = parent.aggregate_count.get() + delta_count;
-            parent.update_aggregate(parents_new_aggregate,parents_new_aggregate_count);
+            int parents_current_aggregate_count = parent.aggregate_count.get();
+            int parents_new_aggregate_count = parents_current_aggregate_count + delta_count;
+
+            // p.avg * p.N = p.Total; p.Total + delta_aggregate_total = p.newTotal
+            double parents_new_aggregate_total = (parent.aggregate_heuristic.get() * parents_current_aggregate_count) + delta_aggregate_total;
+            parent.update_aggregate(parents_new_aggregate_total,parents_new_aggregate_count);
         }
     }
 

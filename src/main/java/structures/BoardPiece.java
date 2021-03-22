@@ -5,8 +5,10 @@ public class BoardPiece {
     public int player; //3 if non-player or 0 if not a piece
 
     public BoardPiece(BoardPiece other){
-        pos = new Position(other.pos);
-        player = other.player;
+        if(other != null) {
+            pos = new Position(other.pos);
+            player = other.player;
+        }
     }
     public BoardPiece(int index, int player){
         pos = new Position(index);
