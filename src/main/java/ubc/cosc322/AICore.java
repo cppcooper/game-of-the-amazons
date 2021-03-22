@@ -173,18 +173,20 @@ public class AICore {
             index = -1;
             if(current_node != null) {
                 if(current_node.edges() == 0){
-                    DebugFlags.ZeroEdgesDetected.set(true);
+                    Debug.ZeroEdgesDetected.set(true);
                 } else {
-                    System.out.printf("GetBestMove: found a node with %d edges, now to find the best one\n", current_node.edges());
+                    Debug.RunDebugCode(()->System.out.printf("GetBestMove: found a node with %d edges, now to find the best one\n", current_node.edges()));
                     for (int i = 0; i < current_node.edges(); ++i) {
                         GameTreeNode sub_node = current_node.get(i);
                         double heuristic = sub_node.aggregate_heuristic.get();
                         if (Double.isNaN(heuristic) || Precision.equals(heuristic,0.0,0.00001)) {
                             heuristic = sub_node.get_heuristic() / sub_node.get_heuristic_count();
                         }
-                        System.out.printf("GetBestMove: node %d with a heuristic of %.3f\n", i, heuristic);
+                        int finalI = i;
+                        double finalHeuristic = heuristic;
+                        Debug.RunDebugCode(()->System.out.printf("GetBestMove: node %d with a heuristic of %.3f\n", finalI, finalHeuristic));
                         if (heuristic > best) {
-                            System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", heuristic, sub_node.move.get());
+                            Debug.RunDebugCode(()->System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", finalHeuristic, sub_node.move.get()));
                             best = heuristic;
                             index = i;
                         }
@@ -193,12 +195,12 @@ public class AICore {
                         move = current_node.get(index).move.get();
                         System.out.println("GetBestMove: found a move");
                     } else {
-                        DebugFlags.NoIndexFound.set(true);
+                        Debug.NoIndexFound.set(true);
                     }
                 }
             } else {
                 //null_count = 0;
-                DebugFlags.NoParentNodeFound.set(true);
+                Debug.NoParentNodeFound.set(true);
                 System.out.println("GetBestMove: GameTree can't find the state");
             }
         } while (move == null);
