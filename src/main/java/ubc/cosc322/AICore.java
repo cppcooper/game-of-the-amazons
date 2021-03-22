@@ -93,8 +93,8 @@ public class AICore {
         LocalState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && !copy.IsGameOver() && !terminate_threads.get()) {
             if(MonteCarlo.RunSimulation(copy, new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE, MonteCarlo.SimPolicy.policy_type.BREADTH_FIRST))){
-                game_tree_is_explored.set(true);
-                return;
+                //game_tree_is_explored.set(true);
+                //return;
             }
             copy = GetStateCopy();
         }
@@ -125,7 +125,7 @@ public class AICore {
     public static void SendDelayedMessage() {
         try {
             System.out.println("SendDelayedMessage: now waiting..");
-            Thread.sleep(749 * 6);
+            Thread.sleep(900 * 30);
             Move move = GetBestMove();
             current_board_state.MakeMove(move,true, true);
             InterruptSimulations();
@@ -152,6 +152,9 @@ public class AICore {
             msg.put("queen-position-current", msg_start);
             msg.put("queen-position-next", msg_next);
             msg.put("arrow-position", msg_arrow);
+            //System.out.printf("QCurr: [%d, %d]\n",start.x,start.y);
+            //System.out.printf("QNew: [%d, %d]\n",next.x,next.y);
+            //System.out.printf("Arrow: [%d, %d]\n",arrow.x,arrow.y);
             return msg;
         }
         return null;
@@ -168,23 +171,32 @@ public class AICore {
             best = Double.NEGATIVE_INFINITY;
             index = -1;
             if(current_node != null) {
+                if(current_node.edges() == 0){
+                    DebugFlags.ZeroEdgesDetected.set(true);
+                }
                 System.out.printf("GetBestMove: found a node with %d edges, now to find the best one\n", current_node.edges());
                 for (int i = 0; i < current_node.edges(); ++i) {
                     GameTreeNode sub_node = current_node.get(i);
-                    double aggregate = sub_node.aggregate_heuristic.get();
-                    //System.out.printf("GetBestMove: node %d with a heuristic of %.3f\n", i, aggregate);
-                    if (aggregate > best) {
-                        //System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", aggregate, sub_node.move.get());
-                        best = aggregate;
+                    double heuristic = sub_node.aggregate_heuristic.get();
+                    if(Double.isNaN(heuristic)){
+                        heuristic = sub_node.get_heuristic() / sub_node.get_heuristic_count();
+                    }
+                    System.out.printf("GetBestMove: node %d with a heuristic of %.3f\n", i, heuristic);
+                    if (heuristic > best) {
+                        System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", heuristic, sub_node.move.get());
+                        best = heuristic;
                         index = i;
                     }
                 }
-                if (index > 0) {
+                if (index >= 0) {
                     move = current_node.get(index).move.get();
                     System.out.println("GetBestMove: found a move");
+                } else {
+                    DebugFlags.NoIndexFound.set(true);
                 }
-            } else if (null_count++ == 100) {
-                null_count = 0;
+            } else {
+                //null_count = 0;
+                DebugFlags.NoParentNodeFound.set(true);
                 System.out.println("GetBestMove: GameTree can't find the state");
             }
         } while (move == null);
