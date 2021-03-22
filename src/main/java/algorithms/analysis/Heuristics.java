@@ -71,10 +71,10 @@ public class Heuristics {
 	}
 
 	public static void CalculateHeuristicFirstDegree(LocalState board, GameTreeNode node){
-		/*if(!node.has_first_degree.get()) {
+		if(!node.has_first_degree.get()) {
 			node.add_heuristic(Heuristics.GetFirstDegreeMoveHeuristic(board));
 			node.has_first_degree.set(true);
-		}*/
+		}
 	}
 
 	public static void CalculateHeuristicCount(LocalState board, GameTreeNode node){
