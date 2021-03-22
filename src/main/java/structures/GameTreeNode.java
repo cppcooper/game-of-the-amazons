@@ -64,6 +64,10 @@ public class GameTreeNode {
         return heuristic_sum.get();
     }
 
+    public int get_heuristic_count(){
+        return N.get();
+    }
+
     public void add_heuristic(double new_value){
         //newMean = oldMean + (Data - oldMean) / N;
         assert new_value >= 0;
