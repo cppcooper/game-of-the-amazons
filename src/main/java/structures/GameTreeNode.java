@@ -101,16 +101,18 @@ public class GameTreeNode {
         int delta_count = new_aggregate_count - aggregate_count.get();
         double delta_aggregate_total = new_aggregate_total - old_aggregate_total;
         // "current" (^^^) is now old
-        aggregate_heuristic.set(new_aggregate_total/new_aggregate_count);
-        aggregate_count.set(new_aggregate_count);
-        for(int i = 0; i < super_nodes.size(); ++i){
-            GameTreeNode parent = super_nodes.get(i);
-            int parents_current_aggregate_count = parent.aggregate_count.get();
-            int parents_new_aggregate_count = parents_current_aggregate_count + delta_count;
+        if(new_aggregate_count != 0) {
+            aggregate_heuristic.set(new_aggregate_total / new_aggregate_count);
+            aggregate_count.set(new_aggregate_count);
+            for (int i = 0; i < super_nodes.size(); ++i) {
+                GameTreeNode parent = super_nodes.get(i);
+                int parents_current_aggregate_count = parent.aggregate_count.get();
+                int parents_new_aggregate_count = parents_current_aggregate_count + delta_count;
 
-            // p.avg * p.N = p.Total; p.Total + delta_aggregate_total = p.newTotal
-            double parents_new_aggregate_total = (parent.aggregate_heuristic.get() * parents_current_aggregate_count) + delta_aggregate_total;
-            parent.update_aggregate(parents_new_aggregate_total,parents_new_aggregate_count);
+                // p.avg * p.N = p.Total; p.Total + delta_aggregate_total = p.newTotal
+                double parents_new_aggregate_total = (parent.aggregate_heuristic.get() * parents_current_aggregate_count) + delta_aggregate_total;
+                parent.update_aggregate(parents_new_aggregate_total, parents_new_aggregate_count);
+            }
         }
     }
 
