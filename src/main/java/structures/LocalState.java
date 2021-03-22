@@ -19,6 +19,18 @@ public class LocalState {
 	private int player_turn = 1;
 	private int hash = -1;
 	private boolean valid_hash = false;
+	final public static Integer[] late_state = {
+			0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+			0, 3, 3, 1, 3, 2, 3, 0, 3, 3, 3,
+			0, 3, 3, 0, 0, 0, 3, 0, 0, 3, 3,
+			0, 3, 3, 0, 2, 0, 3, 0, 0, 3, 3,
+			0, 3, 0, 3, 3, 0, 2, 0, 0, 3, 3,
+			0, 3, 0, 0, 3, 3, 0, 0, 0, 3, 3,
+			0, 3, 3, 0, 0, 0, 3, 0, 3, 3, 3,
+			0, 3, 3, 1, 0, 0, 3, 0, 0, 3, 3,
+			0, 3, 3, 3, 3, 2, 3, 1, 0, 3, 3,
+			0, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3,
+			0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
 
 	private void PopulateSet(){
 		if (always_empty == null) {
@@ -208,7 +220,7 @@ public class LocalState {
 				SetTile(move.start, 0);
 				SetTile(move.arrow, 3);
 				if(print_move_num){
-					System.out.printf("==Move Number %d==", move_number);
+					System.out.printf("==Move Number %d==\n", move_number);
 				}
 				move_number++;
 				last_move = move;
