@@ -45,15 +45,15 @@ public class Heuristics {
 	}
 
 	public static void CalculateHeuristicsAll(LocalState board, GameTreeNode node){
-		final int max_N = 1;
+		final int total_heuristics = 3;
 		int N = 0;
 		double original = node.get_heuristic();;
 		double heuristic = 0;
-		/*if(!node.has_first_degree.get()) {
+		if(!node.has_first_degree.get()) {
 			N++;
 			heuristic += Heuristics.GetFirstDegreeMoveHeuristic(board);
 			node.has_first_degree.set(true);
-		}*/
+		}
 		if(!node.has_count.get()) {
 			N++;
 			heuristic += Heuristics.GetCountHeuristic(board);
@@ -61,12 +61,12 @@ public class Heuristics {
 		}
 		if(!node.has_territory.get()) {
 			N++;
-			heuristic += Heuristics.GetCountHeuristic(board);
+			heuristic += Heuristics.GetTerritoryHeuristic(board);
 			node.has_territory.set(true);
 		}
 		// if N == 0, then we do nothing cause it's already done
 		if(N > 0) {
-			node.set_heuristic(original + heuristic,max_N);
+			node.set_heuristic(original + heuristic,total_heuristics);
 		}
 	}
 
@@ -78,11 +78,10 @@ public class Heuristics {
 	}
 
 	public static void CalculateHeuristicCount(LocalState board, GameTreeNode node){
-		/*
 		if(!node.has_count.get()) {
 			node.add_heuristic(Heuristics.GetCountHeuristic(board));
 			node.has_count.set(true);
-		}*/
+		}
 	}
 
 	public static void CalculateHeuristicTerritory(LocalState board, GameTreeNode node){
