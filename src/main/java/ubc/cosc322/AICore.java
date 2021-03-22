@@ -126,7 +126,7 @@ public class AICore {
     public static void SendDelayedMessage() {
         try {
             System.out.println("SendDelayedMessage: now waiting..");
-            Thread.sleep(900*40);
+            Thread.sleep(1000);
             Move move = GetBestMove();
             current_board_state.MakeMove(move,true, true);
             InterruptSimulations();
@@ -175,18 +175,21 @@ public class AICore {
                 if(current_node.edges() == 0){
                     Debug.ZeroEdgesDetected.set(true);
                 } else {
-                    Debug.RunDebugCode(()->System.out.printf("GetBestMove: found a node with %d edges, now to find the best one\n", current_node.edges()));
+                    Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: found a node with %d edges, now to find the best one\n", current_node.edges()));
                     for (int i = 0; i < current_node.edges(); ++i) {
                         GameTreeNode sub_node = current_node.get(i);
                         double heuristic = sub_node.aggregate_heuristic.get();
                         if (Double.isNaN(heuristic) || Precision.equals(heuristic,0.0,0.00001)) {
-                            heuristic = sub_node.get_heuristic() / sub_node.get_heuristic_count();
+                            int N = sub_node.get_heuristic_count();
+                            if (N > 0) {
+                                heuristic = sub_node.get_heuristic() / sub_node.get_heuristic_count();
+                            }
                         }
-                        int finalI = i;
-                        double finalHeuristic = heuristic;
-                        Debug.RunDebugCode(()->System.out.printf("GetBestMove: node %d with a heuristic of %.3f\n", finalI, finalHeuristic));
+                        final int edge = i;
+                        final double h = heuristic;
+                        Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: node %d with a heuristic of %.3f\n", edge, h));
                         if (heuristic > best) {
-                            Debug.RunDebugCode(()->System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", finalHeuristic, sub_node.move.get()));
+                            Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", h, sub_node.move.get()));
                             best = heuristic;
                             index = i;
                         }
@@ -230,7 +233,15 @@ public class AICore {
                 Position.CalculateIndex(qnew.get(0), qnew.get(1)),
                 Position.CalculateIndex(arrow.get(0), arrow.get(1)));
         GameTreeNode parent = GameTree.get(current_board_state);
-        current_board_state.MakeMove(move, true, true);
+        if(!current_board_state.MakeMove(move, true, true)){
+            current_board_state.DebugPrint();
+            System.out.println("ILLEGAL MOVE");
+            System.out.printf("QCurr: [%d, %d]\n",qcurr.get(0), qcurr.get(1));
+            System.out.printf("QNew: [%d, %d]\n",qnew.get(0), qnew.get(1));
+            System.out.printf("Arrow: [%d, %d]\n",arrow.get(0), arrow.get(1));
+            TerminateThreads();
+            System.exit(1);
+        }
         LocalState copy = GetStateCopy();
         GameTreeNode child = GameTree.get(copy);
         if(child == null){

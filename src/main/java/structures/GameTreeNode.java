@@ -104,6 +104,10 @@ public class GameTreeNode {
         // "current" (^^^) is now old
         if(new_aggregate_count != 0) {
             aggregate_heuristic.set(new_aggregate_total / new_aggregate_count);
+            Debug.RunLevel2DebugCode(()-> {
+                double v = aggregate_heuristic.get();
+                System.out.printf("aggregate total: %.3f\naggregate count: %d\naggregate: %.3f\n-----\n",new_aggregate_total, new_aggregate_count,v);
+            });
             aggregate_count.set(new_aggregate_count);
             for (int i = 0; i < super_nodes.size(); ++i) {
                 GameTreeNode parent = super_nodes.get(i);
