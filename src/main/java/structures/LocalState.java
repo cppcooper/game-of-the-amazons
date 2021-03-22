@@ -181,7 +181,7 @@ public class LocalState {
 		return !PlayerHasMoves(1) || !PlayerHasMoves(2);
 	}
 
-	public boolean MakeMove(Move move, boolean update_pieces) {
+	public boolean MakeMove(Move move, boolean update_pieces, boolean print_move_num) {
 		//if the move doesn't include invalid indices, check if the move is valid for this state
 		if (!always_empty.contains(move.start) && !always_empty.contains(move.next) && !always_empty.contains(move.arrow)) {
 			if (move.IsValidFor(this)) {
@@ -207,6 +207,9 @@ public class LocalState {
 				SetTile(move.next, player);
 				SetTile(move.start, 0);
 				SetTile(move.arrow, 3);
+				if(print_move_num){
+					System.out.printf("==Move Number %d==", move_number);
+				}
 				move_number++;
 				last_move = move;
 				switch (player_turn){

@@ -127,7 +127,7 @@ public class AICore {
             System.out.println("SendDelayedMessage: now waiting..");
             Thread.sleep(749 * 6);
             Move move = GetBestMove();
-            current_board_state.MakeMove(move,true);
+            current_board_state.MakeMove(move,true, true);
             InterruptSimulations();
             var msg = MakeMessage(move);
             player.makeMove(msg);
@@ -214,7 +214,7 @@ public class AICore {
                 Position.CalculateIndex(qnew.get(0), qnew.get(1)),
                 Position.CalculateIndex(arrow.get(0), arrow.get(1)));
         GameTreeNode parent = GameTree.get(current_board_state);
-        current_board_state.MakeMove(move, true);
+        current_board_state.MakeMove(move, true, true);
         LocalState copy = GetStateCopy();
         GameTreeNode child = GameTree.get(copy);
         if(child == null){

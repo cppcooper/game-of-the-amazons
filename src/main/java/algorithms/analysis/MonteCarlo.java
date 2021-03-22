@@ -84,7 +84,7 @@ public class MonteCarlo {
                  * */
                 LocalState new_state = new LocalState(board);
                 Move m = moves.get(rng_set.get(b));
-                if(new_state.MakeMove(m, true)) {
+                if(new_state.MakeMove(m, true, false)) {
                     GameTreeNode node = GameTree.get(new_state); // GameTreeNode might already exist for this state [original_state + move]
                     if (node == null) {
                         // LocalState is a new position
@@ -143,7 +143,7 @@ public class MonteCarlo {
         for(int i = 0; i < tree_policy.sample_size; ++i){
             LocalState copy = new LocalState(board);
             Move move = moves.get(selection.get(i));
-            copy.MakeMove(move,true);
+            copy.MakeMove(move,true, false);
             GameTreeNode node = GameTree.get(copy);
             if(node == null){
                 // todo (10): implement exploration consideration
