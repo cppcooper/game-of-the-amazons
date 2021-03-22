@@ -71,6 +71,7 @@ public class GameTreeNode {
     public void add_heuristic(double new_value){
         //newMean = oldMean + (Data - oldMean) / N;
         assert new_value >= 0;
+        N.incrementAndGet();
         int current_aggregate_count = aggregate_count.get();
         int new_aggregate_count = current_aggregate_count + 1;
         // avg * N = total; (total+X) = new_total
