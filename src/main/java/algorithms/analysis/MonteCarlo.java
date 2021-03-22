@@ -42,7 +42,7 @@ public class MonteCarlo {
          * */
         if (depth < policy.depth && !board.IsGameOver() && !Thread.currentThread().isInterrupted()) {
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
-            DebugFlags.DebugBreakPoint();
+            Debug.DebugBreakPoint();
             if (moves == null || moves.size() == 0) {
                 return;
             }
