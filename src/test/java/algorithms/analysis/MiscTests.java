@@ -34,6 +34,25 @@ public class MiscTests {
     }
 
     @Test
+    void find_max_first_degree_heuristic(){
+        final RandomGen rng = new RandomGen();
+        final int trials = 1000000;
+        double max = Double.NEGATIVE_INFINITY;
+        double min = Double.POSITIVE_INFINITY;
+        for(int i = 0; i < trials; ++i){
+            LocalState board = rng.GetRandomBoard();
+            double heuristic = Heuristics.GetFirstDegreeMoveHeuristic(board);
+            if(heuristic > max){
+                max = heuristic;
+            }
+            if(heuristic < min){
+                min = heuristic;
+            }
+        }
+        System.out.printf("min: %.3f\nmax: %.3f\n",min,max);
+    }
+
+    @Test
     void find_max_count_heuristic(){
         final RandomGen rng = new RandomGen();
         final int trials = 100000;
