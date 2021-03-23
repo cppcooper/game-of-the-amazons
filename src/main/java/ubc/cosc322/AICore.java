@@ -222,6 +222,7 @@ public class AICore {
     public static synchronized void SetState(ArrayList<Integer> state) {
         current_board_state = new LocalState(state, true, false); // saves state reference instead of copying
         game_tree_is_explored.set(false);
+        current_board_state.DebugPrint();
     }
 
     public static synchronized void UpdateState(final Map<String, Object> msgDetails) {
