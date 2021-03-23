@@ -83,11 +83,16 @@ public class LocalState {
 	}
 
 	public void DebugPrint(){
-		for(int i = 0; i < board.size(); ++i){
-			System.out.printf("%2d ", board.get(i));
-			if((i+1) % 11 == 0){
-				System.out.println();
+		final char[] col = {' ','a','b','c','d','e','f','g','h','i','j'};
+		for(int y = 10; y >= 0; --y){
+			for(int x = 0; x < 11; ++x){
+				if(y != 0){
+					System.out.printf("%2d ", x != 0 ? board.get(Position.CalculateIndex(x,y)) : y);
+				} else {
+					System.out.printf(" %c ", col[x]);
+				}
 			}
+			System.out.println();
 		}
 	}
 
