@@ -58,11 +58,8 @@ public class AIPlayer extends GamePlayer{
 
 			// interrupt the monte carlo algorithms to restart from our current state
 			AICore.InterruptSimulations();
-
-			// queue sending a move (this new thread will wait for 29.96 seconds and then send a move to the server)
-			Thread move_sender_orphan = new Thread(AICore::SendDelayedMessage);
-			move_sender_orphan.start(); //orphan will clean itself up (as a good orphan should) when execution is done, no joining or stopping necessary
-
+			// open up a thread to send a delayed message
+			AICore.SendDelayedMessage();
 			AICore.PruneGameTree(); // last thing for this thread to do is clean up the Game Tree
 
 		} else if (messageType.equals(GameMessage.GAME_STATE_BOARD)) {
