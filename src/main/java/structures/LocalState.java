@@ -19,8 +19,8 @@ public class LocalState {
 	private int player_turn = 1;
 	private int hash = -1;
 	private boolean valid_hash = false;
-	final public static Integer[] late_state = {
-			0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+	final public static Integer[] late_state = { //this is upside down compared to the GUI
+			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 3, 3, 1, 3, 2, 3, 0, 3, 3, 3,
 			0, 3, 3, 0, 0, 0, 3, 0, 0, 3, 3,
 			0, 3, 3, 0, 2, 0, 3, 0, 0, 3, 3,
