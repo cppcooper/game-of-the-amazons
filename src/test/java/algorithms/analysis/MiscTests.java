@@ -104,21 +104,21 @@ public class MiscTests {
     @Test
     void probability_test(){
         final int trials = 1000000;
-        int[] counts = new int[5];
-        double[] p_values = new double[5];
+        int[] counts = new int[3];
+        double[] p_values = new double[10];
         RandomGen rng = new RandomGen();
         for(int i = 0; i < trials; ++i){
-            switch(rng.get_random_policy()){
+            switch(rng.get_random_policy(90)){
                 case FIRST_DEGREE_MOVES:
                     counts[0]++;
                     break;
-                case COUNT_HEURISTIC:
+                case TERRITORY:
                     counts[1]++;
                     break;
-                case TERRITORY:
+                case ALL_HEURISTICS:
                     counts[2]++;
                     break;
-                case ALL_HEURISTICS:
+                case COUNT_HEURISTIC:
                     counts[3]++;
                     break;
                 case DO_NOTHING:

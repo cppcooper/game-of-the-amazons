@@ -56,9 +56,9 @@ public class MonteCarlo {
                     int branches2 = policy.branches << 1;
                     int bound = Math.max(branches2, sample_size - branches2);
                     if(bound > 0) {
-                        moves = PruneMoves(board, parent, moves, new TreePolicy(rng.nextInt(bound) + branches2, policy.branches, rng.get_random_policy()));
+                        moves = PruneMoves(board, parent, moves, new TreePolicy(rng.nextInt(bound) + branches2, policy.branches, rng.get_random_policy(board.GetMoveNumber())));
                     } else {
-                        moves = PruneMoves(board, parent, moves, new TreePolicy(policy.branches << 1, policy.branches, rng.get_random_policy()));
+                        moves = PruneMoves(board, parent, moves, new TreePolicy(policy.branches << 1, policy.branches, rng.get_random_policy(board.GetMoveNumber())));
                     }
                     break;
             }
