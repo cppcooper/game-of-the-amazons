@@ -13,13 +13,13 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.BiFunction;
 
 public class Heuristics {
-	private static ConcurrentLinkedDeque<Pair<LocalState, GameTreeNode>> queue = new ConcurrentLinkedDeque();
+	private static final ConcurrentLinkedDeque<Pair<LocalState, GameTreeNode>> queue = new ConcurrentLinkedDeque<>();
 
-	public static void enqueue(Pair<LocalState,GameTreeNode> job){
+	public static void enqueue(Pair<LocalState, GameTreeNode> job) {
 		queue.push(job);
 	}
 
-	public static void ProcessQueue(){
+	public static void ProcessQueue() {
 		try {
 			int i = 0;
 			while (!Thread.currentThread().isInterrupted()) {
@@ -34,93 +34,89 @@ public class Heuristics {
 						continue;
 					}
 					CalculateHeuristicsAll(board, node);
-					i = Math.max(0,i-1);
+					i = Math.max(0, i - 1);
 				} else {
 					Thread.sleep(++i * 50);
 				}
 			}
-		} catch (Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void CalculateHeuristicsAll(LocalState board, GameTreeNode node){
+	public static void CalculateHeuristicsAll(LocalState board, GameTreeNode node) {
 		final int total_heuristics = 2;
 		int N = 0;
-		double original = node.get_heuristic();;
+		double original = node.get_heuristic();
+		;
 		double heuristic = 0;
-		if(!node.has_first_degree.get()) {
+		if (!node.has_first_degree.get()) {
 			N++;
 			heuristic += Heuristics.GetFirstDegreeMoveHeuristic(board);
 			node.has_first_degree.set(true);
 		}
-		/*if(!node.has_count.get()) {
-			N++;
-			heuristic += Heuristics.GetCountHeuristic(board);
-			node.has_count.set(true);
-		}/**/
-		if(!node.has_territory.get()) {
+		if (!node.has_territory.get()) {
 			N++;
 			heuristic += Heuristics.GetTerritoryHeuristic(board);
 			node.has_territory.set(true);
 		}/**/
 		// if N == 0, then we do nothing cause it's already done
-		if(N > 0) {
-			node.set_heuristic(original + heuristic,total_heuristics);
+		if (N > 0) {
+			node.set_heuristic(original + heuristic, total_heuristics);
 		}
 	}
 
-	public static void CalculateHeuristicFirstDegree(LocalState board, GameTreeNode node){
-		if(!node.has_first_degree.get()) {
+	public static void CalculateHeuristicFirstDegree(LocalState board, GameTreeNode node) {
+		if (!node.has_first_degree.get()) {
 			node.add_heuristic(Heuristics.GetFirstDegreeMoveHeuristic(board));
 			node.has_first_degree.set(true);
 		}
 	}
 
-	public static void CalculateHeuristicCount(LocalState board, GameTreeNode node){
-		/*(!node.has_count.get()) {
+	public static void CalculateHeuristicCount(LocalState board, GameTreeNode node) {
+		if (!node.has_count.get()) {
 			node.add_heuristic(Heuristics.GetCountHeuristic(board));
 			node.has_count.set(true);
 		}/**/
 	}
 
-	public static void CalculateHeuristicTerritory(LocalState board, GameTreeNode node){
+	public static void CalculateHeuristicTerritory(LocalState board, GameTreeNode node) {
 		// this is probably the most valuable (single) heuristic for pruning moves. It might also be the most expensive
-		if(!node.has_territory.get()) {
+		if (!node.has_territory.get()) {
 			node.add_heuristic(Heuristics.GetTerritoryHeuristic(board));
 			node.has_territory.set(true);
 		}/**/
 	}
 
-	public static double GetFirstDegreeMoveHeuristic(LocalState board){
+	public static double GetFirstDegreeMoveHeuristic(LocalState board) {
 		int value = GetFirstDegreeMoveCount(board);
 		// the less moves the other player has the higher the returned heuristic
-		return (1-((double)value / (4*35)));
+		return (1 - ((double) value / (4 * 35)));
 	}
 
-	public static double GetCountHeuristic(LocalState board){
+	public static double GetCountHeuristic(LocalState board) {
 		BoardPiece[] our_pieces = board.GetPrevTurnPieces(); // we'll calculate heuristics for the player who got us here
 		CountData total = new CountData();
 		for (int i = 0; i < 4; ++i) {
 			int index = our_pieces[i].pos.CalculateIndex();
-			total.add_our_counts(GetCount(board,index));
+			total.add_our_counts(GetCount(board, index));
 		}
 		BoardPiece[] their_pieces = board.GetTurnPieces(); // we'll calculate heuristics for the player who got us here
 		for (int i = 0; i < 4; ++i) {
 			int index = their_pieces[i].pos.CalculateIndex();
-			total.add_their_counts(GetCount(board,index));
+			total.add_their_counts(GetCount(board, index));
 		}
-		double empty_heuristic = (double)total.our_empty / (total.our_empty + total.their_empty);
+		double empty_heuristic = (double) total.our_empty / (total.our_empty + total.their_empty);
 		double nonempty_heuristic = total.our_nonempty_weighted / (total.our_nonempty_weighted + total.their_nonempty_weighted);
 		double ret_heuristic = empty_heuristic - nonempty_heuristic;
-		return Math.max(0,Math.min(1,ASingleMaths.remap_value(ret_heuristic,-0.6,0.75,0,1)));
+		return Math.max(0, Math.min(1, ASingleMaths.remap_value(ret_heuristic, -0.6, 0.75, 0, 1)));
 	}
 
-	public static double GetTerritoryHeuristic(LocalState board){
+	public static double GetTerritoryHeuristic(LocalState board) {
 		var counts = GetTerritoryCount(board);
 		int total = counts.ours + counts.theirs;
-		double heuristic = 3 * ((double)counts.ours / total);
-		heuristic = Math.pow(heuristic,2);
+		double heuristic = 3 * ((double) counts.ours / total);
+		heuristic = Math.pow(heuristic, 2);
 		heuristic /= 9;
 		return heuristic;
 	}
@@ -128,7 +124,7 @@ public class Heuristics {
 	////////////////////////////
 	/// Nuts and Bolts methods
 
-	public static int GetFirstDegreeMoveCount(LocalState board){
+	public static int GetFirstDegreeMoveCount(LocalState board) {
 		BoardPiece[] pieces = board.GetTurnPieces(); // we'll calculate heuristics for the player who's turn it is
 		int[] positions = new int[pieces.length];
 		for (int i = 0; i < 4; ++i) {
@@ -136,9 +132,9 @@ public class Heuristics {
 			positions[i] = index;
 		}
 		int first_degree = 0;
-		int[][] first_degree_territory = MoveCompiler.GetOpenPositions(board,positions);
+		int[][] first_degree_territory = MoveCompiler.GetOpenPositions(board, positions);
 		for (int[] scan_direction : first_degree_territory) {
-			if(scan_direction != null) {
+			if (scan_direction != null) {
 				for (int tile_index : scan_direction) {
 					if (tile_index < 0) {
 						break;
@@ -157,7 +153,7 @@ public class Heuristics {
 
 		data.visited[startingPos] = startingPos;
 		QueueNeighbours(data, startingPos, board);
-		BiFunction<Position,Integer,Boolean> is_first_degree = (s, index) -> {
+		BiFunction<Position, Integer, Boolean> is_first_degree = (s, index) -> {
 			Position p = new Position(index);
 			int dx = Math.abs(p.x - s.x);
 			int dy = Math.abs(p.y - s.y);
@@ -179,14 +175,14 @@ public class Heuristics {
 				counts.our_nonempty++;
 
 				//calculate simple distance
-				int max = Math.max(Math.abs(start.x - current.x),  Math.abs(start.y - current.y));
-				counts.our_nonempty_weighted += 10.0/Math.pow(10,max-1);
+				int max = Math.max(Math.abs(start.x - current.x), Math.abs(start.y - current.y));
+				counts.our_nonempty_weighted += 10.0 / Math.pow(10, max - 1);
 			}
 		}
 		return counts;
 	}
 
-	private static void QueueNeighbours(CountingAlgorithmData data, int index, LocalState board){
+	private static void QueueNeighbours(CountingAlgorithmData data, int index, LocalState board) {
 		Position[] neighbours = new Position[8];
 		neighbours[0] = new Position(index - 1);
 		neighbours[1] = new Position(index + 1);
@@ -197,7 +193,7 @@ public class Heuristics {
 		neighbours[6] = new Position(index + 11);
 		neighbours[7] = new Position(index + 12);
 
-		for(Position p : neighbours) {
+		for (Position p : neighbours) {
 			if (p.IsValid()) {
 				int neighbour = p.CalculateIndex();
 				if (data.visited[neighbour] == 0) {
@@ -212,7 +208,7 @@ public class Heuristics {
 		}
 	}
 
-	public static TerritoryCounts GetTerritoryCount(LocalState board){
+	public static TerritoryCounts GetTerritoryCount(LocalState board) {
 		BoardPiece[] our_pieces = board.GetPrevTurnPieces();
 		BoardPiece[] their_pieces = board.GetTurnPieces();
 		int[] our_positions = new int[4];
@@ -220,9 +216,9 @@ public class Heuristics {
 		int[] our_degree_map = new int[121];
 		int[] their_degree_map = new int[121];
 
-		for(int i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; i++) {
 			our_positions[i] = our_pieces[i].pos.CalculateIndex();
-			their_positions[i] = their_pieces[i].pos.CalculateIndex();			//element # is the index
+			their_positions[i] = their_pieces[i].pos.CalculateIndex();            //element # is the index
 		}
 
 		GetTerritoryCount(board, our_positions, our_degree_map, 1, new TreeSet<Territory>(new Territory.TerritoryComp()));
@@ -231,22 +227,22 @@ public class Heuristics {
 		int our_territory_count = 0;
 		int their_territory_count = 0;
 
-		for(int i = 0; i < our_degree_map.length; i++) {
-			if(our_degree_map[i] < their_degree_map[i]) {
+		for (int i = 0; i < our_degree_map.length; i++) {
+			if (our_degree_map[i] < their_degree_map[i]) {
 				our_territory_count++;
-			} else if(our_degree_map[i] > their_degree_map[i]){
+			} else if (our_degree_map[i] > their_degree_map[i]) {
 				their_territory_count++;                               /* if we have a lower cost to move set to us, else set to 0 */
 			}
 		}
 
-		return new TerritoryCounts(our_territory_count,their_territory_count);
+		return new TerritoryCounts(our_territory_count, their_territory_count);
 	}
 
 	private static void GetTerritoryCount(LocalState board, int[] starting_positions, int[] degree_mapping, int degree, TreeSet<Territory> visited) {
 		int[][] new_positions = MoveCompiler.GetOpenPositions(board, starting_positions); //[starting index][index of open positions]
 
 		for (int[] position_list : new_positions) {
-			if(position_list != null) {
+			if (position_list != null) {
 				for (int j = 0; j < position_list.length; j++) {
 					if (position_list[j] == -1) {
 						break;
@@ -259,24 +255,24 @@ public class Heuristics {
 		}
 
 		for (int[] position_list : new_positions) {
-			if(position_list != null) {
+			if (position_list != null) {
 				GetTerritoryCount(board, prune_positions(visited, position_list, degree), degree_mapping, degree + 1, visited);
 			}
 		}
 	}
 
-	private static int[] prune_positions(TreeSet<Territory> visited, int[] positions, int degree){
+	private static int[] prune_positions(TreeSet<Territory> visited, int[] positions, int degree) {
 		int[] pruned_positions = new int[positions.length];
 		int i = 0;
 		for (int index : positions) {
-			Territory t = new Territory(index,degree);
+			Territory t = new Territory(index, degree);
 			var best = visited.lower(t);
-			if(best == null || best.index != index){
+			if (best == null || best.index != index) {
 				pruned_positions[i++] = index;
 				visited.add(t);
 			}
 		}
-		if(i < pruned_positions.length){
+		if (i < pruned_positions.length) {
 			pruned_positions[i] = -1;
 		}
 		return pruned_positions;
@@ -295,23 +291,25 @@ public class Heuristics {
 		public int their_nonempty;
 		public double our_nonempty_weighted;
 		public double their_nonempty_weighted;
-		void add_our_counts(CountData other){
+
+		void add_our_counts(CountData other) {
 			our_empty += other.our_empty;
 			our_nonempty += other.our_nonempty;
 			our_nonempty_weighted += other.our_nonempty_weighted;
 		}
-		void add_their_counts(CountData other){
+
+		void add_their_counts(CountData other) {
 			their_empty += other.our_empty;
 			their_nonempty += other.our_nonempty;
 			their_nonempty_weighted += other.our_nonempty_weighted;
 		}
 	}
 
-private static class Territory {
-	int index = 0;
-	int degree = 0;
+	private static class Territory {
+		int index = 0;
+		int degree = 0;
 
-		Territory(int index, int degree){
+		Territory(int index, int degree) {
 			this.index = index;
 			this.degree = degree;
 		}
@@ -328,9 +326,9 @@ private static class Territory {
 
 			@Override
 			public int compare(Territory o1, Territory o2) {
-				int index = Integer.compare(o1.index,o2.index);
-				int degree = Integer.compare(o1.degree,o2.degree);
-				if(index == 0){
+				int index = Integer.compare(o1.index, o2.index);
+				int degree = Integer.compare(o1.degree, o2.degree);
+				if (index == 0) {
 					return degree == 0 ? index : degree;
 				}
 				return index;
@@ -338,11 +336,11 @@ private static class Territory {
 		}
 	}
 
-	public static class TerritoryCounts{
+	public static class TerritoryCounts {
 		int ours = 0;
 		int theirs = 0;
 
-		TerritoryCounts(int ours,int theirs){
+		TerritoryCounts(int ours, int theirs) {
 			this.ours = ours;
 			this.theirs = theirs;
 		}
