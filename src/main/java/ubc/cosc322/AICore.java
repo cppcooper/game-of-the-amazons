@@ -50,6 +50,9 @@ public class AICore {
         if (heuristics_thread != null && heuristics_thread.isAlive()) {
             heuristics_thread.interrupt();
         }
+        if (move_sender_orphan != null && move_sender_orphan.isAlive()) {
+            move_sender_orphan.interrupt();
+        }
         try {
             while (
                     (mc_sim_thread1 != null && mc_sim_thread1.isAlive())
@@ -124,21 +127,30 @@ public class AICore {
     }
 
     public static void SendDelayedMessage() {
-        try {
-            System.out.println("SendDelayedMessage: now waiting..");
-            Thread.sleep(1000);
-            Move move = GetBestMove();
-            current_board_state.MakeMove(move,true, true);
-            InterruptSimulations();
-            var msg = MakeMessage(move);
-            player.makeMove(msg);
-            player.getGameClient().sendMoveMessage(msg);
-            System.out.println("Move sent to server.");
-            PruneGameTree();
+        move_sender_orphan = new Thread(()->{
+            try {
+                System.out.println("SendDelayedMessage: now waiting..");
+                if(!game_tree_is_explored.get()) {
+                    Thread.sleep(Tuner.wait_time);
+                } else {
+                    Thread.sleep(1000);
+                }
+                if(!Thread.interrupted()) {
+                    Move move = GetBestMove();
+                    current_board_state.MakeMove(move, true, true);
+                    InterruptSimulations();
+                    var msg = MakeMessage(move);
+                    player.makeMove(msg);
+                    player.getGameClient().sendMoveMessage(msg);
+                    System.out.println("Move sent to server.");
+                    PruneGameTree();
+                }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        move_sender_orphan.start();
     }
 
     private static Map<String, Object> MakeMessage(Move move) {
