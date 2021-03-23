@@ -19,6 +19,7 @@ public class AICore {
     private static Thread mc_sim_thread1 = null;
     private static Thread mc_sim_thread2 = null;
     private static Thread heuristics_thread = null;
+    private static Thread move_sender_orphan = null;
     private static final AtomicBoolean terminate_threads = new AtomicBoolean(false);
     private static final AtomicBoolean game_tree_is_explored = new AtomicBoolean(false);
 
