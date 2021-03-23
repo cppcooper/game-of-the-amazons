@@ -36,7 +36,7 @@ public class Heuristics {
 					CalculateHeuristicsAll(board, node);
 					i = Math.max(0,i-1);
 				} else {
-					Thread.sleep(++i * 100);
+					Thread.sleep(++i * 50);
 				}
 			}
 		} catch (Exception e){
@@ -45,7 +45,7 @@ public class Heuristics {
 	}
 
 	public static void CalculateHeuristicsAll(LocalState board, GameTreeNode node){
-		final int total_heuristics = 3;
+		final int total_heuristics = 2;
 		int N = 0;
 		double original = node.get_heuristic();;
 		double heuristic = 0;
@@ -54,16 +54,16 @@ public class Heuristics {
 			heuristic += Heuristics.GetFirstDegreeMoveHeuristic(board);
 			node.has_first_degree.set(true);
 		}
-		if(!node.has_count.get()) {
+		/*if(!node.has_count.get()) {
 			N++;
 			heuristic += Heuristics.GetCountHeuristic(board);
 			node.has_count.set(true);
-		}
+		}/**/
 		if(!node.has_territory.get()) {
 			N++;
 			heuristic += Heuristics.GetTerritoryHeuristic(board);
 			node.has_territory.set(true);
-		}
+		}/**/
 		// if N == 0, then we do nothing cause it's already done
 		if(N > 0) {
 			node.set_heuristic(original + heuristic,total_heuristics);
@@ -78,10 +78,10 @@ public class Heuristics {
 	}
 
 	public static void CalculateHeuristicCount(LocalState board, GameTreeNode node){
-		if(!node.has_count.get()) {
+		/*(!node.has_count.get()) {
 			node.add_heuristic(Heuristics.GetCountHeuristic(board));
 			node.has_count.set(true);
-		}
+		}/**/
 	}
 
 	public static void CalculateHeuristicTerritory(LocalState board, GameTreeNode node){
@@ -89,13 +89,13 @@ public class Heuristics {
 		if(!node.has_territory.get()) {
 			node.add_heuristic(Heuristics.GetTerritoryHeuristic(board));
 			node.has_territory.set(true);
-		}
+		}/**/
 	}
 
 	public static double GetFirstDegreeMoveHeuristic(LocalState board){
 		int value = GetFirstDegreeMoveCount(board);
 		// the less moves the other player has the higher the returned heuristic
-		return (1-(double)value / (4*35));
+		return (1-((double)value / (4*35)));
 	}
 
 	public static double GetCountHeuristic(LocalState board){
