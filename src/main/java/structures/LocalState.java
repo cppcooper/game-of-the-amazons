@@ -201,6 +201,9 @@ public class LocalState {
 		if (!always_empty.contains(move.start) && !always_empty.contains(move.next) && !always_empty.contains(move.arrow)) {
 			if (move.IsValidFor(this)) {
 				int player = ReadTile(move.start);
+				if(this.player_turn != player){
+					return false;
+				}
 				if (update_pieces) {
 					BoardPiece[] arr = null;
 					switch (player) {
