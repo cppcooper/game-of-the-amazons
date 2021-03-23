@@ -2,8 +2,11 @@ package ubc.cosc322;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 
+import structures.LocalState;
+import structures.Position;
 import ygraph.ai.smartfox.games.*;
 
 /**
@@ -14,9 +17,8 @@ import ygraph.ai.smartfox.games.*;
  */
 public class AIPlayer extends GamePlayer{
 
-    private GameClient gameClient = null; 
+    private OurGameClient gameClient = null;
     private OurGameGUI gamegui = null;
-
 	
     private String userName = null;
     private String passwd = null;
@@ -75,8 +77,7 @@ public class AIPlayer extends GamePlayer{
 			if(userName.equals(msgDetails.get("player-black"))){
 				System.out.printf("black: %s\n", msgDetails.get("player-black"));
 				System.out.printf("white: %s\n", msgDetails.get("player-white"));
-				Thread move_sender_orphan = new Thread(AICore::SendDelayedMessage);
-				move_sender_orphan.start(); //orphan will clean itself up (as a good orphan should) when execution is done, no joining or stopping necessary
+				AICore.SendDelayedMessage();
 			} else {
 				System.out.printf("white: %s\n", msgDetails.get("player-white"));
 				System.out.printf("black: %s\n", msgDetails.get("player-black"));
@@ -88,8 +89,8 @@ public class AIPlayer extends GamePlayer{
 		}
 		return true;
 	}
-    
-    
+
+
     @Override
     public String userName() {
     	return userName;
