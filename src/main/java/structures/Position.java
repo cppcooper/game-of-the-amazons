@@ -1,5 +1,7 @@
 package structures;
 
+import java.util.ArrayList;
+
 public class Position {
     public int x;
     public int y;
@@ -10,10 +12,15 @@ public class Position {
         this.x = x;
         this.y = y;
     }
+    public Position(ArrayList<Integer> msg_pos){
+        // msg = (row,col)
+        x = msg_pos.get(1);
+        y = msg_pos.get(0);
+    }
     public Position(int index){
         if(index > 0 && index < 121) {
-            x = index / 11;
-            y = index - (x * 11);
+            y = index / 11;
+            x = index - (y * 11);
         } else {
             x = -1;
             y = -1;
@@ -31,6 +38,12 @@ public class Position {
         }
         return false;
     }
+    public int row(){
+        return y;
+    }
+    public int col(){
+        return x;
+    }
     public int CalculateIndex(){
         return CalculateIndex(x,y);
     }
@@ -39,7 +52,7 @@ public class Position {
     }
 
     static public int CalculateIndex(int x, int y){
-        return (x*11)+y;
+        return (y*11)+x;
     }
     static public boolean IsValid(int x, int y){
         return (x > 0 && y > 0) && (x < 11 && y < 11);

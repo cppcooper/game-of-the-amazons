@@ -98,8 +98,8 @@ public class AICore {
         LocalState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && !copy.IsGameOver() && !terminate_threads.get()) {
             if(MonteCarlo.RunSimulation(copy, new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE, MonteCarlo.SimPolicy.policy_type.BREADTH_FIRST))){
-                //game_tree_is_explored.set(true);
-                //return;
+                game_tree_is_explored.set(true);
+                return;
             }
             copy = GetStateCopy();
         }
@@ -159,16 +159,20 @@ public class AICore {
             Position start = new Position(move.start);
             Position next = new Position(move.next);
             Position arrow = new Position(move.arrow);
-            ArrayList<Integer> msg_start = new ArrayList<>(Arrays.asList(start.x, start.y));
-            ArrayList<Integer> msg_next = new ArrayList<>(Arrays.asList(next.x, next.y));
-            ArrayList<Integer> msg_arrow = new ArrayList<>(Arrays.asList(arrow.x, arrow.y));
+            // Yuuup, this (y,x; row,col) is how Gao sends the variables.. verified with debugging inside HumanPlayerTest in the mouse event
+            ArrayList<Integer> msg_start = new ArrayList<>(Arrays.asList(start.row(), start.col()));
+            ArrayList<Integer> msg_next = new ArrayList<>(Arrays.asList(next.row(), next.col()));
+            ArrayList<Integer> msg_arrow = new ArrayList<>(Arrays.asList(arrow.row(), arrow.col()));
             Map<String, Object> msg = new HashMap<>();
             msg.put("queen-position-current", msg_start);
             msg.put("queen-position-next", msg_next);
             msg.put("arrow-position", msg_arrow);
-            //System.out.printf("QCurr: [%d, %d]\n",start.x,start.y);
-            //System.out.printf("QNew: [%d, %d]\n",next.x,next.y);
-            //System.out.printf("Arrow: [%d, %d]\n",arrow.x,arrow.y);
+            Debug.RunLevel3DebugCode(()->{
+                current_board_state.DebugPrint();
+                System.out.printf("QCurr: [%c, %d]: %d\n",64 + start.x, start.y, start.CalculateIndex());
+                System.out.printf("QNew: [%c, %d]: %d\n",64 + next.x, next.y, next.CalculateIndex());
+                System.out.printf("Arrow: [%c, %d]: %d\n",64 + arrow.x, arrow.y, arrow.CalculateIndex());
+            });
             return msg;
         }
         return null;
@@ -242,11 +246,20 @@ public class AICore {
         ArrayList<Integer> qcurr = (ArrayList) msgDetails.get("queen-position-current");
         ArrayList<Integer> qnew = (ArrayList) msgDetails.get("queen-position-next");
         ArrayList<Integer> arrow = (ArrayList) msgDetails.get("arrow-position");
+        Position p1 = new Position(qcurr);
+        Position p2 = new Position(qnew);
+        Position p3 = new Position(arrow);
         Move move = new Move(
-                Position.CalculateIndex(qcurr.get(0), qcurr.get(1)),
-                Position.CalculateIndex(qnew.get(0), qnew.get(1)),
-                Position.CalculateIndex(arrow.get(0), arrow.get(1)));
+                p1.CalculateIndex(),
+                p2.CalculateIndex(),
+                p3.CalculateIndex());
         GameTreeNode parent = GameTree.get(current_board_state);
+        Debug.RunLevel3DebugCode(()->{
+            current_board_state.DebugPrint();
+            System.out.printf("QCurr: [%c, %d]: %d\n",64 + p1.x, p1.y, p1.CalculateIndex());
+            System.out.printf("QNew: [%c, %d]: %d\n",64 + p2.x, p2.y, p2.CalculateIndex());
+            System.out.printf("Arrow: [%c, %d]: %d\n",64 + p3.x, p3.y, p3.CalculateIndex());
+        });
         if(!current_board_state.MakeMove(move, true, true)){
             current_board_state.DebugPrint();
             System.out.println("ILLEGAL MOVE");
