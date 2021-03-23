@@ -113,7 +113,7 @@ public class Heuristics {
 		double empty_heuristic = (double)total.our_empty / (total.our_empty + total.their_empty);
 		double nonempty_heuristic = total.our_nonempty_weighted / (total.our_nonempty_weighted + total.their_nonempty_weighted);
 		double ret_heuristic = empty_heuristic - nonempty_heuristic;
-		return ASingleMaths.remap_value(ret_heuristic,-0.6,0.75,0,1);
+		return Math.max(0,Math.min(1,ASingleMaths.remap_value(ret_heuristic,-0.6,0.75,0,1)));
 	}
 
 	public static double GetTerritoryHeuristic(LocalState board){
