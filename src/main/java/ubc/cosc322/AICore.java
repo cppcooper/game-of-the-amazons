@@ -236,10 +236,12 @@ public class AICore {
         if(!current_board_state.MakeMove(move, true, true)){
             current_board_state.DebugPrint();
             System.out.println("ILLEGAL MOVE");
-            System.out.printf("QCurr: [%d, %d]\n",qcurr.get(0), qcurr.get(1));
-            System.out.printf("QNew: [%d, %d]\n",qnew.get(0), qnew.get(1));
-            System.out.printf("Arrow: [%d, %d]\n",arrow.get(0), arrow.get(1));
+            // Yuuup, this (y,x) is how Gao sends the variables.. verified with debugging inside HumanPlayerTest in the mouse event
+            System.out.printf("QCurr: [%c, %d]: %d\n",64 + p1.x, p1.y, p1.CalculateIndex());
+            System.out.printf("QNew: [%c, %d]: %d\n",64 + p2.x, p2.y, p2.CalculateIndex());
+            System.out.printf("Arrow: [%c, %d]: %d\n",64 + p3.x, p3.y, p3.CalculateIndex());
             TerminateThreads();
+            player.kill();
             System.exit(1);
         }
         LocalState copy = GetStateCopy();
