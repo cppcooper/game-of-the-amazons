@@ -138,7 +138,7 @@ public class RandomGen extends Random {
     }
 
     public MonteCarlo.TreePolicy.policy_type get_random_policy(int move_num){
-        // todo (debug): tune this function
+        // todo (tuning): improve ability to aid in pruning moves
         double progression = move_num / 100.0;
         double p1 = 0.75 * (1 - progression);
         double p2 = 0.9 * (1 - p1);

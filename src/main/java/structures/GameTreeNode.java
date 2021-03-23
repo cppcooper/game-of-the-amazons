@@ -10,6 +10,7 @@ public class GameTreeNode {
     private final SynchronizedArrayList<GameTreeNode> sub_nodes = new SynchronizedArrayList<>(); //note: that there is no way to remove nodes! this is by design!
 
     private final AtomicInteger N = new AtomicInteger(0);
+    // todo (refactor game tree): improve heuristics data [variables,weights,etc.]
     private final AtomicDouble heuristic_sum = new AtomicDouble();
     final public AtomicDouble aggregate_heuristic = new AtomicDouble();
     final public AtomicInteger aggregate_count = new AtomicInteger(0);
@@ -94,7 +95,7 @@ public class GameTreeNode {
         update_aggregate(new_aggregate_total,new_aggregate_count);
     }
 
-    // todo: propagate the max value only. So when a node updates, check it's value against the parent's max_aggregate.. if it is bigger then continue propagation
+    // todo (refactor game tree): propagate the max value only. So when a node updates, check it's value against the parent's max_aggregate.. if it is bigger then continue propagation
     public void update_aggregate(double new_aggregate_total, int new_aggregate_count){
         // current_avg * current_N = current_total
         double old_aggregate_total = aggregate_heuristic.get() * aggregate_count.get();

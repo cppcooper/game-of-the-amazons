@@ -26,7 +26,6 @@ public class MonteCarlo {
         RandomGen rng = new RandomGen();
         GameTreeNode sim_root = GameTree.get(board);
         if(sim_root == null){
-            // This should only be the case if this is the beginning of the game. todo: ensure this holds true?
             sim_root = new GameTreeNode(new Move(),null);
             GameTree.put(board,sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
         }
@@ -48,10 +47,11 @@ public class MonteCarlo {
             }
             switch (policy.type) {
                 case BREADTH_FIRST:
+                    // todo (refactor search): convert exhaustive monte carlo into just a breadth first search
                     moves = PruneMoves(board, parent, moves, new TreePolicy(0, 0, TreePolicy.policy_type.DO_NOTHING));
                     break;
                 case MONTE_CARLO:
-                    // todo (debug): this is probably going to cause a problem.. we'll see
+                    // todo (tuning): do a better job selecting the sample size
                     int sample_size = moves.size() >> 1;
                     int branches2 = policy.branches << 1;
                     int bound = Math.max(branches2, sample_size - branches2);
@@ -144,7 +144,6 @@ public class MonteCarlo {
             if(copy.MakeMove(move,true, false)) {
                 GameTreeNode node = GameTree.get(copy);
                 if (node == null) {
-                    // todo (10): implement exploration consideration
                     node = new GameTreeNode(move, parent);
                     parent.adopt(node);
                     GameTree.put(copy, node);

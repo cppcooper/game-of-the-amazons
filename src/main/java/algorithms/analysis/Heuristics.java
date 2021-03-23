@@ -66,8 +66,8 @@ public class Heuristics {
 		}
 	}
 
-	// todo: implement with data from territory heuristic
-	// todo: provide two variants, one for reduction and one for mobility - then use reduction for pruning moves
+	// todo (refactor heuristics): implement with data from territory heuristic
+	// todo (refactor heuristics): provide two variants, one for reduction and one for mobility - then use reduction for pruning moves
 	public static void CalculateHeuristicFirstDegree(LocalState board, GameTreeNode node) {
 		if (!node.has_first_degree.get()) {
 			node.add_heuristic(Heuristics.GetFirstDegreeMoveHeuristic(board));
@@ -75,8 +75,8 @@ public class Heuristics {
 		}
 	}
 
-	// todo: revise to calculate winner
-	// todo: use to nullify losing moves and double winning moves
+	// todo (refactor heuristics): revise to calculate winner
+	// todo (refactor heuristics): use to nullify losing moves and double winning moves
 	public static void CalculateHeuristicCount(LocalState board, GameTreeNode node) {
 		if (!node.has_count.get()) {
 			node.add_heuristic(Heuristics.GetCountHeuristic(board));
@@ -84,7 +84,7 @@ public class Heuristics {
 		}
 	}
 
-	// todo: revise territory to optimize the difference in territories delta = ours - theirs
+	// todo (refactor heuristics): revise territory to optimize the difference in territories delta = ours - theirs
 	public static void CalculateHeuristicTerritory(LocalState board, GameTreeNode node) {
 		// this is probably the most valuable (single) heuristic for pruning moves. It might also be the most expensive
 		if (!node.has_territory.get()) {
