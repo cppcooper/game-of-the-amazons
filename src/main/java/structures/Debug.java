@@ -6,8 +6,9 @@ public class Debug {
     public static AtomicBoolean ZeroEdgesDetected = new AtomicBoolean(false);
     public static AtomicBoolean NoIndexFound = new AtomicBoolean(false);
     public static AtomicBoolean NoParentNodeFound = new AtomicBoolean(false);
-    private static boolean debugging_level1 = true;
+    private static boolean debugging_level1 = false;
     private static boolean debugging_level2 = false;
+    private static boolean debugging_level3 = false;
 
     public static void DebugBreakPoint(){
         if(ZeroEdgesDetected.get() || NoIndexFound.get() || NoParentNodeFound.get()){
@@ -21,6 +22,11 @@ public class Debug {
     }
     public static void RunLevel2DebugCode(Runnable fn){
         if(debugging_level2){
+            fn.run();
+        }
+    }
+    public static void RunLevel3DebugCode(Runnable fn){
+        if(debugging_level3){
             fn.run();
         }
     }
