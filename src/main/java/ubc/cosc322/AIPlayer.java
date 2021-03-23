@@ -110,7 +110,11 @@ public class AIPlayer extends GamePlayer{
 
 	@Override
 	public void connect() {
-    	gameClient = new GameClient(userName, passwd, this);
+    	gameClient = new OurGameClient(userName, passwd, this);
+	}
+
+	public void kill(){
+    	gamegui.dispose();
 	}
 
 }//end of class
