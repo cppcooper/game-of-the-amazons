@@ -94,9 +94,8 @@ public class GameTreeNode {
         update_aggregate(new_aggregate_total,new_aggregate_count);
     }
 
+    // todo: propagate the max value only. So when a node updates, check it's value against the parent's max_aggregate.. if it is bigger then continue propagation
     public void update_aggregate(double new_aggregate_total, int new_aggregate_count){
-        // todo (1): consider changing the weighting of aggregation (currently 1:1 ratio; parent:child)
-        // todo (debug): verify this function, and its uses ensure an unbroken chain of heuristic aggregating
         // current_avg * current_N = current_total
         double old_aggregate_total = aggregate_heuristic.get() * aggregate_count.get();
         int delta_count = new_aggregate_count - aggregate_count.get();

@@ -76,7 +76,7 @@ public class Heuristics {
 	}
 
 	// todo: revise to calculate winner
-	// todo: use to nullify losing moves
+	// todo: use to nullify losing moves and double winning moves
 	public static void CalculateHeuristicCount(LocalState board, GameTreeNode node) {
 		if (!node.has_count.get()) {
 			node.add_heuristic(Heuristics.GetCountHeuristic(board));
