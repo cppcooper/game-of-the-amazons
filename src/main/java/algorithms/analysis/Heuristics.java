@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.BiFunction;
 
 public class Heuristics {
-	private static ConcurrentLinkedDeque<Pair<LocalState, GameTreeNode>> queue = new ConcurrentLinkedDeque();
+	private static final ConcurrentLinkedDeque<Pair<LocalState, GameTreeNode>> queue = new ConcurrentLinkedDeque<>();
 
 	public static void enqueue(Pair<LocalState, GameTreeNode> job) {
 		queue.push(job);
@@ -55,11 +55,6 @@ public class Heuristics {
 			heuristic += Heuristics.GetFirstDegreeMoveHeuristic(board);
 			node.has_first_degree.set(true);
 		}
-		/*if(!node.has_count.get()) {
-			N++;
-			heuristic += Heuristics.GetCountHeuristic(board);
-			node.has_count.set(true);
-		}/**/
 		if (!node.has_territory.get()) {
 			N++;
 			heuristic += Heuristics.GetTerritoryHeuristic(board);
