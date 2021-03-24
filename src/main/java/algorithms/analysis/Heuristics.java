@@ -121,7 +121,7 @@ public class Heuristics {
 		BoardPiece[] pieces = board.GetTurnPieces(); // we'll calculate heuristics for the player who's turn it is
 		int[] positions = new int[pieces.length];
 		for (int i = 0; i < 4; ++i) {
-			int index = pieces[i].pos.CalculateIndex();
+			int index = pieces[i].CalculateIndex();
 			positions[i] = index;
 		}
 		int first_degree = 0;
@@ -143,7 +143,7 @@ public class Heuristics {
 		int count = 0;
 		CountingAlgorithmData data = new CountingAlgorithmData();
 		for(BoardPiece p : Objects.requireNonNull(board.GetPlayerPieces(player))) {
-			QueueNeighbours(data, p.pos.CalculateIndex(), board);
+			QueueNeighbours(data, p.CalculateIndex(), board);
 		}
 
 		while (!data.blankspace.isEmpty()) {
@@ -189,8 +189,8 @@ public class Heuristics {
 		int[] their_degree_map = new int[121];
 
 		for (int i = 0; i < 4; i++) {
-			our_positions[i] = our_pieces[i].pos.CalculateIndex();
-			their_positions[i] = their_pieces[i].pos.CalculateIndex();            //element # is the index
+			our_positions[i] = our_pieces[i].CalculateIndex();
+			their_positions[i] = their_pieces[i].CalculateIndex();            //element # is the index
 		}
 
 		GetTerritoryCount(board, our_positions, our_degree_map, 1, new TreeSet<Territory>(new Territory.TerritoryComp()));

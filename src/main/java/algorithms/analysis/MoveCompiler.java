@@ -11,7 +11,7 @@ public class MoveCompiler {
     public static ArrayList<Move> GetMoveList(LocalState board, BoardPiece[] player_pieces, boolean use_pooling) {
         int[] piece_indices = new int[4];
         for (int i = 0; i < piece_indices.length; ++i) {
-            piece_indices[i] = player_pieces[i].pos.CalculateIndex();
+            piece_indices[i] = player_pieces[i].CalculateIndex();
         }
         return GetMoveList(board,piece_indices,use_pooling);
     }
