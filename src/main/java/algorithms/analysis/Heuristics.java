@@ -99,22 +99,10 @@ public class Heuristics {
 		return (1 - ((double) value / (4 * 35)));
 	}
 
-	public static double GetCountHeuristic(LocalState board) {
-		BoardPiece[] our_pieces = board.GetPrevTurnPieces(); // we'll calculate heuristics for the player who got us here
-		CountData total = new CountData();
-		for (int i = 0; i < 4; ++i) {
-			int index = our_pieces[i].pos.CalculateIndex();
-			total.add_our_counts(GetCount(board, index));
-		}
-		BoardPiece[] their_pieces = board.GetTurnPieces(); // we'll calculate heuristics for the player who got us here
-		for (int i = 0; i < 4; ++i) {
-			int index = their_pieces[i].pos.CalculateIndex();
-			total.add_their_counts(GetCount(board, index));
-		}
-		double empty_heuristic = (double) total.our_empty / (total.our_empty + total.their_empty);
-		double nonempty_heuristic = total.our_nonempty_weighted / (total.our_nonempty_weighted + total.their_nonempty_weighted);
-		double ret_heuristic = empty_heuristic - nonempty_heuristic;
-		return Math.max(0, Math.min(1, ASingleMaths.remap_value(ret_heuristic, -0.6, 0.75, 0, 1)));
+	public static int CalculateWinner(LocalState board) {
+		int p1 = CountAccessiblePositions(board,1);
+		int p2 = CountAccessiblePositions(board,2);
+		return p1 == p2 ? 0 : (p1 > p2 ? 1 : 2);
 	}
 
 	public static double GetTerritoryHeuristic(LocalState board) {
@@ -151,40 +139,20 @@ public class Heuristics {
 		return first_degree;
 	}
 
-	public static CountData GetCount(LocalState board, int startingPos) {
-		CountData counts = new CountData();
+	public static int CountAccessiblePositions(LocalState board, int player) {
+		int count = 0;
 		CountingAlgorithmData data = new CountingAlgorithmData();
-		Position start = new Position(startingPos);
-
-		data.visited[startingPos] = startingPos;
-		QueueNeighbours(data, startingPos, board);
-		BiFunction<Position, Integer, Boolean> is_first_degree = (s, index) -> {
-			Position p = new Position(index);
-			int dx = Math.abs(p.x - s.x);
-			int dy = Math.abs(p.y - s.y);
-			return dx == 0 || dy == 0 || dx == dy;
-		};
-
-		if (!data.blankspace.isEmpty()) {
-			while (!data.blankspace.isEmpty()) {
-				int value = data.blankspace.poll();
-				counts.our_empty++;
-				QueueNeighbours(data, value, board);
-			}
+		for(BoardPiece p : Objects.requireNonNull(board.GetPlayerPieces(player))) {
+			QueueNeighbours(data, p.pos.CalculateIndex(), board);
 		}
 
-		if (!data.blockedspace.isEmpty()) {
-			while (!data.blockedspace.isEmpty()) {
-				int value = data.blockedspace.poll();
-				Position current = new Position(value);
-				counts.our_nonempty++;
-
-				//calculate simple distance
-				int max = Math.max(Math.abs(start.x - current.x), Math.abs(start.y - current.y));
-				counts.our_nonempty_weighted += 10.0 / Math.pow(10, max - 1);
-			}
+		while (!data.blankspace.isEmpty()) {
+			int value = data.blankspace.poll();
+			count++;
+			QueueNeighbours(data, value, board);
 		}
-		return counts;
+
+		return count;
 	}
 
 	private static void QueueNeighbours(CountingAlgorithmData data, int index, LocalState board) {
@@ -201,13 +169,12 @@ public class Heuristics {
 		for (Position p : neighbours) {
 			if (p.IsValid()) {
 				int neighbour = p.CalculateIndex();
-				if (data.visited[neighbour] == 0) {
-					data.visited[neighbour] = neighbour;
-					if (board.ReadTile(neighbour) == 0) {
-						data.blankspace.offer(neighbour);
-					} else {
-						data.blockedspace.offer(neighbour);
-					}
+				if (data.visited[neighbour] > 0) {
+					continue;
+				}
+				data.visited[neighbour] = neighbour;
+				if (board.ReadTile(neighbour) == 0) {
+					data.blankspace.offer(neighbour);
 				}
 			}
 		}
@@ -286,28 +253,6 @@ public class Heuristics {
 	private static class CountingAlgorithmData {
 		public int[] visited = new int[121];
 		public Queue<Integer> blankspace = new LinkedList<>();
-		public Queue<Integer> blockedspace = new LinkedList<>();
-	}
-
-	public static class CountData {
-		public int our_empty;
-		public int our_nonempty;
-		public int their_empty;
-		public int their_nonempty;
-		public double our_nonempty_weighted;
-		public double their_nonempty_weighted;
-
-		void add_our_counts(CountData other) {
-			our_empty += other.our_empty;
-			our_nonempty += other.our_nonempty;
-			our_nonempty_weighted += other.our_nonempty_weighted;
-		}
-
-		void add_their_counts(CountData other) {
-			their_empty += other.our_empty;
-			their_nonempty += other.our_nonempty;
-			their_nonempty_weighted += other.our_nonempty_weighted;
-		}
 	}
 
 	private static class Territory {

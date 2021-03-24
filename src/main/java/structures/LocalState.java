@@ -113,11 +113,14 @@ public class LocalState {
 		}
 	}
 
-	public final BoardPiece[] GetP1Pieces(){
-		return player1;
-	}
-	public final BoardPiece[] GetP2Pieces(){
-		return player2;
+	public final BoardPiece[] GetPlayerPieces(int player){
+		switch(player){
+			case 1:
+				return player1;
+			case 2:
+				return player2;
+		}
+		return null;
 	}
 
 	public int ReadTile(int index){
