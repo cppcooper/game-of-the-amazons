@@ -175,7 +175,7 @@ public class LocalState {
 		};
 		var pieces = player_num == 1 ? player1 : player2;
 		for (BoardPiece piece : pieces) {
-			if (has_a_move.apply(piece.pos.CalculateIndex())) {
+			if (has_a_move.apply(piece.CalculateIndex())) {
 				switch (player_num) {
 					case 1:
 						p1_has_moves = true;
@@ -225,8 +225,8 @@ public class LocalState {
 							return false;
 					}
 					for (BoardPiece p : arr) {
-						if (p.pos.CalculateIndex() == move.start) {
-							p.pos = new Position(move.next);
+						if (p.CalculateIndex() == move.start) {
+							p.UpdatePosition(move.next);
 						}
 					}
 				}
