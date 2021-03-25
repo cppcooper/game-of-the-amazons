@@ -139,6 +139,9 @@ public class MonteCarlo {
         TreeSet<GameTreeNode> sample = new TreeSet<>(new GameTreeNode.NodeComparator());
         List<Integer> selection = rng.GetDistinctSequenceShuffled(0, moves.size()-1, tree_policy.sample_size);
         for(int i = 0; i < tree_policy.sample_size; ++i){
+            if(Thread.currentThread().isInterrupted()){
+                return null;
+            }
             LocalState copy = new LocalState(board);
             Move move = moves.get(selection.get(i));
             if(copy.MakeMove(move,true, false)) {
@@ -149,7 +152,6 @@ public class MonteCarlo {
                     GameTree.put(copy, node);
                 }
                 sample.add(node);
-                boolean enqueue = true;
                 switch (tree_policy.type) {
                     case WINNER_LOSER:
                         Heuristics.SetWinner(copy, node);
@@ -173,6 +175,9 @@ public class MonteCarlo {
         moves = new ArrayList<>(tree_policy.max_return);
         int i = 0;
         for(GameTreeNode n : sample.descendingSet()){
+            if(Thread.currentThread().isInterrupted()){
+                return null;
+            }
             if(i++ < tree_policy.max_return) {
                 moves.add(n.move.get());
             } else {
