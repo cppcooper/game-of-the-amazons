@@ -5,7 +5,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Heuristic {
     public final AtomicDouble aggregate = new AtomicDouble();
-    public final AtomicDouble max_sub_heuristic = new AtomicDouble();
+    public final AtomicDouble maximum_sub = new AtomicDouble();
+    public final AtomicDouble minimum_sub = new AtomicDouble();
 
     public final AtomicInteger winner = new AtomicInteger();
     public final AtomicDouble mobility = new AtomicDouble();
