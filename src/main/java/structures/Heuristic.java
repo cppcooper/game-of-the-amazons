@@ -1,0 +1,19 @@
+package structures;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class Heuristic {
+    public final AtomicDouble aggregate = new AtomicDouble();
+    public final AtomicDouble max_sub_heuristic = new AtomicDouble();
+
+    public final AtomicInteger winner = new AtomicInteger();
+    public final AtomicDouble mobility = new AtomicDouble();
+    public final AtomicDouble territory = new AtomicDouble();
+
+    public final AtomicBoolean has_propagated = new AtomicBoolean(false);
+    public final AtomicBoolean has_winner = new AtomicBoolean(false);
+    public final AtomicBoolean has_mobility = new AtomicBoolean(false);
+    public final AtomicBoolean has_territory = new AtomicBoolean(false);
+
+}
