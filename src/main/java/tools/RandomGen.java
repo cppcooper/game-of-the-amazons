@@ -145,7 +145,7 @@ public class RandomGen extends Random {
         assert (p1+p2) <= 1;
         double x = nextDouble();
         if (x < p1) {
-            return MonteCarlo.TreePolicy.policy_type.FIRST_DEGREE_MOVES;
+            return MonteCarlo.TreePolicy.policy_type.MOBILITY;
         } else if (x < p1+p2) {
             return MonteCarlo.TreePolicy.policy_type.TERRITORY;
         } else {

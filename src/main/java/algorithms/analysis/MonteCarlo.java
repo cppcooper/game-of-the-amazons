@@ -110,8 +110,8 @@ public class MonteCarlo {
 
     public static class TreePolicy{
         public enum policy_type{
-            FIRST_DEGREE_MOVES,
-            COUNT_HEURISTIC,
+            MOBILITY,
+            WINNER_LOSER,
             TERRITORY,
             ALL_HEURISTICS,
             DO_NOTHING
@@ -151,16 +151,16 @@ public class MonteCarlo {
                 sample.add(node);
                 boolean enqueue = true;
                 switch (tree_policy.type) {
-                    case FIRST_DEGREE_MOVES:
-                        Heuristics.CalculateHeuristicFirstDegree(copy, node);
+                    case WINNER_LOSER:
+                        Heuristics.SetWinner(copy, node);
                         Heuristics.enqueue(new Pair<>(copy, node));
                         break;
-                    case COUNT_HEURISTIC:
-                        Heuristics.CalculateHeuristicCount(copy, node);
+                    case MOBILITY:
+                        Heuristics.SetMobility(copy, node);
                         Heuristics.enqueue(new Pair<>(copy, node));
                         break;
                     case TERRITORY:
-                        Heuristics.CalculateHeuristicTerritory(copy, node);
+                        Heuristics.SetTerritory(copy, node);
                         Heuristics.enqueue(new Pair<>(copy, node));
                         break;
                     case ALL_HEURISTICS:

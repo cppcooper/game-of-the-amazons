@@ -3,7 +3,6 @@ package algorithms.analysis;
 import org.junit.jupiter.api.Test;
 import structures.Debug;
 import structures.LocalState;
-import structures.Position;
 import tools.RandomGen;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -109,7 +108,7 @@ public class MiscTests {
         RandomGen rng = new RandomGen();
         for(int i = 0; i < trials; ++i){
             switch(rng.get_random_policy(90)){
-                case FIRST_DEGREE_MOVES:
+                case MOBILITY:
                     counts[0]++;
                     break;
                 case TERRITORY:
@@ -118,7 +117,7 @@ public class MiscTests {
                 case ALL_HEURISTICS:
                     counts[2]++;
                     break;
-                case COUNT_HEURISTIC:
+                case WINNER_LOSER:
                     counts[3]++;
                     break;
                 case DO_NOTHING:
