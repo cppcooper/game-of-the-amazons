@@ -27,9 +27,7 @@ public class GameTreeNode {
     private void add_parent(GameTreeNode parent){
         super_nodes.add(parent);
         if(heuristic.has_propagated.get()){
-            if(parent.heuristic.max_sub_heuristic.get() < heuristic.aggregate.get()){
-                parent.heuristic.max_sub_heuristic.set(heuristic.aggregate.get());
-            }
+            force_propagate();
         }
     }
 
@@ -53,11 +51,18 @@ public class GameTreeNode {
     public void propagate(){
         if(!heuristic.has_propagated.get()){
             heuristic.has_propagated.set(true);
-            for (int i = 0; i < super_nodes.size(); ++i) {
-                GameTreeNode parent = super_nodes.get(i);
-                if(parent.heuristic.max_sub_heuristic.get() < heuristic.aggregate.get()){
-                    parent.heuristic.max_sub_heuristic.set(heuristic.aggregate.get());
-                }
+            force_propagate();
+        }
+    }
+    private void force_propagate(){
+        double h = heuristic.aggregate.get();
+        for (int i = 0; i < super_nodes.size(); ++i) {
+            GameTreeNode parent = super_nodes.get(i);
+            if(parent.heuristic.maximum_sub.get() < h){
+                parent.heuristic.maximum_sub.set(h);
+            }
+            if(parent.heuristic.minimum_sub.get() > h){
+                parent.heuristic.minimum_sub.set(h);
             }
         }
     }
@@ -65,7 +70,7 @@ public class GameTreeNode {
     public static class NodeComparator implements Comparator<GameTreeNode> {
         @Override
         public int compare(GameTreeNode o1, GameTreeNode o2) {
-            return Double.compare(o1.heuristic.max_sub_heuristic.get(), o2.heuristic.max_sub_heuristic.get());
+            return Double.compare(o1.heuristic.maximum_sub.get(), o2.heuristic.maximum_sub.get());
         }
     }
 }
