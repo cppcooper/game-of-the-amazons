@@ -17,6 +17,7 @@ public class Heuristics {
 
 	public static void ProcessQueue() {
 		try {
+			Debug.PrintThreadID("ProcessQueue");
 			int i = 0;
 			while (!Thread.currentThread().isInterrupted()) {
 				var pair = queue.poll();
@@ -42,7 +43,7 @@ public class Heuristics {
 
 	public static void CalculateHeuristicsAll(LocalState board, GameTreeNode node) {
 		boolean changed = false;
-		Heuristic h = node.heuristic;
+		GameTreeNode.Heuristic h = node.heuristic;
 		if (!h.has_winner.get()) {
 			h.has_winner.set(true);
 			h.winner.set(Winner.CalculateHeuristic(board));
@@ -65,7 +66,7 @@ public class Heuristics {
 	}
 
 	public static void SetWinner(LocalState board, GameTreeNode node) {
-		Heuristic h = node.heuristic;
+		GameTreeNode.Heuristic h = node.heuristic;
 		if (!h.has_winner.get()) {
 			h.has_winner.set(true);
 			h.winner.set(Winner.CalculateHeuristic(board));
@@ -73,7 +74,7 @@ public class Heuristics {
 	}
 
 	public static void SetMobility(LocalState board, GameTreeNode node) {
-		Heuristic h = node.heuristic;
+		GameTreeNode.Heuristic h = node.heuristic;
 		if(!h.has_mobility.get()){
 			h.has_mobility.set(true);
 			h.mobility.set(Mobility.CalculateHeuristic(board));
@@ -81,7 +82,7 @@ public class Heuristics {
 	}
 
 	public static void SetTerritory(LocalState board, GameTreeNode node) {
-		Heuristic h = node.heuristic;
+		GameTreeNode.Heuristic h = node.heuristic;
 		if (!h.has_territory.get()) {
 			h.has_territory.set(true);
 			h.territory.set(Territory.CalculateHeuristic(board));
@@ -176,7 +177,7 @@ public class Heuristics {
 				positions[i] = index;
 			}
 			int moves = 0;
-			int[][] first_degree_positions = MoveCompiler.GetOpenPositions(board, positions);
+			int[][] first_degree_positions = MoveCompiler.GetOpenPositions(board, positions,false);
 			for (int[] scan_direction : first_degree_positions) {
 				if (scan_direction != null) {
 					for (int tile_index : scan_direction) {
@@ -191,7 +192,7 @@ public class Heuristics {
 		}
 
 		private static int count_first_degree_moves(LocalState board, BoardPiece[] pieces) {
-			return MoveCompiler.GetMoveList(board, pieces,true).size();
+			return MoveCompiler.GetMoveList(board, pieces,true, false).size();
 		}
 	}
 
@@ -210,6 +211,8 @@ public class Heuristics {
 			var counts = calculate_territories(board);
 			int total = counts.ours + counts.theirs;
 			double heuristic;
+			// todo: figure it out part 2?
+			//  Maybe this is the part that needs to be flipped?
 			if(counts.ours > counts.theirs){
 				heuristic = 1-((double) counts.theirs / total);
 			} else {
@@ -224,13 +227,16 @@ public class Heuristics {
 			int[] our_degree_map = null;
 			int[] their_degree_map = null;
 			switch(board.GetPlayerTurn()){
+				// todo: figure it out
+				//  Not sure why this isn't flipped.. I think it should be flipped.. but the game is way smarter this way
+				//  very confused why this happens.
 				case 1:
-					our_degree_map = calculate_degree_map(board,2);
-					their_degree_map = calculate_degree_map(board,1);
-					break;
-				case 2:
 					our_degree_map = calculate_degree_map(board,1);
 					their_degree_map = calculate_degree_map(board,2);
+					break;
+				case 2:
+					our_degree_map = calculate_degree_map(board,2);
+					their_degree_map = calculate_degree_map(board,1);
 					break;
 				default: // this will never happen
 					our_degree_map = new int[121];
@@ -255,7 +261,7 @@ public class Heuristics {
 		}
 
 		private static void find_lowest_degrees(LocalState board, int[] starting_positions, int[] degree_mapping, int degree) {
-			int[][] new_positions = MoveCompiler.GetOpenPositions(board, starting_positions); //[starting index][index of open positions]
+			int[][] new_positions = MoveCompiler.GetOpenPositions(board, starting_positions, false); //[starting index][index of open positions]
 			for (int[] position_list : new_positions) {
 				if (position_list != null) {
 					for (int index : position_list) {
@@ -280,6 +286,9 @@ public class Heuristics {
 			int[] pruned_positions = new int[positions.length];
 			int i = 0;
 			for (int index : positions) {
+				if(index < 0){
+					break;
+				}
 				if (degree_mapping[index] > degree) {
 					pruned_positions[i++] = index;
 				}

@@ -95,6 +95,7 @@ public class AICore {
     }
 
     private static void ExhaustiveMonteCarlo() {
+        Debug.PrintThreadID("ExhaustiveMC");
         LocalState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && !copy.IsGameOver() && !terminate_threads.get()) {
             if(MonteCarlo.RunSimulation(copy, new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE, MonteCarlo.SimPolicy.policy_type.BREADTH_FIRST))){
@@ -106,6 +107,7 @@ public class AICore {
     }
 
     private static void NonExhaustiveMonteCarlo(){
+        Debug.PrintThreadID("NonExhaustiveMC");
         final int initial_branches = 3;
         final int initial_depth = 3;
         final float binc = 0.333f;
@@ -201,7 +203,7 @@ public class AICore {
                         Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: node %d with a heuristic of %.3f\n", edge, h));
 
                         if (heuristic > best) {
-                            Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", h, sub_node.move.get()));
+                            Debug.RunLevel2DebugCode(()->System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", h, sub_node.move.get()));
                             best = heuristic;
                             index = i;
                         }
