@@ -1,10 +1,7 @@
 package algorithms.analysis;
 
 import org.apache.commons.math3.util.Pair;
-import structures.BoardPiece;
-import structures.GameTreeNode;
-import structures.LocalState;
-import structures.Position;
+import structures.*;
 import tools.ASingleMaths;
 import ubc.cosc322.AICore;
 
@@ -44,58 +41,69 @@ public class Heuristics {
 	}
 
 	public static void CalculateHeuristicsAll(LocalState board, GameTreeNode node) {
-		final int total_heuristics = 2;
-		int N = 0;
-		double original = node.get_heuristic();
-		;
-		double heuristic = 0;
-		if (!node.has_first_degree.get()) {
-			N++;
-			heuristic += Heuristics.Mobility.CalculateHeuristic(board);
-			node.has_first_degree.set(true);
+		boolean changed = false;
+		Heuristic h = node.heuristic;
+		if (!h.has_winner.get()) {
+			h.has_winner.set(true);
+			h.winner.set(Winner.CalculateHeuristic(board));
+			changed = true;
 		}
-		if (!node.has_territory.get()) {
-			N++;
-			heuristic += Heuristics.Territory.CalculateHeuristic(board);
-			node.has_territory.set(true);
-		}/**/
-		// if N == 0, then we do nothing cause it's already done
-		if (N > 0) {
-			node.set_heuristic(original + heuristic, total_heuristics);
+		if(!h.has_mobility.get()){
+			h.has_mobility.set(true);
+			h.mobility.set(Mobility.CalculateHeuristic(board));
+			changed = true;
 		}
-	}
-
-	public static void CalculateHeuristicFirstDegree(LocalState board, GameTreeNode node) {
-		if (!node.has_first_degree.get()) {
-			node.add_heuristic(Heuristics.Mobility.CalculateHeuristic(board));
-			node.has_first_degree.set(true);
+		if (!h.has_territory.get()) {
+			h.has_territory.set(true);
+			h.territory.set(Territory.CalculateHeuristic(board));
+			changed = true;
+		}
+		if(changed){
+			h.aggregate.set(h.winner.get() * (h.mobility.get() + h.territory.get()));
+			node.propagate();
 		}
 	}
 
-	public static void CalculateHeuristicTerritory(LocalState board, GameTreeNode node) {
-		// this is probably the most valuable (single) heuristic for pruning moves. It might also be the most expensive
-		if (!node.has_territory.get()) {
-			node.add_heuristic(Heuristics.Territory.CalculateHeuristic(board));
-			node.has_territory.set(true);
-		}/**/
+	public static void SetWinner(LocalState board, GameTreeNode node) {
+		Heuristic h = node.heuristic;
+		if (!h.has_winner.get()) {
+			h.has_winner.set(true);
+			h.winner.set(Winner.CalculateHeuristic(board));
+		}
+	}
+
+	public static void SetMobility(LocalState board, GameTreeNode node) {
+		Heuristic h = node.heuristic;
+		if(!h.has_mobility.get()){
+			h.has_mobility.set(true);
+			h.mobility.set(Mobility.CalculateHeuristic(board));
+		}
+	}
+
+	public static void SetTerritory(LocalState board, GameTreeNode node) {
+		Heuristic h = node.heuristic;
+		if (!h.has_territory.get()) {
+			h.has_territory.set(true);
+			h.territory.set(Territory.CalculateHeuristic(board));
+		}
 	}
 
 	////////////////////
 	/// Nuts and Bolts
 
-	public static class Winning {
+	public static class Winner {
 		private static class CountingAlgorithmData {
 			public int[] visited = new int[121];
 			public Queue<Integer> blankspace = new LinkedList<>();
 		}
 
 		// todo (refactor heuristics): use to nullify losing moves and double winning moves
-		public static double CalculateHeuristic(LocalState board){
+		public static int CalculateHeuristic(LocalState board){
 			int winner = calculate_winner(board);
 			if(winner == 0){
-				return 1.0;
+				return 1;
 			}
-			return winner != board.GetPlayerTurn() ? 2.0 : 0.0;
+			return winner != board.GetPlayerTurn() ? 2 : -1;
 		}
 
 		private static int calculate_winner(LocalState board) {
