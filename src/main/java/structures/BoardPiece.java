@@ -18,4 +18,11 @@ public class BoardPiece extends Position {
         super(x, y);
         this.player = player;
     }
+    public static int[] GetIndices(BoardPiece[] pieces){
+        int[] indices = new int[pieces.length];
+        for (int i = 0; i < indices.length; i++) {
+            indices[i] = pieces[i].CalculateIndex();
+        }
+        return indices;
+    }
 }

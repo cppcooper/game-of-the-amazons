@@ -5,12 +5,10 @@ import structures.BoardPiece;
 import structures.GameTreeNode;
 import structures.LocalState;
 import structures.Position;
-import tools.ASingleMaths;
 import ubc.cosc322.AICore;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.function.BiFunction;
 
 public class Heuristics {
 	private static final ConcurrentLinkedDeque<Pair<LocalState, GameTreeNode>> queue = new ConcurrentLinkedDeque<>();
@@ -52,12 +50,12 @@ public class Heuristics {
 		double heuristic = 0;
 		if (!node.has_first_degree.get()) {
 			N++;
-			heuristic += Heuristics.GetFirstDegreeMoveHeuristic(board);
+			heuristic += Heuristics.Mobility.CalculateHeuristic(board);
 			node.has_first_degree.set(true);
 		}
 		if (!node.has_territory.get()) {
 			N++;
-			heuristic += Heuristics.GetTerritoryHeuristic(board);
+			heuristic += Heuristics.Territory.CalculateHeuristic(board);
 			node.has_territory.set(true);
 		}/**/
 		// if N == 0, then we do nothing cause it's already done
@@ -66,233 +64,217 @@ public class Heuristics {
 		}
 	}
 
-	// todo (refactor heuristics): implement with data from territory heuristic
-	// todo (refactor heuristics): provide two variants, one for reduction and one for mobility - then use reduction for pruning moves
 	public static void CalculateHeuristicFirstDegree(LocalState board, GameTreeNode node) {
 		if (!node.has_first_degree.get()) {
-			node.add_heuristic(Heuristics.GetFirstDegreeMoveHeuristic(board));
+			node.add_heuristic(Heuristics.Mobility.CalculateHeuristic(board));
 			node.has_first_degree.set(true);
 		}
 	}
 
-	// todo (refactor heuristics): revise to calculate winner
-	// todo (refactor heuristics): use to nullify losing moves and double winning moves
-	public static void CalculateHeuristicCount(LocalState board, GameTreeNode node) {
-		if (!node.has_count.get()) {
-			node.add_heuristic(Heuristics.GetCountHeuristic(board));
-			node.has_count.set(true);
-		}
-	}
-
-	// todo (refactor heuristics): revise territory to optimize the difference in territories delta = ours - theirs
 	public static void CalculateHeuristicTerritory(LocalState board, GameTreeNode node) {
 		// this is probably the most valuable (single) heuristic for pruning moves. It might also be the most expensive
 		if (!node.has_territory.get()) {
-			node.add_heuristic(Heuristics.GetTerritoryHeuristic(board));
+			node.add_heuristic(Heuristics.Territory.CalculateHeuristic(board));
 			node.has_territory.set(true);
 		}/**/
 	}
 
-	public static double GetFirstDegreeMoveHeuristic(LocalState board) {
-		int value = GetFirstDegreeMoveCount(board);
-		// the less moves the other player has the higher the returned heuristic
-		return (1 - ((double) value / (4 * 35)));
-	}
+	////////////////////
+	/// Nuts and Bolts
 
-	public static int CalculateWinner(LocalState board) {
-		int p1 = CountAccessiblePositions(board,1);
-		int p2 = CountAccessiblePositions(board,2);
-		return p1 == p2 ? 0 : (p1 > p2 ? 1 : 2);
-	}
-
-	public static double GetTerritoryHeuristic(LocalState board) {
-		var counts = GetTerritoryCount(board);
-		int total = counts.ours + counts.theirs;
-		double heuristic = 3 * ((double) counts.ours / total);
-		heuristic = Math.pow(heuristic, 2);
-		heuristic /= 9;
-		return heuristic;
-	}
-
-	////////////////////////////
-	/// Nuts and Bolts methods
-
-	public static int GetFirstDegreeMoveCount(LocalState board) {
-		BoardPiece[] pieces = board.GetTurnPieces(); // we'll calculate heuristics for the player who's turn it is
-		int[] positions = new int[pieces.length];
-		for (int i = 0; i < 4; ++i) {
-			int index = pieces[i].CalculateIndex();
-			positions[i] = index;
+	public static class Winning {
+		private static class CountingAlgorithmData {
+			public int[] visited = new int[121];
+			public Queue<Integer> blankspace = new LinkedList<>();
 		}
-		int first_degree = 0;
-		int[][] first_degree_territory = MoveCompiler.GetOpenPositions(board, positions);
-		for (int[] scan_direction : first_degree_territory) {
-			if (scan_direction != null) {
-				for (int tile_index : scan_direction) {
-					if (tile_index < 0) {
-						break;
+
+		// todo (refactor heuristics): use to nullify losing moves and double winning moves
+		public static double CalculateHeuristic(LocalState board){
+			int winner = calculate_winner(board);
+			if(winner == 0){
+				return 1.0;
+			}
+			return winner != board.GetPlayerTurn() ? 2.0 : 0.0;
+		}
+
+		private static int calculate_winner(LocalState board) {
+			int p1 = count_accessible_positions(board,1);
+			int p2 = count_accessible_positions(board,2);
+			return p1 == p2 ? 0 : (p1 > p2 ? 1 : 2);
+		}
+
+		private static int count_accessible_positions(LocalState board, int player) {
+			int count = 0;
+			CountingAlgorithmData data = new CountingAlgorithmData();
+			for(BoardPiece p : Objects.requireNonNull(board.GetPlayerPieces(player))) {
+				enqueue_neighbours(data, p.CalculateIndex(), board);
+			}
+
+			while (!data.blankspace.isEmpty()) {
+				int value = data.blankspace.poll();
+				count++;
+				enqueue_neighbours(data, value, board);
+			}
+
+			return count;
+		}
+
+		private static void enqueue_neighbours(CountingAlgorithmData data, int index, LocalState board) {
+			Position[] neighbours = new Position[8];
+			neighbours[0] = new Position(index - 1);
+			neighbours[1] = new Position(index + 1);
+			neighbours[2] = new Position(index - 12);
+			neighbours[3] = new Position(index - 11);
+			neighbours[4] = new Position(index - 10);
+			neighbours[5] = new Position(index + 10);
+			neighbours[6] = new Position(index + 11);
+			neighbours[7] = new Position(index + 12);
+
+			for (Position p : neighbours) {
+				if (p.IsValid()) {
+					int neighbour = p.CalculateIndex();
+					if (data.visited[neighbour] > 0) {
+						continue;
 					}
-					first_degree++;
-				}
-			}
-		}
-		return first_degree;
-	}
-
-	public static int CountAccessiblePositions(LocalState board, int player) {
-		int count = 0;
-		CountingAlgorithmData data = new CountingAlgorithmData();
-		for(BoardPiece p : Objects.requireNonNull(board.GetPlayerPieces(player))) {
-			QueueNeighbours(data, p.CalculateIndex(), board);
-		}
-
-		while (!data.blankspace.isEmpty()) {
-			int value = data.blankspace.poll();
-			count++;
-			QueueNeighbours(data, value, board);
-		}
-
-		return count;
-	}
-
-	private static void QueueNeighbours(CountingAlgorithmData data, int index, LocalState board) {
-		Position[] neighbours = new Position[8];
-		neighbours[0] = new Position(index - 1);
-		neighbours[1] = new Position(index + 1);
-		neighbours[2] = new Position(index - 12);
-		neighbours[3] = new Position(index - 11);
-		neighbours[4] = new Position(index - 10);
-		neighbours[5] = new Position(index + 10);
-		neighbours[6] = new Position(index + 11);
-		neighbours[7] = new Position(index + 12);
-
-		for (Position p : neighbours) {
-			if (p.IsValid()) {
-				int neighbour = p.CalculateIndex();
-				if (data.visited[neighbour] > 0) {
-					continue;
-				}
-				data.visited[neighbour] = neighbour;
-				if (board.ReadTile(neighbour) == 0) {
-					data.blankspace.offer(neighbour);
-				}
-			}
-		}
-	}
-
-	public static TerritoryCounts GetTerritoryCount(LocalState board) {
-		BoardPiece[] our_pieces = board.GetPrevTurnPieces();
-		BoardPiece[] their_pieces = board.GetTurnPieces();
-		int[] our_positions = new int[4];
-		int[] their_positions = new int[4];
-		int[] our_degree_map = new int[121];
-		int[] their_degree_map = new int[121];
-
-		for (int i = 0; i < 4; i++) {
-			our_positions[i] = our_pieces[i].CalculateIndex();
-			their_positions[i] = their_pieces[i].CalculateIndex();            //element # is the index
-		}
-
-		GetTerritoryCount(board, our_positions, our_degree_map, 1, new TreeSet<Territory>(new Territory.TerritoryComp()));
-		GetTerritoryCount(board, their_positions, their_degree_map, 1, new TreeSet<Territory>(new Territory.TerritoryComp()));
-
-		int our_territory_count = 0;
-		int their_territory_count = 0;
-
-		for (int i = 0; i < our_degree_map.length; i++) {
-			if (our_degree_map[i] < their_degree_map[i]) {
-				our_territory_count++;
-			} else if (our_degree_map[i] > their_degree_map[i]) {
-				their_territory_count++;                               /* if we have a lower cost to move set to us, else set to 0 */
-			}
-		}
-
-		return new TerritoryCounts(our_territory_count, their_territory_count);
-	}
-
-	private static void GetTerritoryCount(LocalState board, int[] starting_positions, int[] degree_mapping, int degree, TreeSet<Territory> visited) {
-		int[][] new_positions = MoveCompiler.GetOpenPositions(board, starting_positions); //[starting index][index of open positions]
-
-		for (int[] position_list : new_positions) {
-			if (position_list != null) {
-				for (int j = 0; j < position_list.length; j++) {
-					if (position_list[j] == -1) {
-						break;
-					}
-					if (degree_mapping[position_list[j]] == 0 || degree_mapping[position_list[j]] > degree) {
-						degree_mapping[position_list[j]] = degree;
+					data.visited[neighbour] = neighbour;
+					if (board.ReadTile(neighbour) == 0) {
+						data.blankspace.offer(neighbour);
 					}
 				}
 			}
 		}
+	}
 
-		for (int[] position_list : new_positions) {
-			if (position_list != null) {
-				GetTerritoryCount(board, prune_positions(visited, position_list, degree), degree_mapping, degree + 1, visited);
+	public static class Mobility {
+		private static final int max_moves = 4*35*35;
+
+		public static double CalculateHeuristic(LocalState board){
+			return (CalculateMobilityHeuristic(board) + CalculateReductionHeuristic(board)) / 2.0;
+		}
+
+		public static double CalculateMobilityHeuristic(LocalState board){
+			return (double)count_first_degree_moves(board, board.GetPrevTurnPieces()) / max_moves;
+		}
+
+		public static double CalculateReductionHeuristic(LocalState board){
+			return 1 - ((double)count_first_degree_moves(board, board.GetTurnPieces()) / max_moves);
+		}
+
+		private static int count_first_degree_positions(LocalState board, BoardPiece[] pieces) {
+			int[] positions = new int[pieces.length];
+			for (int i = 0; i < 4; ++i) {
+				int index = pieces[i].CalculateIndex();
+				positions[i] = index;
 			}
-		}
-	}
-
-	private static int[] prune_positions(TreeSet<Territory> visited, int[] positions, int degree) {
-		int[] pruned_positions = new int[positions.length];
-		int i = 0;
-		for (int index : positions) {
-			Territory t = new Territory(index, degree);
-			var best = visited.lower(t);
-			if (best == null || best.index != index) {
-				pruned_positions[i++] = index;
-				visited.add(t);
-			}
-		}
-		if (i < pruned_positions.length) {
-			pruned_positions[i] = -1;
-		}
-		return pruned_positions;
-	}
-
-	private static class CountingAlgorithmData {
-		public int[] visited = new int[121];
-		public Queue<Integer> blankspace = new LinkedList<>();
-	}
-
-	private static class Territory {
-		int index = 0;
-		int degree = 0;
-
-		Territory(int index, int degree) {
-			this.index = index;
-			this.degree = degree;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			Territory territory = (Territory) o;
-			return index == territory.index && degree == territory.degree;
-		}
-
-		public static class TerritoryComp implements Comparator<Territory> {
-
-			@Override
-			public int compare(Territory o1, Territory o2) {
-				int index = Integer.compare(o1.index, o2.index);
-				int degree = Integer.compare(o1.degree, o2.degree);
-				if (index == 0) {
-					return degree == 0 ? index : degree;
+			int moves = 0;
+			int[][] first_degree_positions = MoveCompiler.GetOpenPositions(board, positions);
+			for (int[] scan_direction : first_degree_positions) {
+				if (scan_direction != null) {
+					for (int tile_index : scan_direction) {
+						if (tile_index < 0) {
+							break;
+						}
+						moves++;
+					}
 				}
-				return index;
 			}
+			return moves;
+		}
+
+		private static int count_first_degree_moves(LocalState board, BoardPiece[] pieces) {
+			return MoveCompiler.GetMoveList(board, pieces,true).size();
 		}
 	}
 
-	public static class TerritoryCounts {
-		int ours = 0;
-		int theirs = 0;
+	public static class Territory {
+		private static class TerritoryCounts {
+			int ours = 0;
+			int theirs = 0;
 
-		TerritoryCounts(int ours, int theirs) {
-			this.ours = ours;
-			this.theirs = theirs;
+			TerritoryCounts(int ours, int theirs) {
+				this.ours = ours;
+				this.theirs = theirs;
+			}
+		}
+
+		// todo (refactor heuristics): revise territory to optimize the difference in territories delta = ours - theirs
+		public static double CalculateHeuristic(LocalState board) {
+			var counts = calculate_territories(board);
+			int total = counts.ours + counts.theirs;
+			double heuristic = 3 * ((double) counts.ours / total);
+			heuristic = Math.pow(heuristic, 2);
+			heuristic /= 9;
+			return heuristic;
+		}
+
+		private static TerritoryCounts calculate_territories(LocalState board) {
+			int[] our_degree_map = null;
+			int[] their_degree_map = null;
+			switch(board.GetPlayerTurn()){
+				case 1:
+					our_degree_map = calculate_degree_map(board,2);
+					their_degree_map = calculate_degree_map(board,1);
+					break;
+				case 2:
+					our_degree_map = calculate_degree_map(board,1);
+					their_degree_map = calculate_degree_map(board,2);
+					break;
+				default: // this will never happen
+					our_degree_map = new int[121];
+					their_degree_map = new int[121];
+			}
+			int our_territory_count = 0;
+			int their_territory_count = 0;
+			for (int i = 0; i < our_degree_map.length; i++) {
+				if (our_degree_map[i] < their_degree_map[i]) {
+					our_territory_count++;
+				} else if (our_degree_map[i] > their_degree_map[i]) {
+					their_territory_count++;
+				}
+			}
+			return new TerritoryCounts(our_territory_count, their_territory_count);
+		}
+
+		private static int[] calculate_degree_map(LocalState board, int player) {
+			int[] degree_map = new int[121];
+			find_lowest_degrees(board, BoardPiece.GetIndices(Objects.requireNonNull(board.GetPlayerPieces(player))), degree_map, 1);
+			return degree_map;
+		}
+
+		private static void find_lowest_degrees(LocalState board, int[] starting_positions, int[] degree_mapping, int degree) {
+			int[][] new_positions = MoveCompiler.GetOpenPositions(board, starting_positions); //[starting index][index of open positions]
+			for (int[] position_list : new_positions) {
+				if (position_list != null) {
+					for (int index : position_list) {
+						if (index == -1) {
+							break;
+						}
+						if (degree_mapping[index] == 0 || degree_mapping[index] > degree) {
+							degree_mapping[index] = degree;
+						}
+					}
+				}
+			}
+
+			for (int[] position_list : new_positions) {
+				if (position_list != null) {
+					find_lowest_degrees(board, prune_positions(degree_mapping, position_list, degree), degree_mapping, degree + 1);
+				}
+			}
+		}
+
+		private static int[] prune_positions(int[] degree_mapping, int[] positions, int degree) {
+			int[] pruned_positions = new int[positions.length];
+			int i = 0;
+			for (int index : positions) {
+				if (degree_mapping[index] > degree) {
+					pruned_positions[i++] = index;
+				}
+			}
+			if (i < pruned_positions.length) {
+				pruned_positions[i] = -1;
+			}
+			return pruned_positions;
 		}
 	}
 }

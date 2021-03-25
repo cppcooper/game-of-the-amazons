@@ -113,16 +113,6 @@ public class LocalState {
 		}
 	}
 
-	public final BoardPiece[] GetPlayerPieces(int player){
-		switch(player){
-			case 1:
-				return player1;
-			case 2:
-				return player2;
-		}
-		return null;
-	}
-
 	public int ReadTile(int index){
 		return board.get(index);
 	}
@@ -277,6 +267,16 @@ public class LocalState {
 			case 2:
 				return player1;
 			case 1:
+				return player2;
+		}
+		return null;
+	}
+
+	public final BoardPiece[] GetPlayerPieces(int player){
+		switch(player){
+			case 1:
+				return player1;
+			case 2:
 				return player2;
 		}
 		return null;
