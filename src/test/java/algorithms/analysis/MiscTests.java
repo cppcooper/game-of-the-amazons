@@ -8,10 +8,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class MiscTests {
     @Test
-    void find_first_degree_range() {
+    void find_all_possible_moves() {
         LocalState board = new LocalState();
         int[] positions = Debug.GetAllPositions();
-        int[][] first_degree_territory = MoveCompiler.GetOpenPositions(board,positions);
+        var moves = MoveCompiler.GetMoveList(board,positions,true);
+        System.out.printf("possible moves (without pieces): %d\n",moves.size());
+    }
+
+    @Test
+    void find_first_degree_positions() {
+        LocalState board = new LocalState();
+        int[] positions = Debug.GetAllPositions();
+        int[][] first_degree_territory = MoveCompiler.GetOpenPositions(board,positions,false);
         int max = 0;
         int min = Integer.MAX_VALUE;
         for(int i = 0; i < first_degree_territory.length; ++i) {
@@ -33,33 +41,14 @@ public class MiscTests {
     }
 
     @Test
-    void find_max_first_degree_heuristic(){
+    void find_minmax_mobility(){
         final RandomGen rng = new RandomGen();
         final int trials = 1000000;
         double max = Double.NEGATIVE_INFINITY;
         double min = Double.POSITIVE_INFINITY;
         for(int i = 0; i < trials; ++i){
             LocalState board = rng.GetRandomBoard();
-            double heuristic = Heuristics.GetFirstDegreeMoveHeuristic(board);
-            if(heuristic > max){
-                max = heuristic;
-            }
-            if(heuristic < min){
-                min = heuristic;
-            }
-        }
-        System.out.printf("min: %.3f\nmax: %.3f\n",min,max);
-    }
-
-    @Test
-    void find_max_count_heuristic(){
-        final RandomGen rng = new RandomGen();
-        final int trials = 100000;
-        double max = Double.NEGATIVE_INFINITY;
-        double min = Double.POSITIVE_INFINITY;
-        for(int i = 0; i < trials; ++i){
-            LocalState board = rng.GetRandomBoard(0.9);
-            double heuristic = Heuristics.GetCountHeuristic(board);
+            double heuristic = Heuristics.Mobility.CalculateHeuristic(board);
             if(heuristic > max){
                 max = heuristic;
             }
@@ -78,7 +67,7 @@ public class MiscTests {
         double min = Double.POSITIVE_INFINITY;
         for(int i = 0; i < trials; ++i){
             LocalState board = new LocalState(rng.GetRandomState(),true,true);/*new int[121]);/**/
-            double heuristic = Heuristics.GetTerritoryHeuristic(board);
+            double heuristic = Heuristics.Territory.CalculateHeuristic(board);
             boolean new_value = false;
             if(heuristic > max){
                 new_value = true;
