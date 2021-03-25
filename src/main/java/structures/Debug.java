@@ -7,13 +7,16 @@ public class Debug {
     public static AtomicBoolean NoIndexFound = new AtomicBoolean(false);
     public static AtomicBoolean NoParentNodeFound = new AtomicBoolean(false);
     private static boolean debugging_level1 = false;
-    private static boolean debugging_level2 = false;
+    private static boolean debugging_level2 = true;
     private static boolean debugging_level3 = false;
 
     public static void DebugBreakPoint(){
         if(ZeroEdgesDetected.get() || NoIndexFound.get() || NoParentNodeFound.get()){
             System.out.println("debug breakpoint reached");
         }
+    }
+    public static void PrintThreadID(String method_name){
+        System.out.printf("Thread: %s - %s\n", Thread.currentThread().getName(),method_name);
     }
     public static void RunLevel1DebugCode(Runnable fn){
         if(debugging_level1){

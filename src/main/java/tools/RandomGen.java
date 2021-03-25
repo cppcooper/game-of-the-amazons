@@ -137,24 +137,19 @@ public class RandomGen extends Random {
         return pieces;
     }
 
-    public MonteCarlo.TreePolicy.policy_type get_random_policy(){
-        // todo (debug): tune this function
-        double p1 = 0.35;
-        double p2 = 0.45;
-        double p3 = 0.15;
-        double p4 = 0.04;
-        assert (p1+p2+p3+p4) <= 1;
+    public MonteCarlo.TreePolicy.policy_type get_random_policy(int move_num){
+        // todo (tuning): improve ability to aid in pruning moves
+        double progression = move_num / 100.0;
+        double p1 = 0.75 * (1 - progression);
+        double p2 = 0.9 * (1 - p1);
+        assert (p1+p2) <= 1;
         double x = nextDouble();
-        if (x < p1) { // p = 0.35 ?
-            return MonteCarlo.TreePolicy.policy_type.FIRST_DEGREE_MOVES;
-        } else if (x < p1+p2) { // p = 0.25 ?
-            return MonteCarlo.TreePolicy.policy_type.COUNT_HEURISTIC;
-        } else if (x < p1+p2+p3) { // p = 0.125 ?
+        if (x < p1) {
+            return MonteCarlo.TreePolicy.policy_type.MOBILITY;
+        } else if (x < p1+p2) {
             return MonteCarlo.TreePolicy.policy_type.TERRITORY;
-        } else if (x < p1+p2+p3+p4){ // p = 0.0625 ?
+        } else {
             return MonteCarlo.TreePolicy.policy_type.ALL_HEURISTICS;
-        } else { // p = 0.0625 ?
-            return MonteCarlo.TreePolicy.policy_type.DO_NOTHING;
-        }/**/
-    }
+        }
+    }/**/
 }

@@ -56,9 +56,11 @@ public class LocalState {
 	}
 	public LocalState(LocalState other){
 		board = new ArrayList<>(other.board);
-		for(int i = 0; i < player1.length; ++i){
-			player1[i] = new BoardPiece(other.player1[i]);
-			player2[i] = new BoardPiece(other.player2[i]);
+		if(other.player1 != null && other.player1[0] != null) {
+			for (int i = 0; i < player1.length; ++i) {
+				player1[i] = new BoardPiece(other.player1[i]);
+				player2[i] = new BoardPiece(other.player2[i]);
+			}
 		}
 		last_move = other.last_move;
 		p1_state_analyzed = other.p1_state_analyzed;
@@ -83,11 +85,16 @@ public class LocalState {
 	}
 
 	public void DebugPrint(){
-		for(int i = 0; i < board.size(); ++i){
-			System.out.printf("%2d ", board.get(i));
-			if((i+1) % 11 == 0){
-				System.out.println();
+		final char[] col = {' ','a','b','c','d','e','f','g','h','i','j'};
+		for(int y = 10; y >= 0; --y){
+			for(int x = 0; x < 11; ++x){
+				if(y != 0){
+					System.out.printf("%2d ", x != 0 ? board.get(Position.CalculateIndex(x,y)) : y);
+				} else {
+					System.out.printf(" %c ", col[x]);
+				}
 			}
+			System.out.println();
 		}
 	}
 
@@ -106,13 +113,6 @@ public class LocalState {
 			}
 			index++;
 		}
-	}
-
-	public final BoardPiece[] GetP1Pieces(){
-		return player1;
-	}
-	public final BoardPiece[] GetP2Pieces(){
-		return player2;
 	}
 
 	public int ReadTile(int index){
@@ -167,7 +167,7 @@ public class LocalState {
 		};
 		var pieces = player_num == 1 ? player1 : player2;
 		for (BoardPiece piece : pieces) {
-			if (has_a_move.apply(piece.pos.CalculateIndex())) {
+			if (has_a_move.apply(piece.CalculateIndex())) {
 				switch (player_num) {
 					case 1:
 						p1_has_moves = true;
@@ -217,8 +217,8 @@ public class LocalState {
 							return false;
 					}
 					for (BoardPiece p : arr) {
-						if (p.pos.CalculateIndex() == move.start) {
-							p.pos = new Position(move.next);
+						if (p.CalculateIndex() == move.start) {
+							p.UpdatePosition(move.next);
 						}
 					}
 				}
@@ -269,6 +269,16 @@ public class LocalState {
 			case 2:
 				return player1;
 			case 1:
+				return player2;
+		}
+		return null;
+	}
+
+	public final BoardPiece[] GetPlayerPieces(int player){
+		switch(player){
+			case 1:
+				return player1;
+			case 2:
 				return player2;
 		}
 		return null;
