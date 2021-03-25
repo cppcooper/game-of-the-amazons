@@ -56,9 +56,11 @@ public class LocalState {
 	}
 	public LocalState(LocalState other){
 		board = new ArrayList<>(other.board);
-		for(int i = 0; i < player1.length; ++i){
-			player1[i] = new BoardPiece(other.player1[i]);
-			player2[i] = new BoardPiece(other.player2[i]);
+		if(other.player1 != null && other.player1[0] != null) {
+			for (int i = 0; i < player1.length; ++i) {
+				player1[i] = new BoardPiece(other.player1[i]);
+				player2[i] = new BoardPiece(other.player2[i]);
+			}
 		}
 		last_move = other.last_move;
 		p1_state_analyzed = other.p1_state_analyzed;
