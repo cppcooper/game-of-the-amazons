@@ -1,6 +1,8 @@
 package structures;
 
 import java.util.Comparator;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class GameTreeNode {
@@ -16,12 +18,11 @@ public class GameTreeNode {
         }
     }
 
-    public int edges(){
-        return sub_nodes.size();
-    }
-
     public GameTreeNode get(int index){
         return sub_nodes.get(index);
+    }
+    public int edges(){
+        return sub_nodes.size();
     }
 
     private void add_parent(GameTreeNode parent){
@@ -30,7 +31,6 @@ public class GameTreeNode {
             force_propagate();
         }
     }
-
     public void adopt(GameTreeNode node){
         //we don't do anything with heuristics because they won't exist yet when this method is used (RunSim/PruneMoves)
         if(this != node) { //no idea why node == this (other than it happens in the MonteCarlo else)
@@ -40,7 +40,6 @@ public class GameTreeNode {
             }
         }
     }
-
     public void disown_children(){
         for(int i = 0; i < sub_nodes.size(); ++i){
             sub_nodes.get(i).super_nodes.clear(); // we're only going to be running this during memory cleanup
@@ -65,6 +64,22 @@ public class GameTreeNode {
                 parent.heuristic.minimum_sub.set(h);
             }
         }
+    }
+
+    public static class Heuristic {
+        public final AtomicDouble aggregate = new AtomicDouble();
+        public final AtomicDouble maximum_sub = new AtomicDouble();
+        public final AtomicDouble minimum_sub = new AtomicDouble();
+
+        public final AtomicInteger winner = new AtomicInteger();
+        public final AtomicDouble mobility = new AtomicDouble();
+        public final AtomicDouble territory = new AtomicDouble();
+
+        public final AtomicBoolean has_propagated = new AtomicBoolean(false);
+        public final AtomicBoolean has_winner = new AtomicBoolean(false);
+        public final AtomicBoolean has_mobility = new AtomicBoolean(false);
+        public final AtomicBoolean has_territory = new AtomicBoolean(false);
+
     }
 
     public static class NodeComparator implements Comparator<GameTreeNode> {
