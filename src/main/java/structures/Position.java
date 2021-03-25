@@ -18,13 +18,7 @@ public class Position {
         y = msg_pos.get(0);
     }
     public Position(int index){
-        if(index > 0 && index < 121) {
-            y = index / 11;
-            x = index - (y * 11);
-        } else {
-            x = -1;
-            y = -1;
-        }
+        UpdatePosition(index);
     }
     public boolean equals(Position other){
         if(x == other.x && y == other.y){
@@ -43,6 +37,15 @@ public class Position {
     }
     public int col(){
         return x;
+    }
+    public void UpdatePosition(int index){
+        if(index > 0 && index < 121) {
+            y = index / 11;
+            x = index - (y * 11);
+        } else {
+            x = -1;
+            y = -1;
+        }
     }
     public int CalculateIndex(){
         return CalculateIndex(x,y);

@@ -26,7 +26,6 @@ public class MonteCarlo {
         RandomGen rng = new RandomGen();
         GameTreeNode sim_root = GameTree.get(board);
         if(sim_root == null){
-            // This should only be the case if this is the beginning of the game. todo: ensure this holds true?
             sim_root = new GameTreeNode(new Move(),null);
             GameTree.put(board,sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
         }
@@ -48,10 +47,11 @@ public class MonteCarlo {
             }
             switch (policy.type) {
                 case BREADTH_FIRST:
+                    // todo (refactor search): convert exhaustive monte carlo into just a breadth first search
                     moves = PruneMoves(board, parent, moves, new TreePolicy(0, 0, TreePolicy.policy_type.DO_NOTHING));
                     break;
                 case MONTE_CARLO:
-                    // todo (debug): this is probably going to cause a problem.. we'll see
+                    // todo (tuning): do a better job selecting the sample size
                     int sample_size = moves.size() >> 1;
                     int branches2 = policy.branches << 1;
                     int bound = Math.max(branches2, sample_size - branches2);
@@ -110,8 +110,8 @@ public class MonteCarlo {
 
     public static class TreePolicy{
         public enum policy_type{
-            FIRST_DEGREE_MOVES,
-            COUNT_HEURISTIC,
+            MOBILITY,
+            WINNER_LOSER,
             TERRITORY,
             ALL_HEURISTICS,
             DO_NOTHING
@@ -139,29 +139,30 @@ public class MonteCarlo {
         TreeSet<GameTreeNode> sample = new TreeSet<>(new GameTreeNode.NodeComparator());
         List<Integer> selection = rng.GetDistinctSequenceShuffled(0, moves.size()-1, tree_policy.sample_size);
         for(int i = 0; i < tree_policy.sample_size; ++i){
+            if(Thread.currentThread().isInterrupted()){
+                return null;
+            }
             LocalState copy = new LocalState(board);
             Move move = moves.get(selection.get(i));
             if(copy.MakeMove(move,true, false)) {
                 GameTreeNode node = GameTree.get(copy);
                 if (node == null) {
-                    // todo (10): implement exploration consideration
                     node = new GameTreeNode(move, parent);
                     parent.adopt(node);
                     GameTree.put(copy, node);
                 }
                 sample.add(node);
-                boolean enqueue = true;
                 switch (tree_policy.type) {
-                    case FIRST_DEGREE_MOVES:
-                        Heuristics.CalculateHeuristicFirstDegree(copy, node);
+                    case WINNER_LOSER:
+                        Heuristics.SetWinner(copy, node);
                         Heuristics.enqueue(new Pair<>(copy, node));
                         break;
-                    case COUNT_HEURISTIC:
-                        Heuristics.CalculateHeuristicCount(copy, node);
+                    case MOBILITY:
+                        Heuristics.SetMobility(copy, node);
                         Heuristics.enqueue(new Pair<>(copy, node));
                         break;
                     case TERRITORY:
-                        Heuristics.CalculateHeuristicTerritory(copy, node);
+                        Heuristics.SetTerritory(copy, node);
                         Heuristics.enqueue(new Pair<>(copy, node));
                         break;
                     case ALL_HEURISTICS:
@@ -174,6 +175,9 @@ public class MonteCarlo {
         moves = new ArrayList<>(tree_policy.max_return);
         int i = 0;
         for(GameTreeNode n : sample.descendingSet()){
+            if(Thread.currentThread().isInterrupted()){
+                return null;
+            }
             if(i++ < tree_policy.max_return) {
                 moves.add(n.move.get());
             } else {

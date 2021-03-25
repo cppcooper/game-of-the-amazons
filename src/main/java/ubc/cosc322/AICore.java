@@ -95,6 +95,7 @@ public class AICore {
     }
 
     private static void ExhaustiveMonteCarlo() {
+        Debug.PrintThreadID("ExhaustiveMC");
         LocalState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && !copy.IsGameOver() && !terminate_threads.get()) {
             if(MonteCarlo.RunSimulation(copy, new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE, MonteCarlo.SimPolicy.policy_type.BREADTH_FIRST))){
@@ -106,6 +107,7 @@ public class AICore {
     }
 
     private static void NonExhaustiveMonteCarlo(){
+        Debug.PrintThreadID("NonExhaustiveMC");
         final int initial_branches = 3;
         final int initial_depth = 3;
         final float binc = 0.333f;
@@ -179,7 +181,6 @@ public class AICore {
     }
 
     private static Move GetBestMove() {
-        // todo (debug): verify GetBestMove implementation
         Move move = null;
         double best;
         int index;
@@ -195,18 +196,14 @@ public class AICore {
                     Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: found a node with %d edges, now to find the best one\n", current_node.edges()));
                     for (int i = 0; i < current_node.edges(); ++i) {
                         GameTreeNode sub_node = current_node.get(i);
-                        double heuristic = sub_node.aggregate_heuristic.get();
-                        if (Double.isNaN(heuristic) || Precision.equals(heuristic,0.0,0.00001)) {
-                            int N = sub_node.get_heuristic_count();
-                            if (N > 0) {
-                                heuristic = sub_node.get_heuristic() / sub_node.get_heuristic_count();
-                            }
-                        }
+                        double heuristic = sub_node.heuristic.aggregate.get();
+
                         final int edge = i;
                         final double h = heuristic;
                         Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: node %d with a heuristic of %.3f\n", edge, h));
+
                         if (heuristic > best) {
-                            Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", h, sub_node.move.get()));
+                            Debug.RunLevel2DebugCode(()->System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", h, sub_node.move.get()));
                             best = heuristic;
                             index = i;
                         }

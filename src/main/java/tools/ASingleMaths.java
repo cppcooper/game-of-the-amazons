@@ -9,4 +9,7 @@ public class ASingleMaths {
         double max = Math.max(v0,v1);
         return Math.min(max,Math.max(min,min + (alpha * (max-min))));
     }
+    public static double clamp(double v, double min, double max){
+        return Math.min(max,Math.max(min,v));
+    }
 }
