@@ -5,6 +5,7 @@ import structures.BoardPiece;
 import structures.GameTreeNode;
 import structures.LocalState;
 import structures.Position;
+import tools.ASingleMaths;
 import ubc.cosc322.AICore;
 
 import java.util.*;
@@ -197,14 +198,18 @@ public class Heuristics {
 			}
 		}
 
-		// todo (refactor heuristics): revise territory to optimize the difference in territories delta = ours - theirs
 		public static double CalculateHeuristic(LocalState board) {
 			var counts = calculate_territories(board);
 			int total = counts.ours + counts.theirs;
-			double heuristic = 3 * ((double) counts.ours / total);
-			heuristic = Math.pow(heuristic, 2);
-			heuristic /= 9;
-			return heuristic;
+			double heuristic;
+			if(counts.ours > counts.theirs){
+				heuristic = 1-((double) counts.theirs / total);
+			} else {
+				heuristic = ((double) counts.ours / total);
+			}
+			heuristic = Math.pow(4*heuristic, 2);
+			heuristic /= 16;
+			return ASingleMaths.clamp(heuristic,0,1);
 		}
 
 		private static TerritoryCounts calculate_territories(LocalState board) {
