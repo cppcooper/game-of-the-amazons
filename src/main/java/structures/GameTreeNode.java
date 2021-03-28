@@ -64,7 +64,7 @@ public class GameTreeNode {
         }
     }
     private void force_propagate(){
-        double h = heuristic.aggregate.get();
+        double h = heuristic.value.get();
         for (int i = 0; i < super_nodes.size(); ++i) {
             GameTreeNode parent = super_nodes.get(i);
             if(parent.heuristic.maximum_sub.get() < h){
@@ -78,6 +78,7 @@ public class GameTreeNode {
 
     public static class Heuristic {
         public final AtomicDouble aggregate = new AtomicDouble();
+        public final AtomicDouble value = new AtomicDouble();
         public final AtomicDouble maximum_sub = new AtomicDouble();
         public final AtomicDouble minimum_sub = new AtomicDouble();
 

@@ -39,7 +39,7 @@ public class BreadFirstSearch {
                         // LocalState is a new position
                         node = new GameTreeNode(m, parent, new_state);
                         parent.adopt(node);
-                        Heuristics.enqueue(new Pair<>(new_state, node));
+                        Heuristics.enqueue(node);
                         GameTree.put(node);
                     } else { //no idea why parent == node
                         // This LocalState + Node have already been seen once.

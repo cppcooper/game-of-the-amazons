@@ -1,6 +1,5 @@
 package ubc.cosc322;
 
-import algorithms.analysis.BreadFirstSearch;
 import algorithms.analysis.Heuristics;
 import algorithms.analysis.MonteCarlo;
 import structures.*;
@@ -196,7 +195,7 @@ public class AICore {
                     Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: found a node with %d edges, now to find the best one\n", current_node.edges()));
                     for (int i = 0; i < current_node.edges(); ++i) {
                         GameTreeNode sub_node = current_node.get(i);
-                        double heuristic = sub_node.heuristic.aggregate.get();
+                        double heuristic = sub_node.heuristic.value.get();
 
                         final int edge = i;
                         final double h = heuristic;

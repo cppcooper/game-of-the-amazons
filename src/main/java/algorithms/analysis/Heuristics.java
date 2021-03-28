@@ -1,6 +1,5 @@
 package algorithms.analysis;
 
-import org.apache.commons.math3.util.Pair;
 import structures.*;
 import tools.ASingleMaths;
 import ubc.cosc322.AICore;
@@ -9,9 +8,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class Heuristics {
-	private static final ConcurrentLinkedDeque<Pair<GameState, GameTreeNode>> queue = new ConcurrentLinkedDeque<>();
+	private static final ConcurrentLinkedDeque<GameTreeNode> queue = new ConcurrentLinkedDeque<>();
 
-	public static void enqueue(Pair<GameState, GameTreeNode> job) {
+	public static void enqueue(GameTreeNode job) {
 		queue.push(job);
 	}
 
@@ -20,11 +19,10 @@ public class Heuristics {
 			Debug.PrintThreadID("ProcessQueue");
 			int i = 0;
 			while (!Thread.currentThread().isInterrupted()) {
-				var pair = queue.poll();
-				if (pair != null) {
-					GameState board = pair.getFirst();
-					GameTreeNode node = pair.getSecond();
-					if (board == null || node == null || node.move.get() == null) {
+				GameTreeNode node = queue.poll();
+				if (node != null) {
+					GameState board = node.state_after_move.get();
+					if (board == null || node.move.get() == null) {
 						continue;
 					}
 					if (AICore.GetCurrentTurnNumber() > board.GetMoveNumber()) {
@@ -60,7 +58,7 @@ public class Heuristics {
 			changed = true;
 		}
 		if(changed){
-			h.aggregate.set(h.winner.get() * (h.mobility.get() + h.territory.get()));
+			h.value.set(h.winner.get() * (h.mobility.get() + h.territory.get()));
 			node.propagate();
 		}
 	}

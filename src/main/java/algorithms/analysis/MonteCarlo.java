@@ -88,7 +88,7 @@ public class MonteCarlo {
                         // LocalState is a new position
                         node = new GameTreeNode(m, parent, new_state);
                         parent.adopt(node);
-                        Heuristics.enqueue(new Pair<>(new_state, node));
+                        Heuristics.enqueue(node);
                         GameTree.put(node);
                     } else { //no idea why parent == node
                         // This LocalState + Node have already been seen once.
@@ -155,15 +155,15 @@ public class MonteCarlo {
                 switch (tree_policy.type) {
                     case WINNER_LOSER:
                         Heuristics.SetWinner(copy, node);
-                        Heuristics.enqueue(new Pair<>(copy, node));
+                        Heuristics.enqueue(node);
                         break;
                     case MOBILITY:
                         Heuristics.SetMobility(copy, node);
-                        Heuristics.enqueue(new Pair<>(copy, node));
+                        Heuristics.enqueue(node);
                         break;
                     case TERRITORY:
                         Heuristics.SetTerritory(copy, node);
-                        Heuristics.enqueue(new Pair<>(copy, node));
+                        Heuristics.enqueue(node);
                         break;
                     case ALL_HEURISTICS:
                         // all of the above combined
