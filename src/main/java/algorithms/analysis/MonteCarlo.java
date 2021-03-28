@@ -22,18 +22,18 @@ public class MonteCarlo {
         }
     }
 
-    public static boolean RunSimulation(LocalState board, SimPolicy sim_policy) {
+    public static boolean RunSimulation(GameState board, SimPolicy sim_policy) {
         RandomGen rng = new RandomGen();
         GameTreeNode sim_root = GameTree.get(board);
         if(sim_root == null){
-            sim_root = new GameTreeNode(new Move(),null);
-            GameTree.put(board,sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
+            sim_root = new GameTreeNode(new Move(),null, board);
+            GameTree.put(sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
         }
         RunSimulation(rng, board, sim_root, 1, sim_policy);
         return !Thread.interrupted(); //Assuming execution was interrupted then we need to clear that flag, and restart from the current LocalState
     }
 
-    private static void RunSimulation(RandomGen rng, LocalState board, GameTreeNode parent, int depth, SimPolicy policy) {
+    private static void RunSimulation(RandomGen rng, GameState board, GameTreeNode parent, int depth, SimPolicy policy) {
         /* Simulate X branches at Y depths
          * simulate X branches
          ** On each branch simulate X branches
@@ -66,7 +66,7 @@ public class MonteCarlo {
                 return;
             }
             List<Integer> rng_set = rng.GetDistinctSequenceShuffled(0, moves.size()-1, Math.min(policy.branches, moves.size()));
-            Queue<Pair<LocalState,GameTreeNode>> branch_jobs = new LinkedList<>();
+            Queue<Pair<GameState,GameTreeNode>> branch_jobs = new LinkedList<>();
             for (int b = 0; b < policy.branches && b < moves.size(); ++b) {
                 if (Thread.currentThread().isInterrupted()) {
                     break;
@@ -80,16 +80,16 @@ public class MonteCarlo {
                  * Perform simulation on this board state
                  * Update node according to simulations run under it
                  * */
-                LocalState new_state = new LocalState(board);
+                GameState new_state = new GameState(board);
                 Move m = moves.get(rng_set.get(b));
                 if(new_state.MakeMove(m, true, false)) {
                     GameTreeNode node = GameTree.get(new_state); // GameTreeNode might already exist for this state [original_state + move]
                     if (node == null) {
                         // LocalState is a new position
-                        node = new GameTreeNode(m, parent);
+                        node = new GameTreeNode(m, parent, new_state);
                         parent.adopt(node);
                         Heuristics.enqueue(new Pair<>(new_state, node));
-                        GameTree.put(new_state, node);
+                        GameTree.put(node);
                     } else { //no idea why parent == node
                         // This LocalState + Node have already been seen once.
                         // This might represent branches merging so..
@@ -126,7 +126,7 @@ public class MonteCarlo {
         }
     }
 
-    private static ArrayList<Move> PruneMoves(LocalState board, GameTreeNode parent, ArrayList<Move> moves, TreePolicy tree_policy){
+    private static ArrayList<Move> PruneMoves(GameState board, GameTreeNode parent, ArrayList<Move> moves, TreePolicy tree_policy){
         if(moves == null){
             return null;
         }
@@ -142,14 +142,14 @@ public class MonteCarlo {
             if(Thread.currentThread().isInterrupted()){
                 return null;
             }
-            LocalState copy = new LocalState(board);
+            GameState copy = new GameState(board);
             Move move = moves.get(selection.get(i));
             if(copy.MakeMove(move,true, false)) {
                 GameTreeNode node = GameTree.get(copy);
                 if (node == null) {
-                    node = new GameTreeNode(move, parent);
+                    node = new GameTreeNode(move, parent, copy);
                     parent.adopt(node);
-                    GameTree.put(copy, node);
+                    GameTree.put(node);
                 }
                 sample.add(node);
                 switch (tree_policy.type) {

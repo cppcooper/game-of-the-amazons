@@ -1,7 +1,5 @@
 package structures;
 
-import java.util.Objects;
-
 public class Move {
     public int start = -1;
     public int next = -1;
@@ -12,7 +10,7 @@ public class Move {
         this.next = next;
         this.arrow = arrow;
     }
-    public boolean IsValidFor(LocalState state){
+    public boolean IsValidFor(GameState state){
         if(!(start < 0)) {
             int start_pos = state.ReadTile(start);
             if (start_pos > 0 && start_pos < 3) {

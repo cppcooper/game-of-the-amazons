@@ -5,7 +5,7 @@ import java.util.BitSet;
 import java.util.HashSet;
 import java.util.function.Function;
 
-public class LocalState {
+public class GameState {
 	private static HashSet<Integer> always_empty = null;
 	private final ArrayList<Integer> board;
 	private final BoardPiece[] player1 = new BoardPiece[4];
@@ -44,17 +44,17 @@ public class LocalState {
 			}
 		}
 	}
-	public LocalState(){
+	public GameState(){
 		this(new int[121]);
 	}
-	public LocalState(int[] state){
+	public GameState(int[] state){
 		assert state.length >= 121;
 		board = new ArrayList<>(121);
 		for(int i = 0; i < 121; ++i){
 			board.add(state[i]);
 		}
 	}
-	public LocalState(LocalState other){
+	public GameState(GameState other){
 		board = new ArrayList<>(other.board);
 		if(other.player1 != null && other.player1[0] != null) {
 			for (int i = 0; i < player1.length; ++i) {
@@ -72,7 +72,7 @@ public class LocalState {
 		hash = other.hash;
 		valid_hash = other.valid_hash;
 	}
-	public LocalState(ArrayList<Integer> state, boolean find_pieces, boolean copy_state) {
+	public GameState(ArrayList<Integer> state, boolean find_pieces, boolean copy_state) {
 		PopulateSet();
 		if(copy_state && state != null) {
 			board = new ArrayList<>(state);
@@ -307,7 +307,7 @@ public class LocalState {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		LocalState that = (LocalState) o;
+		GameState that = (GameState) o;
 		return board.equals(that.board) && ((last_move == null && that.last_move == null) || (last_move != null && last_move.equals(that.last_move)));
 	}
 }
