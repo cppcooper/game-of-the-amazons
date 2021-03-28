@@ -98,7 +98,7 @@ public class AICore {
         Debug.PrintThreadID("ExhaustiveMC");
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && !copy.IsGameOver() && !terminate_threads.get()) {
-            if(BreadFirstSearch.Search(copy)){
+            if(MonteCarlo.RunSimulation(copy, new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE, MonteCarlo.SimPolicy.policy_type.BREADTH_FIRST))){
                 game_tree_is_explored.set(true);
                 return;
             }
