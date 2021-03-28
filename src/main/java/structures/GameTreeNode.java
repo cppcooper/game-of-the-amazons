@@ -5,14 +5,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+/** GameTreeNode represents a Move and the value that move has for the player making it
+ * We track:
+ *  - past moves
+ *  - future moves
+ *  -
+ *
+ * */
+
 public class GameTreeNode {
     private final SynchronizedArrayList<GameTreeNode> super_nodes = new SynchronizedArrayList<>();
     private final SynchronizedArrayList<GameTreeNode> sub_nodes = new SynchronizedArrayList<>(); //note: that there is no way to remove nodes! this is by design!
     public final Heuristic heuristic = new Heuristic();
-    final public AtomicReference<Move> move = new AtomicReference<>(null);
+    final public AtomicReference<Move> move = new AtomicReference<>();
+    final public AtomicReference<GameState> state_after_move = new AtomicReference<>();
 
-    public GameTreeNode(Move move, GameTreeNode parent){
+    public GameTreeNode(Move move, GameTreeNode parent, GameState state_after_move){
         this.move.set(move);
+        this.state_after_move.set(state_after_move);
         if(parent != null){
             parent.adopt(this);
         }

@@ -2,11 +2,8 @@ package ubc.cosc322;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
-import structures.LocalState;
-import structures.Position;
 import ygraph.ai.smartfox.games.*;
 
 /**

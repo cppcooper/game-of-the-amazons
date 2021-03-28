@@ -2,14 +2,14 @@ package algorithms.analysis;
 
 import org.junit.jupiter.api.Test;
 import structures.Debug;
-import structures.LocalState;
+import structures.GameState;
 import tools.RandomGen;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MiscTests {
     @Test
     void find_all_possible_moves() {
-        LocalState board = new LocalState();
+        GameState board = new GameState();
         int[] positions = Debug.GetAllPositions();
         var moves = MoveCompiler.GetMoveList(board,positions,true);
         System.out.printf("possible moves (without pieces): %d\n",moves.size());
@@ -17,7 +17,7 @@ public class MiscTests {
 
     @Test
     void find_first_degree_positions() {
-        LocalState board = new LocalState();
+        GameState board = new GameState();
         int[] positions = Debug.GetAllPositions();
         int[][] first_degree_territory = MoveCompiler.GetOpenPositions(board,positions,false);
         int max = 0;
@@ -47,7 +47,7 @@ public class MiscTests {
         double max = Double.NEGATIVE_INFINITY;
         double min = Double.POSITIVE_INFINITY;
         for(int i = 0; i < trials; ++i){
-            LocalState board = rng.GetRandomBoard();
+            GameState board = rng.GetRandomBoard();
             double heuristic = Heuristics.Mobility.CalculateHeuristic(board);
             if(heuristic > max){
                 max = heuristic;
@@ -66,7 +66,7 @@ public class MiscTests {
         double max = Double.NEGATIVE_INFINITY;
         double min = Double.POSITIVE_INFINITY;
         for(int i = 0; i < trials; ++i){
-            LocalState board = new LocalState(rng.GetRandomState(),true,true);/*new int[121]);/**/
+            GameState board = new GameState(rng.GetRandomState(),true,true);/*new int[121]);/**/
             double heuristic = Heuristics.Territory.CalculateHeuristic(board);
             boolean new_value = false;
             if(heuristic > max){

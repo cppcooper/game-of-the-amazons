@@ -2,7 +2,6 @@ package structures;
 
 import algorithms.analysis.MoveCompiler;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MovePool {
@@ -10,7 +9,7 @@ public class MovePool {
 
     public static void generate_pool(){
         int[] all_positions = Debug.GetAllPositions();
-        MoveCompiler.GetMoveList(new LocalState(),all_positions,true);
+        MoveCompiler.GetMoveList(new GameState(),all_positions,true);
     }
 
     private static int make_key(int start, int next, int arrow){

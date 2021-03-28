@@ -2,7 +2,7 @@ package tools;
 
 import algorithms.analysis.MonteCarlo;
 import structures.BoardPiece;
-import structures.LocalState;
+import structures.GameState;
 import structures.Position;
 
 import java.util.ArrayList;
@@ -99,12 +99,12 @@ public class RandomGen extends Random {
         return arr;
     }
 
-    public LocalState GetRandomBoard(){
-        return new LocalState(GetRandomState(),true,true);
+    public GameState GetRandomBoard(){
+        return new GameState(GetRandomState(),true,true);
     }
 
-    public LocalState GetRandomBoard(double threshold){
-        return new LocalState(GetRandomState(threshold),true,true);
+    public GameState GetRandomBoard(double threshold){
+        return new GameState(GetRandomState(threshold),true,true);
     }
 
     public Position[] GetRandomPositions(int N){

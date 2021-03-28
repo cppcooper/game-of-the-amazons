@@ -1,8 +1,8 @@
 package ubc.cosc322;
 
+import algorithms.analysis.BreadFirstSearch;
 import algorithms.analysis.Heuristics;
 import algorithms.analysis.MonteCarlo;
-import org.apache.commons.math3.util.Precision;
 import structures.*;
 import tools.RandomGen;
 import ygraph.ai.smartfox.games.BaseGameGUI;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AICore {
-    private static LocalState current_board_state = null;
+    private static GameState current_board_state = null;
     private static AIPlayer player = null;
     private static Thread mc_sim_thread1 = null;
     private static Thread mc_sim_thread2 = null;
@@ -96,9 +96,9 @@ public class AICore {
 
     private static void ExhaustiveMonteCarlo() {
         Debug.PrintThreadID("ExhaustiveMC");
-        LocalState copy = GetStateCopy();
+        GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && !copy.IsGameOver() && !terminate_threads.get()) {
-            if(MonteCarlo.RunSimulation(copy, new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE, MonteCarlo.SimPolicy.policy_type.BREADTH_FIRST))){
+            if(BreadFirstSearch.Search(copy)){
                 game_tree_is_explored.set(true);
                 return;
             }
@@ -114,7 +114,7 @@ public class AICore {
         final float dinc = 1.5f;
         float branches = initial_branches;
         float depth = initial_depth;
-        LocalState copy = GetStateCopy();
+        GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && !copy.IsGameOver() && !terminate_threads.get()) {
             if(MonteCarlo.RunSimulation(copy, new MonteCarlo.SimPolicy((int)branches,(int)depth, MonteCarlo.SimPolicy.policy_type.MONTE_CARLO))){
                 branches += binc;
@@ -234,7 +234,7 @@ public class AICore {
     }
 
     public static synchronized void SetState(ArrayList<Integer> state) {
-        current_board_state = new LocalState(state, true, false); // saves state reference instead of copying
+        current_board_state = new GameState(state, true, false); // saves state reference instead of copying
         game_tree_is_explored.set(false);
         current_board_state.DebugPrint();
     }
@@ -268,21 +268,21 @@ public class AICore {
             player.kill();
             System.exit(1);
         }
-        LocalState copy = GetStateCopy();
+        GameState copy = GetStateCopy();
         GameTreeNode child = GameTree.get(copy);
         if(child == null){
             //we copy the state, because it's going to change.. and we don't want to invalidate the key we use in the hash map (game tree)
             System.out.println("New Move.. updating game tree now.");
-            child = new GameTreeNode(move,parent);
-            GameTree.put(copy,child);
+            child = new GameTreeNode(move,parent,copy);
+            GameTree.put(child);
         }
     }
 
-    private static synchronized LocalState GetState() {
+    private static synchronized GameState GetState() {
         return current_board_state;
     }
 
-    private static synchronized LocalState GetStateCopy() {
-        return new LocalState(current_board_state);
+    private static synchronized GameState GetStateCopy() {
+        return new GameState(current_board_state);
     }
 }

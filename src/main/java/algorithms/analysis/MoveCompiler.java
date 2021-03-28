@@ -3,20 +3,19 @@ package algorithms.analysis;
 import structures.*;
 
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.function.*;
 
 public class MoveCompiler {
     // To find all of one player's move options you calculate `pieces x positions x arrows` = 4*40*40 = 6400 max options/operations
-    public static ArrayList<Move> GetMoveList(LocalState board, BoardPiece[] player_pieces, boolean use_pooling){
+    public static ArrayList<Move> GetMoveList(GameState board, BoardPiece[] player_pieces, boolean use_pooling){
         return GetMoveList(board,player_pieces,use_pooling,true);
     }
 
-    public static ArrayList<Move> GetMoveList(LocalState board, int[] piece_indices, boolean use_pooling){
+    public static ArrayList<Move> GetMoveList(GameState board, int[] piece_indices, boolean use_pooling){
         return GetMoveList(board,piece_indices,use_pooling,true);
     }
 
-    public static ArrayList<Move> GetMoveList(LocalState board, BoardPiece[] player_pieces, boolean use_pooling, boolean use_interrupts) {
+    public static ArrayList<Move> GetMoveList(GameState board, BoardPiece[] player_pieces, boolean use_pooling, boolean use_interrupts) {
         int[] piece_indices = new int[4];
         for (int i = 0; i < piece_indices.length; ++i) {
             piece_indices[i] = player_pieces[i].CalculateIndex();
@@ -24,7 +23,7 @@ public class MoveCompiler {
         return GetMoveList(board,piece_indices,use_pooling,use_interrupts);
     }
 
-    public static ArrayList<Move> GetMoveList(LocalState board, int[] piece_indices, boolean use_pooling, boolean use_interrupts){
+    public static ArrayList<Move> GetMoveList(GameState board, int[] piece_indices, boolean use_pooling, boolean use_interrupts){
         ArrayList<Move> all_moves = new ArrayList<>(5000);
         // Getting the available positions for a piece to move to
         int [][] open_piece_positions = GetOpenPositions(board,piece_indices,use_interrupts); //values of -1 are invalid elements, to be ignored
@@ -33,7 +32,7 @@ public class MoveCompiler {
         }
         for(int piece_i = 0; piece_i < piece_indices.length; ++piece_i){
             // Getting the available positions for an arrow from all the positions a piece could shoot from
-            LocalState copy = new LocalState(board);
+            GameState copy = new GameState(board);
             copy.SetTile(piece_indices[piece_i],0);
             int[][] all_arrow_positions = GetOpenPositions(copy,open_piece_positions[piece_i],use_interrupts);
             if(use_interrupts && Thread.currentThread().isInterrupted()){
@@ -73,7 +72,7 @@ public class MoveCompiler {
     }
 
     //40 bottom level operations for every starting position.
-    public static int[][] GetOpenPositions(LocalState board, int[] starting_positions, boolean use_interrupts){
+    public static int[][] GetOpenPositions(GameState board, int[] starting_positions, boolean use_interrupts){
         if(starting_positions != null) {
             int[][] all_moves = new int[starting_positions.length][];
             for (int i = 0; i < starting_positions.length; ++i) {
@@ -90,7 +89,7 @@ public class MoveCompiler {
     }
 
     //this will always be faster than a parallel version for the board size we have
-    public static int[] ScanAllDirections(LocalState board, int index, boolean use_interrupts){
+    public static int[] ScanAllDirections(GameState board, int index, boolean use_interrupts){
         int[] moves = new int[40];
         Position pos = new Position(index); //JVM should optimize this to be in the stack memory
 
@@ -112,7 +111,7 @@ public class MoveCompiler {
     }
 
     //this has been optimized to death
-    public static int ScanDirection(int[] moves, int start_index, LocalState board, int x, int y, int xi, int yi, boolean use_interrupts){
+    public static int ScanDirection(int[] moves, int start_index, GameState board, int x, int y, int xi, int yi, boolean use_interrupts){
         if(use_interrupts && Thread.currentThread().isInterrupted()){
             return 0;
         }

@@ -9,9 +9,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class Heuristics {
-	private static final ConcurrentLinkedDeque<Pair<LocalState, GameTreeNode>> queue = new ConcurrentLinkedDeque<>();
+	private static final ConcurrentLinkedDeque<Pair<GameState, GameTreeNode>> queue = new ConcurrentLinkedDeque<>();
 
-	public static void enqueue(Pair<LocalState, GameTreeNode> job) {
+	public static void enqueue(Pair<GameState, GameTreeNode> job) {
 		queue.push(job);
 	}
 
@@ -22,7 +22,7 @@ public class Heuristics {
 			while (!Thread.currentThread().isInterrupted()) {
 				var pair = queue.poll();
 				if (pair != null) {
-					LocalState board = pair.getFirst();
+					GameState board = pair.getFirst();
 					GameTreeNode node = pair.getSecond();
 					if (board == null || node == null || node.move.get() == null) {
 						continue;
@@ -41,7 +41,7 @@ public class Heuristics {
 		}
 	}
 
-	public static void CalculateHeuristicsAll(LocalState board, GameTreeNode node) {
+	public static void CalculateHeuristicsAll(GameState board, GameTreeNode node) {
 		boolean changed = false;
 		GameTreeNode.Heuristic h = node.heuristic;
 		if (!h.has_winner.get()) {
@@ -65,7 +65,7 @@ public class Heuristics {
 		}
 	}
 
-	public static void SetWinner(LocalState board, GameTreeNode node) {
+	public static void SetWinner(GameState board, GameTreeNode node) {
 		GameTreeNode.Heuristic h = node.heuristic;
 		if (!h.has_winner.get()) {
 			h.has_winner.set(true);
@@ -73,7 +73,7 @@ public class Heuristics {
 		}
 	}
 
-	public static void SetMobility(LocalState board, GameTreeNode node) {
+	public static void SetMobility(GameState board, GameTreeNode node) {
 		GameTreeNode.Heuristic h = node.heuristic;
 		if(!h.has_mobility.get()){
 			h.has_mobility.set(true);
@@ -81,7 +81,7 @@ public class Heuristics {
 		}
 	}
 
-	public static void SetTerritory(LocalState board, GameTreeNode node) {
+	public static void SetTerritory(GameState board, GameTreeNode node) {
 		GameTreeNode.Heuristic h = node.heuristic;
 		if (!h.has_territory.get()) {
 			h.has_territory.set(true);
@@ -99,7 +99,7 @@ public class Heuristics {
 		}
 
 		// todo (refactor heuristics): use to nullify losing moves and double winning moves
-		public static int CalculateHeuristic(LocalState board){
+		public static int CalculateHeuristic(GameState board){
 			int winner = calculate_winner(board);
 			if(winner == 0){
 				return 1;
@@ -107,13 +107,13 @@ public class Heuristics {
 			return winner != board.GetPlayerTurn() ? 2 : -1;
 		}
 
-		private static int calculate_winner(LocalState board) {
+		private static int calculate_winner(GameState board) {
 			int p1 = count_accessible_positions(board,1);
 			int p2 = count_accessible_positions(board,2);
 			return p1 == p2 ? 0 : (p1 > p2 ? 1 : 2);
 		}
 
-		private static int count_accessible_positions(LocalState board, int player) {
+		private static int count_accessible_positions(GameState board, int player) {
 			int count = 0;
 			CountingAlgorithmData data = new CountingAlgorithmData();
 			for(BoardPiece p : Objects.requireNonNull(board.GetPlayerPieces(player))) {
@@ -129,7 +129,7 @@ public class Heuristics {
 			return count;
 		}
 
-		private static void enqueue_neighbours(CountingAlgorithmData data, int index, LocalState board) {
+		private static void enqueue_neighbours(CountingAlgorithmData data, int index, GameState board) {
 			Position[] neighbours = new Position[8];
 			neighbours[0] = new Position(index - 1);
 			neighbours[1] = new Position(index + 1);
@@ -157,20 +157,26 @@ public class Heuristics {
 
 	public static class Mobility {
 		private static final int max_moves = 4*35*35;
+		// todo: improve mobility heuristic. Needs to consider pieces that are cut off
+		//  Maybe for each piece that is cut off count a block heuristic
+		//  then use the block heuristic to reduce the mobility heuristic
+		//  or if against the enemy, then to increase the mobility heuristic
+		//  division and multiplication?
+		//  maybe just grabbing the first degree positions and using that to multiply the as-is mobility heuristic is enough?
 
-		public static double CalculateHeuristic(LocalState board){
+		public static double CalculateHeuristic(GameState board){
 			return (CalculateMobilityHeuristic(board) + CalculateReductionHeuristic(board)) / 2.0;
 		}
 
-		public static double CalculateMobilityHeuristic(LocalState board){
+		public static double CalculateMobilityHeuristic(GameState board){
 			return (double)count_first_degree_moves(board, board.GetPrevTurnPieces()) / max_moves;
 		}
 
-		public static double CalculateReductionHeuristic(LocalState board){
+		public static double CalculateReductionHeuristic(GameState board){
 			return 1 - ((double)count_first_degree_moves(board, board.GetTurnPieces()) / max_moves);
 		}
 
-		private static int count_first_degree_positions(LocalState board, BoardPiece[] pieces) {
+		private static int count_first_degree_positions(GameState board, BoardPiece[] pieces) {
 			int[] positions = new int[pieces.length];
 			for (int i = 0; i < 4; ++i) {
 				int index = pieces[i].CalculateIndex();
@@ -191,7 +197,7 @@ public class Heuristics {
 			return moves;
 		}
 
-		private static int count_first_degree_moves(LocalState board, BoardPiece[] pieces) {
+		private static int count_first_degree_moves(GameState board, BoardPiece[] pieces) {
 			return MoveCompiler.GetMoveList(board, pieces,true, false).size();
 		}
 	}
@@ -207,7 +213,7 @@ public class Heuristics {
 			}
 		}
 
-		public static double CalculateHeuristic(LocalState board) {
+		public static double CalculateHeuristic(GameState board) {
 			var counts = calculate_territories(board);
 			int total = counts.ours + counts.theirs;
 			double heuristic;
@@ -223,13 +229,14 @@ public class Heuristics {
 			return ASingleMaths.clamp(heuristic,0,1);
 		}
 
-		private static TerritoryCounts calculate_territories(LocalState board) {
+		private static TerritoryCounts calculate_territories(GameState board) {
 			int[] our_degree_map = null;
 			int[] their_degree_map = null;
 			switch(board.GetPlayerTurn()){
 				// todo: figure it out
 				//  Not sure why this isn't flipped.. I think it should be flipped.. but the game is way smarter this way
 				//  very confused why this happens.
+				//  IT IS BECAUSE THE EDGES PROVIDE THE MOST TERRITORY!
 				case 1:
 					our_degree_map = calculate_degree_map(board,1);
 					their_degree_map = calculate_degree_map(board,2);
@@ -254,13 +261,13 @@ public class Heuristics {
 			return new TerritoryCounts(our_territory_count, their_territory_count);
 		}
 
-		private static int[] calculate_degree_map(LocalState board, int player) {
+		private static int[] calculate_degree_map(GameState board, int player) {
 			int[] degree_map = new int[121];
 			find_lowest_degrees(board, BoardPiece.GetIndices(Objects.requireNonNull(board.GetPlayerPieces(player))), degree_map, 1);
 			return degree_map;
 		}
 
-		private static void find_lowest_degrees(LocalState board, int[] starting_positions, int[] degree_mapping, int degree) {
+		private static void find_lowest_degrees(GameState board, int[] starting_positions, int[] degree_mapping, int degree) {
 			int[][] new_positions = MoveCompiler.GetOpenPositions(board, starting_positions, false); //[starting index][index of open positions]
 			for (int[] position_list : new_positions) {
 				if (position_list != null) {
