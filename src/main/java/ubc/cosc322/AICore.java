@@ -1,5 +1,6 @@
 package ubc.cosc322;
 
+import algorithms.analysis.BreadFirstSearch;
 import algorithms.analysis.Heuristics;
 import algorithms.analysis.MonteCarlo;
 import structures.*;
@@ -97,7 +98,7 @@ public class AICore {
         Debug.PrintThreadID("ExhaustiveMC");
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && !copy.IsGameOver() && !terminate_threads.get()) {
-            if(MonteCarlo.RunSimulation(copy, new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE, MonteCarlo.SimPolicy.policy_type.BREADTH_FIRST))){
+            if(BreadFirstSearch.Search(copy)){
                 game_tree_is_explored.set(true);
                 return;
             }
