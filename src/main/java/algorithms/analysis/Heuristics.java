@@ -58,8 +58,12 @@ public class Heuristics {
 			changed = true;
 		}
 		if(changed){
-			h.value.set(h.winner.get() * (h.mobility.get() + h.territory.get()));
+			double value = h.winner.get() * (h.mobility.get() + h.territory.get());
+			h.value.set(value);
+			h.aggregate.add(value);
 			node.propagate();
+		} else {
+			Debug.RunLevel4DebugCode(()->System.out.printf("CalculateHeuristicAll: NOTHING WAS DONE!! this might be a problem\n"));
 		}
 	}
 

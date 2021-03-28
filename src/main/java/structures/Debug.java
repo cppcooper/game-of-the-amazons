@@ -9,6 +9,7 @@ public class Debug {
     private static boolean debugging_level1 = false;
     private static boolean debugging_level2 = true;
     private static boolean debugging_level3 = false;
+    private static boolean debugging_level4 = true;
 
     public static void DebugBreakPoint(){
         if(ZeroEdgesDetected.get() || NoIndexFound.get() || NoParentNodeFound.get()){
@@ -30,6 +31,11 @@ public class Debug {
     }
     public static void RunLevel3DebugCode(Runnable fn){
         if(debugging_level3){
+            fn.run();
+        }
+    }
+    public static void RunLevel4DebugCode(Runnable fn){
+        if(debugging_level4){
             fn.run();
         }
     }

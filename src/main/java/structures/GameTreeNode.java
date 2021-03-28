@@ -65,8 +65,10 @@ public class GameTreeNode {
     }
     private void force_propagate(){
         double h = heuristic.value.get();
+        double a = heuristic.aggregate.get();
         for (int i = 0; i < super_nodes.size(); ++i) {
             GameTreeNode parent = super_nodes.get(i);
+            parent.heuristic.aggregate.add(a);
             if(parent.heuristic.maximum_sub.get() < h){
                 parent.heuristic.maximum_sub.set(h);
             }

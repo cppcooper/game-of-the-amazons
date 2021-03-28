@@ -12,4 +12,7 @@ public class AtomicDouble {
         cached = new_value;
         value.set(Double.doubleToLongBits(new_value));
     }
+    public void add(double value){
+        set(cached + value);
+    }
 }
