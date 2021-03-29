@@ -140,13 +140,16 @@ public class RandomGen extends Random {
     public MonteCarlo.TreePolicy.policy_type get_random_policy(int move_num){
         // todo (tuning): improve ability to aid in pruning moves
         double progression = move_num / 100.0;
-        double p1 = 0.75 * (1 - progression);
-        double p2 = 0.9 * (1 - p1);
-        assert (p1+p2) <= 1;
+        double p1 = (0.9 - progression/2) * (1 - progression);
+        double p2 = 0.95 * (1 - p1);
+        double p3 = 0.5 * (1 - (p1 + p2));
+        assert (p1+p2+p3) <= 1;
         double x = nextDouble();
-        if (x < p1) {
+        if(x < p1){
             return MonteCarlo.TreePolicy.policy_type.MOBILITY;
         } else if (x < p1+p2) {
+            return MonteCarlo.TreePolicy.policy_type.WINNER_LOSER;
+        } else if (x < p1+p2+p3) {
             return MonteCarlo.TreePolicy.policy_type.TERRITORY;
         } else {
             return MonteCarlo.TreePolicy.policy_type.ALL_HEURISTICS;
