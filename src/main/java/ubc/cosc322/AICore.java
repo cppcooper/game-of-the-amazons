@@ -3,8 +3,10 @@ package ubc.cosc322;
 import algorithms.analysis.BreadFirstSearch;
 import algorithms.analysis.Heuristics;
 import algorithms.analysis.MonteCarlo;
-import structures.*;
+import data.*;
+import tools.Debug;
 import tools.RandomGen;
+import tools.Tuner;
 import ygraph.ai.smartfox.games.BaseGameGUI;
 
 import java.util.ArrayList;

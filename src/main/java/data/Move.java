@@ -1,4 +1,4 @@
-package structures;
+package data;
 
 public class Move {
     public int start = -1;

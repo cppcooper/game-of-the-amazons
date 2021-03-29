@@ -1,10 +1,10 @@
 package algorithms.analysis;
 
 import org.apache.commons.math3.util.Pair;
-import structures.GameState;
-import structures.GameTree;
-import structures.GameTreeNode;
-import structures.Move;
+import data.GameState;
+import data.GameTree;
+import data.GameTreeNode;
+import data.Move;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

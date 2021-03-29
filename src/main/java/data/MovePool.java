@@ -1,4 +1,4 @@
-package structures;
+package data;
 
 import algorithms.analysis.MoveCompiler;
 

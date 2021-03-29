@@ -1,9 +1,9 @@
 package tools;
 
 import algorithms.analysis.MonteCarlo;
-import structures.BoardPiece;
-import structures.GameState;
-import structures.Position;
+import data.BoardPiece;
+import data.GameState;
+import data.Position;
 
 import java.util.ArrayList;
 import java.util.Collections;

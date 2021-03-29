@@ -1,6 +1,6 @@
 package algorithms.analysis;
 
-import structures.*;
+import data.*;
 
 import java.util.*;
 import java.util.function.*;

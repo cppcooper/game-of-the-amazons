@@ -1,4 +1,4 @@
-package structures;
+package data;
 
 public class BoardPiece extends Position {
     public int player; //3 if non-player or 0 if not a piece

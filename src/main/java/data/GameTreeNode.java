@@ -1,4 +1,4 @@
-package structures;
+package data;
 
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;

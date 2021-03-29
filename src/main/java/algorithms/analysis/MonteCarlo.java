@@ -1,7 +1,8 @@
 package algorithms.analysis;
 
 import org.apache.commons.math3.util.Pair;
-import structures.*;
+import data.*;
+import tools.Debug;
 import tools.RandomGen;
 
 import java.util.*;

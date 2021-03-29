@@ -1,4 +1,4 @@
-package structures;
+package tools;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

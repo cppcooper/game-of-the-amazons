@@ -1,7 +1,7 @@
 package algorithms.analysis;
 
 import org.junit.jupiter.api.Test;
-import structures.GameState;
+import data.GameState;
 import tools.RandomGen;
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,6 +1,7 @@
 package algorithms.analysis;
 
-import structures.*;
+import data.*;
+import tools.Debug;
 import tools.Maths;
 import ubc.cosc322.AICore;
 
