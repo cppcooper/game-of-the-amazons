@@ -1,5 +1,6 @@
 package ubc.cosc322;
 
+import algorithms.analysis.BreadFirstSearch;
 import algorithms.analysis.Heuristics;
 import algorithms.analysis.MonteCarlo;
 import structures.*;
@@ -134,8 +135,6 @@ public class AICore {
                 System.out.println("SendDelayedMessage: now waiting..");
                 if(!game_tree_is_explored.get()) {
                     Thread.sleep(Tuner.wait_time);
-                } else {
-                    Thread.sleep(1000);
                 }
                 if(!Thread.interrupted()) {
                     Move move = GetBestMove();
@@ -179,12 +178,15 @@ public class AICore {
         return null;
     }
 
-    private static Move GetBestMove() {
+    private static Move GetBestMove() throws InterruptedException {
         Move move = null;
         double best;
         int index;
         int null_count = 0;
         do {
+            while(!BreadFirstSearch.first_depth_done.get() || !Heuristics.first_depth_processed.get()){
+                Thread.sleep(500);
+            }
             GameTreeNode current_node = GameTree.get(GetState());
             best = Double.NEGATIVE_INFINITY;
             index = -1;
@@ -224,7 +226,7 @@ public class AICore {
     }
 
     public static void PruneGameTree() {
-        int prev_turn_num = GetState().GetMoveNumber() - 5;
+        int prev_turn_num = GetState().GetMoveNumber() - 3;
         GameTree.remove(prev_turn_num);
     }
 

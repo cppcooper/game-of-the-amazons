@@ -9,19 +9,23 @@ import structures.Move;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BreadFirstSearch {
+    public static final AtomicBoolean first_depth_done = new AtomicBoolean(false);
+
     public static boolean Search(GameState board){
+        first_depth_done.set(false);
         GameTreeNode sim_root = GameTree.get(board);
         if(sim_root == null){
             sim_root = new GameTreeNode(new Move(),null, board);
             GameTree.put(sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
         }
-        Search(board, sim_root);
+        Search(board, sim_root, 0);
         return !Thread.interrupted();
     }
 
-    public static void Search(GameState board, GameTreeNode parent){
+    public static void Search(GameState board, GameTreeNode parent, int depth){
         if(!board.IsGameOver() && !Thread.currentThread().isInterrupted()) {
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
             if (moves == null || moves.size() == 0) {
@@ -52,9 +56,13 @@ public class BreadFirstSearch {
                     }
                 }
             }
+            if (depth == 0) {
+                Heuristics.first_depth_processed.set(false);
+                first_depth_done.set(true);
+            }
             while(!branch_jobs.isEmpty()){
                 var job = branch_jobs.poll();
-                Search(job.getFirst(), job.getSecond());
+                Search(job.getFirst(), job.getSecond(),1);
             }
         }
     }

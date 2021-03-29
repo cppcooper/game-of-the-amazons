@@ -6,9 +6,12 @@ import ubc.cosc322.AICore;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Heuristics {
 	private static final ConcurrentLinkedDeque<GameTreeNode> queue = new ConcurrentLinkedDeque<>();
+
+	public static final AtomicBoolean first_depth_processed = new AtomicBoolean(false);
 
 	public static void enqueue(GameTreeNode job) {
 		queue.push(job);
@@ -31,6 +34,9 @@ public class Heuristics {
 					CalculateHeuristicsAll(board, node);
 					i = Math.max(0, i - 1);
 				} else {
+					if(BreadFirstSearch.first_depth_done.get()){
+						first_depth_processed.set(true);
+					}
 					Thread.sleep(++i * 50);
 				}
 			}
