@@ -206,7 +206,9 @@ public class Heuristics {
 				int temp1 = data.their_best.king_distances[tile] - data.our_best.king_distances[tile];
 				c2 += Math.min(1, Math.max(-1, temp1 / 6.0));
 				int temp2 = data.our_best.queen_distances[tile] - data.their_best.queen_distances[tile];
-				w += Math.pow(2, -Math.abs(temp2));
+				if(data.our_best.queen_distances[tile] != 0 && data.their_best.queen_distances[tile] != 0) {
+					w += Math.pow(2, -Math.abs(temp2));
+				}
 				t1 += temp2;
 				t2 += data.our_best.king_distances[tile] - data.their_best.king_distances[tile];
 			}
