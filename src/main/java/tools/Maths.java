@@ -12,8 +12,20 @@ public class Maths {
     public static double clamp(double v, double min, double max){
         return Math.min(max,Math.max(min,v));
     }
+    public static double f1(double w){
+        return Tuner.t1c * w;
+    }
+    public static double f2(double w){
+        return Tuner.c1c * w;
+    }
+    public static double f3(double w){
+        return Tuner.c2c * w;
+    }
+    public static double f4(double w){
+        return Tuner.t2c * w;
+    }
     public static double f(double w, double alpha){
-        return 0.0;
+        return w*alpha;
     }
     public static double sumf(double w, double[] alphas){
         double sum = 0.0;

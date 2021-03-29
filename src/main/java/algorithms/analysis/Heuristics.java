@@ -213,7 +213,7 @@ public class Heuristics {
 				t2 += data.our_best.king_distances[tile] - data.their_best.king_distances[tile];
 			}
 			c1 *= 2;
-			double t = w * (t1 + c1 + c2 + t2);
+			double t = Maths.f1(w)*t1 + Maths.f2(w)*c1 + Maths.f3(w)*c2 + Maths.f4(w)*t2;
 			double[] p1_a = new double[num_pieces];
 			double[] p2_a = new double[num_pieces];
 			for(int piece = 0; piece < num_pieces; ++piece){
