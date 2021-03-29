@@ -48,7 +48,7 @@ public class Heuristics {
 
 	public static void CalculateHeuristicsAll(GameState board, GameTreeNode node) {
 		boolean changed = false;
-		GameTreeNode.Heuristic h = node.heuristic;
+		Heuristic h = node.heuristic;
 		if (!h.has_winner.get()) {
 			h.has_winner.set(true);
 			h.winner.set(Winner.CalculateHeuristic(board));
@@ -74,27 +74,30 @@ public class Heuristics {
 	}
 
 	public static void SetWinner(GameState board, GameTreeNode node) {
-		GameTreeNode.Heuristic h = node.heuristic;
+		Heuristic h = node.heuristic;
 		if (!h.has_winner.get()) {
 			h.has_winner.set(true);
 			h.winner.set(Winner.CalculateHeuristic(board));
 		}
+		h.value.set(h.winner.get());
 	}
 
 	public static void SetMobility(GameState board, GameTreeNode node) {
-		GameTreeNode.Heuristic h = node.heuristic;
+		Heuristic h = node.heuristic;
 		if(!h.has_mobility.get()){
 			h.has_mobility.set(true);
 			h.mobility.set(Mobility.CalculateHeuristic(board));
 		}
+		h.value.set(h.mobility.get());
 	}
 
 	public static void SetTerritory(GameState board, GameTreeNode node) {
-		GameTreeNode.Heuristic h = node.heuristic;
+		Heuristic h = node.heuristic;
 		if (!h.has_territory.get()) {
 			h.has_territory.set(true);
 			h.territory.set(Territory.CalculateHeuristic(board));
 		}
+		h.value.set(h.territory.get());
 	}
 
 	////////////////////

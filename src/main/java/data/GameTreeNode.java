@@ -1,8 +1,6 @@
 package data;
 
 import java.util.Comparator;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /** GameTreeNode represents a Move and the value that move has for the player making it
@@ -76,25 +74,11 @@ public class GameTreeNode {
         }
     }
 
-    public static class Heuristic {
-        public final AtomicDouble value = new AtomicDouble();
-        public final AtomicDouble maximum_sub = new AtomicDouble();
-        public final AtomicDouble minimum_sub = new AtomicDouble();
-
-        public final AtomicInteger winner = new AtomicInteger();
-        public final AtomicDouble mobility = new AtomicDouble();
-        public final AtomicDouble territory = new AtomicDouble();
-
-        public final AtomicBoolean has_propagated = new AtomicBoolean(false);
-        public final AtomicBoolean has_winner = new AtomicBoolean(false);
-        public final AtomicBoolean has_mobility = new AtomicBoolean(false);
-        public final AtomicBoolean has_territory = new AtomicBoolean(false);
-
-    }
-
+    // used in PruneMoves to sort moves according to best for us and least beneficial to the enemy
     public static class NodeComparator implements Comparator<GameTreeNode> {
         @Override
         public int compare(GameTreeNode o1, GameTreeNode o2) {
+            int c1 = Double.compare(o1.heuristic.value.get())
             return Double.compare(o1.heuristic.maximum_sub.get(), o2.heuristic.maximum_sub.get());
         }
     }
