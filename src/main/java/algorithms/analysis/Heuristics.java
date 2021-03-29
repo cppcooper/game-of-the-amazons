@@ -216,13 +216,17 @@ public class Heuristics {
 			double t = Maths.f1(w)*t1 + Maths.f2(w)*c1 + Maths.f3(w)*c2 + Maths.f4(w)*t2;
 			double[] p1_a = new double[num_pieces];
 			double[] p2_a = new double[num_pieces];
-			for(int piece = 0; piece < num_pieces; ++piece){
+			for(int piece = 0; piece < num_pieces; ++piece) {
 				p1_a[piece] = 0;
 				p2_a[piece] = 0;
-				for(int tile : valid_tiles) {
+				for (int tile : valid_tiles) {
 					int N_b = count_neighbours(board, tile);
-					p1_a[piece] += Math.pow(2, -data.ours[piece].king_distances[tile]) * N_b;
-					p2_a[piece] += Math.pow(2, -data.theirs[piece].king_distances[tile]) * N_b;
+					if (data.ours[piece].queen_distances[tile] == 1) {
+						p1_a[piece] += Math.pow(2, -data.ours[piece].king_distances[tile]) * N_b;
+					}
+					if (data.theirs[piece].queen_distances[tile] == 1) {
+						p2_a[piece] += Math.pow(2, -data.theirs[piece].king_distances[tile]) * N_b;
+					}
 				}
 			}
 			double m = Maths.sumf(w, p2_a) - Maths.sumf(w, p1_a);
