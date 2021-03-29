@@ -205,13 +205,15 @@ public class Heuristics {
 			}
 			c1 *= 2;
 			double t = w * (t1 + c1 + c2 + t2);
-			double p1_a = 0;
-			double p2_a = 0;
+			double[] p1_a = new double[our_pieces.length];
+			double[] p2_a = new double[our_pieces.length];
 			for(int piece = 0; piece < our_pieces.length; ++piece){
+				p1_a[piece] = 0;
+				p2_a[piece] = 0;
 				for(int tile : valid_tiles) {
 					int N_b = count_neighbours(board, tile);
-					p1_a += Math.pow(2, -data.ours[piece].king_distances[tile]) * N_b;
-					p2_a += Math.pow(2, -data.theirs[piece].king_distances[tile]) * N_b;
+					p1_a[piece] += Math.pow(2, -data.ours[piece].king_distances[tile]) * N_b;
+					p2_a[piece] += Math.pow(2, -data.theirs[piece].king_distances[tile]) * N_b;
 				}
 			}
 			double m = 0;
