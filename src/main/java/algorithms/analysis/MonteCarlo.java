@@ -8,17 +8,11 @@ import java.util.*;
 
 public class MonteCarlo {
     public static class SimPolicy{
-        public enum policy_type{
-            BREADTH_FIRST,
-            MONTE_CARLO
-        }
         public int branches = 1;
         public int depth = 1;
-        public policy_type type;
-        public SimPolicy(int branches, int depth, policy_type sim_type){
+        public SimPolicy(int branches, int depth){
             this.branches = branches;
             this.depth = depth;
-            this.type = sim_type;
         }
     }
 
@@ -34,33 +28,15 @@ public class MonteCarlo {
     }
 
     private static void RunSimulation(RandomGen rng, GameState board, GameTreeNode parent, int depth, SimPolicy policy) {
-        /* Simulate X branches at Y depths
-         * simulate X branches
-         ** On each branch simulate X branches
-         * repeat until at Y depth
-         * */
         if (depth < policy.depth && !board.IsGameOver() && !Thread.currentThread().isInterrupted()) {
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
             Debug.DebugBreakPoint();
             if (moves == null || moves.size() == 0) {
                 return;
             }
-            switch (policy.type) {
-                case BREADTH_FIRST:
-                    // todo (refactor search): convert exhaustive monte carlo into just a breadth first search
-                    moves = PruneMoves(board, parent, moves, new TreePolicy(0, 0, TreePolicy.policy_type.DO_NOTHING));
-                    break;
-                case MONTE_CARLO:
-                    // todo (tuning): do a better job selecting the sample size
-                    int sample_size = moves.size() >> 1;
-                    int branches2 = policy.branches << 1;
-                    int bound = Math.max(branches2, sample_size - branches2);
-                    if(bound > 0) {
-                        moves = PruneMoves(board, parent, moves, new TreePolicy(rng.nextInt(bound) + branches2, policy.branches, rng.get_random_policy(board.GetMoveNumber())));
-                    } else {
-                        moves = PruneMoves(board, parent, moves, new TreePolicy(policy.branches << 1, policy.branches, rng.get_random_policy(board.GetMoveNumber())));
-                    }
-                    break;
+            int ideal_sample_size = moves.size() >> 1; // divide by two
+            if(ideal_sample_size > 0){
+                moves = PruneMoves(moves, rng, board, parent, new TreePolicy(ideal_sample_size, policy.branches));
             }
             if (moves == null || moves.size() == 0) {
                 return;
@@ -71,15 +47,6 @@ public class MonteCarlo {
                 if (Thread.currentThread().isInterrupted()) {
                     break;
                 }
-                /* Copy board
-                 * Perform move on board's copy
-                 * Check if GameTree has this board state already
-                 * + retrieve existing node
-                 * - make new node
-                 * - update GameTree
-                 * Perform simulation on this board state
-                 * Update node according to simulations run under it
-                 * */
                 GameState new_state = new GameState(board);
                 Move m = moves.get(rng_set.get(b));
                 if(new_state.MakeMove(m, true, false)) {
@@ -90,20 +57,17 @@ public class MonteCarlo {
                         parent.adopt(node);
                         Heuristics.enqueue(node);
                         GameTree.put(node);
-                    } else { //no idea why parent == node
+                    } else {
                         // This LocalState + Node have already been seen once.
                         // This might represent branches merging so..
                         // run the adoption procedure to ensure linkage and propagation of the heuristic (only one link, and only propagates if node's heuristic is non-zero)
+                        // (no idea why parent might be equal to node)
                         parent.adopt(node);
                     }
                     if (parent != node) {
-                        branch_jobs.add(new Pair<>(new_state, node));
+                        RunSimulation(rng, new_state, node, depth + 1, policy);
                     }
                 }
-            }
-            while(!branch_jobs.isEmpty()){
-                var job = branch_jobs.poll();
-                RunSimulation(rng, job.getFirst(), job.getSecond(), depth + 1, policy);
             }
         }
     }
@@ -116,26 +80,23 @@ public class MonteCarlo {
             ALL_HEURISTICS,
             DO_NOTHING
         }
-        policy_type type;
         int sample_size;
         int max_return;
-        TreePolicy(int N,int M, policy_type T){
+        TreePolicy(int N,int M){
             sample_size = N;
             max_return = M;
-            type = T;
         }
     }
 
-    private static ArrayList<Move> PruneMoves(GameState board, GameTreeNode parent, ArrayList<Move> moves, TreePolicy tree_policy){
+    private static ArrayList<Move> PruneMoves(ArrayList<Move> moves, RandomGen rng, GameState board, GameTreeNode parent, TreePolicy tree_policy){
         if(moves == null){
             return null;
         }
         tree_policy.sample_size = Math.min(tree_policy.sample_size, moves.size());
         tree_policy.max_return = Math.min(tree_policy.max_return, tree_policy.sample_size);
-        if(tree_policy.max_return == moves.size() || tree_policy.sample_size == 0 || tree_policy.type == TreePolicy.policy_type.DO_NOTHING){
+        if(tree_policy.max_return == moves.size() || tree_policy.sample_size == 0){
             return moves;
         }
-        RandomGen rng = new RandomGen();
         TreeSet<GameTreeNode> sample = new TreeSet<>(new GameTreeNode.NodeComparator());
         List<Integer> selection = rng.GetDistinctSequenceShuffled(0, moves.size()-1, tree_policy.sample_size);
         for(int i = 0; i < tree_policy.sample_size; ++i){
@@ -152,7 +113,7 @@ public class MonteCarlo {
                     GameTree.put(node);
                 }
                 sample.add(node);
-                switch (tree_policy.type) {
+                switch (rng.get_random_policy(board.GetMoveNumber())) {
                     case WINNER_LOSER:
                         Heuristics.SetWinner(copy, node);
                         Heuristics.enqueue(node);
