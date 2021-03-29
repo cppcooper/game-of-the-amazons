@@ -1,6 +1,6 @@
 package tools;
 
-public class ASingleMaths {
+public class Maths {
     public static double remap_value(double value, double r1_low, double r1_high, double r2_low, double r2_high) {
         return r2_low + (value - r1_low) * (r2_high - r2_low) / (r1_high - r1_low);
     }
@@ -11,5 +11,15 @@ public class ASingleMaths {
     }
     public static double clamp(double v, double min, double max){
         return Math.min(max,Math.max(min,v));
+    }
+    public static double f(double w, double alpha){
+        return 0.0;
+    }
+    public static double sumf(double w, double[] alphas){
+        double sum = 0.0;
+        for(double alpha : alphas){
+            sum += f(w, alpha);
+        }
+        return sum;
     }
 }

@@ -1,7 +1,7 @@
 package algorithms.analysis;
 
 import structures.*;
-import tools.ASingleMaths;
+import tools.Maths;
 import ubc.cosc322.AICore;
 
 import java.util.*;
@@ -184,10 +184,8 @@ public class Heuristics {
 		}
 
 		public static double CalculateHeuristic(GameState board) {
-			BoardPiece[] our_pieces = board.GetPrevTurnPieces();
-			BoardPiece[] their_pieces = board.GetTurnPieces();
 			MobilityData data = get_territories(board);
-			double heuristic = 0.0;
+			final int num_pieces = data.ours.length;
 			int[] valid_tiles = MoveCompiler.GetAllValidPositions();
 			double c1 = 0;
 			double c2 = 0;
@@ -205,9 +203,9 @@ public class Heuristics {
 			}
 			c1 *= 2;
 			double t = w * (t1 + c1 + c2 + t2);
-			double[] p1_a = new double[our_pieces.length];
-			double[] p2_a = new double[our_pieces.length];
-			for(int piece = 0; piece < our_pieces.length; ++piece){
+			double[] p1_a = new double[num_pieces];
+			double[] p2_a = new double[num_pieces];
+			for(int piece = 0; piece < num_pieces; ++piece){
 				p1_a[piece] = 0;
 				p2_a[piece] = 0;
 				for(int tile : valid_tiles) {
@@ -216,8 +214,8 @@ public class Heuristics {
 					p2_a[piece] += Math.pow(2, -data.theirs[piece].king_distances[tile]) * N_b;
 				}
 			}
-			double m = 0;
-			return heuristic;
+			double m = Maths.sumf(w, p2_a) - Maths.sumf(w, p1_a);
+			return t + m;
 		}
 
 		private static MobilityData get_territories(GameState board) {
@@ -332,7 +330,7 @@ public class Heuristics {
 			}
 			heuristic = Math.pow(4*heuristic, 2);
 			heuristic /= 16;
-			return ASingleMaths.clamp(heuristic,0,1);
+			return Maths.clamp(heuristic,0,1);
 		}
 
 		private static TerritoryData calculate_territories(GameState board) {
