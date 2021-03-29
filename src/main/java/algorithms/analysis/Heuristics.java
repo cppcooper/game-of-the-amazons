@@ -132,16 +132,7 @@ public class Heuristics {
 		}
 
 		private static void enqueue_neighbours(CountingAlgorithmData data, int index, GameState board) {
-			Position[] neighbours = new Position[8];
-			neighbours[0] = new Position(index - 1);
-			neighbours[1] = new Position(index + 1);
-			neighbours[2] = new Position(index - 12);
-			neighbours[3] = new Position(index - 11);
-			neighbours[4] = new Position(index - 10);
-			neighbours[5] = new Position(index + 10);
-			neighbours[6] = new Position(index + 11);
-			neighbours[7] = new Position(index + 12);
-
+			Position[] neighbours = MoveCompiler.GetNeighbours(index);
 			for (Position p : neighbours) {
 				if (p.IsValid()) {
 					int neighbour = p.CalculateIndex();
@@ -158,58 +149,79 @@ public class Heuristics {
 	}
 
 	public static class Mobility {
-		private static final int max_moves = 4*35*35;
-		// todo: improve mobility heuristic. Needs to consider pieces that are cut off
-		//  Maybe for each piece that is cut off count a block heuristic
-		//  then use the block heuristic to reduce the mobility heuristic
-		//  or if against the enemy, then to increase the mobility heuristic
-		//  division and multiplication?
-		//  maybe just grabbing the first degree positions and using that to multiply the as-is mobility heuristic is enough?
+		private static class MobilityData {
+			public MapData ours;
+			public MapData theirs;
 
-		public static double CalculateHeuristic(GameState board){
-			return (CalculateMobilityHeuristic(board) + CalculateReductionHeuristic(board)) / 2.0;
-		}
-
-		public static double CalculateMobilityHeuristic(GameState board){
-			return (double)count_first_degree_moves(board, board.GetPrevTurnPieces()) / max_moves;
-		}
-
-		public static double CalculateReductionHeuristic(GameState board){
-			return 1 - ((double)count_first_degree_moves(board, board.GetTurnPieces()) / max_moves);
-		}
-
-		private static int count_first_degree_positions(GameState board, BoardPiece[] pieces) {
-			int[] positions = new int[pieces.length];
-			for (int i = 0; i < 4; ++i) {
-				int index = pieces[i].CalculateIndex();
-				positions[i] = index;
+			MobilityData(MapData ours, MapData theirs) {
+				this.ours = ours;
+				this.theirs = theirs;
 			}
-			int moves = 0;
-			int[][] first_degree_positions = MoveCompiler.GetOpenPositions(board, positions,false);
-			for (int[] scan_direction : first_degree_positions) {
-				if (scan_direction != null) {
-					for (int tile_index : scan_direction) {
-						if (tile_index < 0) {
-							break;
+		}
+
+		private static class MapData {
+			public int[] queen_tiles;
+			public int[] king_tiles;
+
+			MapData(int[] queen_tiles, int[] king_tiles) {
+				this.queen_tiles = queen_tiles;
+				this.king_tiles = king_tiles;
+			}
+		}
+
+		public static double CalculateHeuristic(GameState board) {
+			BoardPiece[] our_pieces = board.GetPrevTurnPieces();
+			BoardPiece[] their_pieces = board.GetTurnPieces();
+			MobilityData data = new MobilityData(get_map_data(board, our_pieces), get_map_data(board, their_pieces));
+			double heuristic = 0.0;
+
+
+			return heuristic;
+		}
+
+		private static MapData get_map_data(GameState board, BoardPiece[] pieces) {
+			return new MapData(find_queen_tiles(board, pieces), find_king_tiles(board, pieces));
+		}
+
+		private static int[] find_king_tiles(GameState board, BoardPiece[] pieces) {
+			int[] move_map = new int[121];
+			for (BoardPiece piece : pieces) {
+				Position[] neighbours = MoveCompiler.GetNeighbours(piece.CalculateIndex());
+				for (Position n : neighbours) {
+					if (n.IsValid()) {
+						int index = n.CalculateIndex();
+						if (board.ReadTile(index) == 0) {
+							move_map[index]++;
 						}
-						moves++;
 					}
 				}
 			}
-			return moves;
+			return move_map;
 		}
 
-		private static int count_first_degree_moves(GameState board, BoardPiece[] pieces) {
-			return MoveCompiler.GetMoveList(board, pieces,true, false).size();
+		private static int[] find_queen_tiles(GameState board, BoardPiece[] pieces) {
+			int[] move_map = new int[121];
+			int[][] open_positions = MoveCompiler.GetOpenPositions(board, MoveCompiler.ConvertPositions(pieces), false);
+			for (int[] piece_positions : open_positions) {
+				if (piece_positions != null) {
+					for (int index : piece_positions) {
+						if (index < 0) {
+							break;
+						}
+						move_map[index]++;
+					}
+				}
+			}
+			return move_map;
 		}
 	}
 
 	public static class Territory {
 		private static class TerritoryCounts {
-			int ours = 0;
-			int theirs = 0;
+			double ours = 0;
+			double theirs = 0;
 
-			TerritoryCounts(int ours, int theirs) {
+			TerritoryCounts(double ours, double theirs) {
 				this.ours = ours;
 				this.theirs = theirs;
 			}
@@ -217,7 +229,7 @@ public class Heuristics {
 
 		public static double CalculateHeuristic(GameState board) {
 			var counts = calculate_territories(board);
-			int total = counts.ours + counts.theirs;
+			double total = counts.ours + counts.theirs;
 			double heuristic;
 			// todo: figure it out part 2?
 			//  Maybe this is the part that needs to be flipped?
@@ -240,24 +252,24 @@ public class Heuristics {
 				//  very confused why this happens.
 				//  IT IS BECAUSE THE EDGES PROVIDE THE MOST TERRITORY!
 				case 1:
-					our_degree_map = calculate_degree_map(board,1);
-					their_degree_map = calculate_degree_map(board,2);
-					break;
-				case 2:
 					our_degree_map = calculate_degree_map(board,2);
 					their_degree_map = calculate_degree_map(board,1);
+					break;
+				case 2:
+					our_degree_map = calculate_degree_map(board,1);
+					their_degree_map = calculate_degree_map(board,2);
 					break;
 				default: // this will never happen
 					our_degree_map = new int[121];
 					their_degree_map = new int[121];
 			}
-			int our_territory_count = 0;
-			int their_territory_count = 0;
+			double our_territory_count = 0;
+			double their_territory_count = 0;
 			for (int i = 0; i < our_degree_map.length; i++) {
 				if (our_degree_map[i] < their_degree_map[i]) {
-					our_territory_count++;
+					our_territory_count += Math.pow(2, their_degree_map[i] - our_degree_map[i]);
 				} else if (our_degree_map[i] > their_degree_map[i]) {
-					their_territory_count++;
+					their_territory_count += Math.pow(2, our_degree_map[i] - their_degree_map[i]);
 				}
 			}
 			return new TerritoryCounts(our_territory_count, their_territory_count);

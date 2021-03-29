@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Position {
     public int x;
     public int y;
+    private int index = -1;
     public Position(Position other){
         this(other.x,other.y);
     }
@@ -39,6 +40,7 @@ public class Position {
         return x;
     }
     public void UpdatePosition(int index){
+        this.index = index;
         if(index > 0 && index < 121) {
             y = index / 11;
             x = index - (y * 11);
@@ -48,7 +50,10 @@ public class Position {
         }
     }
     public int CalculateIndex(){
-        return CalculateIndex(x,y);
+        if(index < 0) {
+            index = CalculateIndex(x, y);
+        }
+        return index;
     }
     public boolean IsValid(){
         return IsValid(x,y);

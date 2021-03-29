@@ -134,4 +134,34 @@ public class MoveCompiler {
         }
         return i;
     }
+
+    public static Position[] GetNeighbours(int index){
+        Position[] neighbours = new Position[8];
+        neighbours[0] = new Position(index - 1);
+        neighbours[1] = new Position(index + 1);
+        neighbours[2] = new Position(index - 12);
+        neighbours[3] = new Position(index - 11);
+        neighbours[4] = new Position(index - 10);
+        neighbours[5] = new Position(index + 10);
+        neighbours[6] = new Position(index + 11);
+        neighbours[7] = new Position(index + 12);
+        return neighbours;
+    }
+
+    public static int[] ConvertPositions(Position[] positions){
+        int valid_count = 0;
+        for(Position p : positions){
+            if(p.IsValid()){
+                valid_count++;
+            }
+        }
+        int[] converted = new int[valid_count];
+        int i = 0;
+        for(Position p : positions){
+            if(p.IsValid()){
+                converted[i++] = p.CalculateIndex();
+            }
+        }
+        return converted;
+    }
 }

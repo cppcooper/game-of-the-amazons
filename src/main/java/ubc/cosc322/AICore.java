@@ -224,7 +224,7 @@ public class AICore {
     }
 
     public static void PruneGameTree() {
-        int prev_turn_num = GetState().GetMoveNumber() - 2;
+        int prev_turn_num = GetState().GetMoveNumber() - 5;
         GameTree.remove(prev_turn_num);
     }
 
