@@ -83,8 +83,8 @@ public class AICore {
         if(mc_sim_thread2 != null && mc_sim_thread2.isAlive() && !mc_sim_thread2.isInterrupted()){
             mc_sim_thread2.interrupt();
         }
-        mc_sim_thread1 = new Thread(AICore::ExhaustiveMonteCarlo);
-        mc_sim_thread2 = new Thread(AICore::NonExhaustiveMonteCarlo);
+        mc_sim_thread1 = new Thread(AICore::ExhaustiveSearch);
+        mc_sim_thread2 = new Thread(AICore::MonteCarloTreeSearch);
         if(heuristics_thread == null) {
             heuristics_thread = new Thread(Heuristics::ProcessQueue);
             heuristics_thread.start();
@@ -94,11 +94,11 @@ public class AICore {
         mc_sim_thread2.start();
     }
 
-    private static void ExhaustiveMonteCarlo() {
-        Debug.PrintThreadID("ExhaustiveMC");
+    private static void ExhaustiveSearch() {
+        Debug.PrintThreadID("ExhaustiveSearch");
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && !copy.IsGameOver() && !terminate_threads.get()) {
-            if(MonteCarlo.RunSimulation(copy, new MonteCarlo.SimPolicy(Integer.MAX_VALUE, Integer.MAX_VALUE, MonteCarlo.SimPolicy.policy_type.BREADTH_FIRST))){
+            if(BreadFirstSearch.Search(copy)){
                 game_tree_is_explored.set(true);
                 return;
             }
@@ -106,17 +106,17 @@ public class AICore {
         }
     }
 
-    private static void NonExhaustiveMonteCarlo(){
-        Debug.PrintThreadID("NonExhaustiveMC");
+    private static void MonteCarloTreeSearch(){
+        Debug.PrintThreadID("MonteCarloSearch");
         final int initial_branches = 3;
-        final int initial_depth = 3;
-        final float binc = 0.333f;
+        final int initial_depth = 6;
+        final float binc = 2.f;
         final float dinc = 1.5f;
         float branches = initial_branches;
         float depth = initial_depth;
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && !copy.IsGameOver() && !terminate_threads.get()) {
-            if(MonteCarlo.RunSimulation(copy, new MonteCarlo.SimPolicy((int)branches,(int)depth, MonteCarlo.SimPolicy.policy_type.MONTE_CARLO))){
+            if(MonteCarlo.RunSimulation(copy, new MonteCarlo.SimPolicy((int)branches,(int)depth))){
                 branches += binc;
                 depth += dinc;
             } else {
