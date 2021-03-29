@@ -78,8 +78,11 @@ public class GameTreeNode {
     public static class NodeComparator implements Comparator<GameTreeNode> {
         @Override
         public int compare(GameTreeNode o1, GameTreeNode o2) {
-            int c1 = Double.compare(o1.heuristic.value.get())
-            return Double.compare(o1.heuristic.maximum_sub.get(), o2.heuristic.maximum_sub.get());
+            int c1 = Double.compare(o1.heuristic.value.get(),o2.heuristic.value.get());
+            if(c1 == 0){
+                return Double.compare(o1.heuristic.maximum_sub.get(), o2.heuristic.maximum_sub.get());
+            }
+            return c1;
         }
     }
 }
