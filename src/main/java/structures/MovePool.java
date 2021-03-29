@@ -8,7 +8,7 @@ public class MovePool {
     private static HashMap<Integer, Move> pool = new HashMap<>(1200000, 1.f);
 
     public static void generate_pool(){
-        int[] all_positions = Debug.GetAllPositions();
+        int[] all_positions = MoveCompiler.GetAllValidPositions();
         MoveCompiler.GetMoveList(new GameState(),all_positions,true);
     }
 

@@ -149,82 +149,172 @@ public class Heuristics {
 	}
 
 	public static class Mobility {
-		private static class MobilityData {
-			public MapData ours;
-			public MapData theirs;
+		public static class MobilityData {
+			//todo: if we only need more than one of the king distances, then move the arrays inside distance data (the algo will only need to run once)
+			public DistanceData[] ours;
+			public DistanceData[] theirs;
+			public DistanceData our_best = new DistanceData();
+			public DistanceData their_best = new DistanceData();
 
-			MobilityData(MapData ours, MapData theirs) {
+			MobilityData(DistanceData[] ours, DistanceData[] theirs) {
 				this.ours = ours;
 				this.theirs = theirs;
+				for (int piece = 0; piece < ours.length; ++piece) {
+					for (int tile = 0; tile < our_best.king_distances.length; ++tile) {
+						if (our_best.king_distances[tile] > ours[piece].king_distances[tile]) {
+							our_best.king_distances[tile] = ours[piece].king_distances[tile];
+						}
+						if (our_best.queen_distances[tile] > ours[piece].queen_distances[tile]){
+							our_best.queen_distances[tile] = ours[piece].queen_distances[tile];
+						}
+						if (their_best.king_distances[tile] > theirs[piece].king_distances[tile]) {
+							their_best.king_distances[tile] = theirs[piece].king_distances[tile];
+						}
+						if (their_best.queen_distances[tile] > theirs[piece].queen_distances[tile]){
+							their_best.queen_distances[tile] = theirs[piece].queen_distances[tile];
+						}
+					}
+				}
 			}
 		}
 
-		private static class MapData {
-			public int[] queen_tiles;
-			public int[] king_tiles;
-
-			MapData(int[] queen_tiles, int[] king_tiles) {
-				this.queen_tiles = queen_tiles;
-				this.king_tiles = king_tiles;
-			}
+		private static class DistanceData {
+			public int[] queen_distances;
+			public int[] king_distances;
 		}
 
 		public static double CalculateHeuristic(GameState board) {
 			BoardPiece[] our_pieces = board.GetPrevTurnPieces();
 			BoardPiece[] their_pieces = board.GetTurnPieces();
-			MobilityData data = new MobilityData(get_map_data(board, our_pieces), get_map_data(board, their_pieces));
+			MobilityData data = get_territories(board);
 			double heuristic = 0.0;
-
-
+			int[] valid_tiles = MoveCompiler.GetAllValidPositions();
+			double c1 = 0;
+			double c2 = 0;
+			double w = 0;
+			double t1 = 0;
+			double t2 = 0;
+			for (int tile : valid_tiles) {
+				c1 += Math.pow(2, -data.our_best.queen_distances[tile]) - Math.pow(2, -data.their_best.queen_distances[tile]);
+				int temp1 = data.their_best.king_distances[tile] - data.our_best.king_distances[tile];
+				c2 += Math.min(1, Math.max(-1, temp1 / 6.0));
+				int temp2 = data.our_best.queen_distances[tile] - data.their_best.queen_distances[tile];
+				w += Math.pow(2, -Math.abs(temp2));
+				t1 += temp2;
+				t2 += data.our_best.king_distances[tile] - data.their_best.king_distances[tile];
+			}
+			c1 *= 2;
+			double t = w * (t1 + c1 + c2 + t2);
+			double p1_a = 0;
+			double p2_a = 0;
+			for(int piece = 0; piece < our_pieces.length; ++piece){
+				for(int tile : valid_tiles) {
+					int N_b = count_neighbours(board, tile);
+					p1_a += Math.pow(2, -data.ours[piece].king_distances[tile]) * N_b;
+					p2_a += Math.pow(2, -data.theirs[piece].king_distances[tile]) * N_b;
+				}
+			}
+			double m = 0;
 			return heuristic;
 		}
 
-		private static MapData get_map_data(GameState board, BoardPiece[] pieces) {
-			return new MapData(find_queen_tiles(board, pieces), find_king_tiles(board, pieces));
+		private static MobilityData get_territories(GameState board) {
+			BoardPiece[] ours = board.GetPrevTurnPieces();
+			BoardPiece[] theirs = board.GetTurnPieces();
+			return new MobilityData(calculate_territory(board, ours), calculate_territory(board, theirs));
 		}
 
-		private static int[] find_king_tiles(GameState board, BoardPiece[] pieces) {
-			int[] move_map = new int[121];
-			for (BoardPiece piece : pieces) {
-				Position[] neighbours = MoveCompiler.GetNeighbours(piece.CalculateIndex());
-				for (Position n : neighbours) {
-					if (n.IsValid()) {
-						int index = n.CalculateIndex();
-						if (board.ReadTile(index) == 0) {
-							move_map[index]++;
+		private static DistanceData[] calculate_territory(GameState board, BoardPiece[] pieces) {
+			DistanceData[] territory = new DistanceData[pieces.length];
+			for (DistanceData piece_territory : territory) {
+				find_best_king_distances(board, MoveCompiler.ConvertPositions(pieces), piece_territory.king_distances, 1);
+				find_best_queen_distances(board, MoveCompiler.ConvertPositions(pieces), piece_territory.queen_distances, 1);
+			}
+			return territory;
+		}
+
+		private static void find_best_king_distances(GameState board, int[] starting_positions, int[] distance_map, int distance) {
+			int[] next_positions = new int[121];
+			for(int index : starting_positions) {
+				if(index != 0) {
+					Position[] neighbours = MoveCompiler.GetNeighbours(index);
+					if(neighbours != null) {
+						for (Position n : neighbours) {
+							int n_index = n.CalculateIndex();
+							if (n.IsValid() && board.ReadTile(n_index) == 0 && distance_map[n_index] > distance) {
+								next_positions[n.CalculateIndex()] = n.CalculateIndex();
+								distance_map[n_index] = distance;
+							}
 						}
 					}
 				}
 			}
-			return move_map;
+			if(distance < 100) {
+				find_best_king_distances(board, next_positions, distance_map, distance + 1);
+			}
 		}
 
-		private static int[] find_queen_tiles(GameState board, BoardPiece[] pieces) {
-			int[] move_map = new int[121];
-			int[][] open_positions = MoveCompiler.GetOpenPositions(board, MoveCompiler.ConvertPositions(pieces), false);
-			for (int[] piece_positions : open_positions) {
-				if (piece_positions != null) {
-					for (int index : piece_positions) {
-						if (index < 0) {
+		private static void find_best_queen_distances(GameState board, int[] starting_positions, int[] distance_map, int distance) {
+			int[][] new_positions = MoveCompiler.GetOpenPositions(board, starting_positions, false); //[starting index][index of open positions]
+			for (int[] position_list : new_positions) {
+				if (position_list != null) {
+					for (int index : position_list) {
+						if (index == -1) {
 							break;
 						}
-						move_map[index]++;
+						if (distance_map[index] == 0 || distance_map[index] > distance) {
+							distance_map[index] = distance;
+						}
 					}
 				}
 			}
-			return move_map;
+
+			for (int[] position_list : new_positions) {
+				if (position_list != null) {
+					find_best_queen_distances(board, prune_positions(position_list, distance_map, distance), distance_map, distance + 1);
+				}
+			}
+		}
+
+		private static int[] prune_positions(int[] positions, int[] distance_map, int distance) {
+			int[] pruned_positions = new int[positions.length];
+			int i = 0;
+			for (int index : positions) {
+				if(index < 0){
+					break;
+				}
+				if (distance_map[index] > distance) {
+					pruned_positions[i++] = index;
+				}
+			}
+			if (i < pruned_positions.length) {
+				pruned_positions[i] = -1;
+			}
+			return pruned_positions;
+		}
+
+		private static int count_neighbours(GameState board, int tile){
+			Position[] neighbours = MoveCompiler.GetNeighbours(tile);
+			int count = 0;
+			for(Position n : neighbours){
+				if(n.IsValid() && board.ReadTile(n.CalculateIndex()) == 0){
+					count++;
+				}
+			}
+			return count;
 		}
 	}
 
 	public static class Territory {
-		private static class TerritoryCounts {
+		private static class TerritoryData {
 			double ours = 0;
-			double theirs = 0;
 
-			TerritoryCounts(double ours, double theirs) {
+			double theirs = 0;
+			TerritoryData(double ours, double theirs) {
 				this.ours = ours;
 				this.theirs = theirs;
 			}
+
 		}
 
 		public static double CalculateHeuristic(GameState board) {
@@ -243,7 +333,7 @@ public class Heuristics {
 			return ASingleMaths.clamp(heuristic,0,1);
 		}
 
-		private static TerritoryCounts calculate_territories(GameState board) {
+		private static TerritoryData calculate_territories(GameState board) {
 			int[] our_degree_map = null;
 			int[] their_degree_map = null;
 			switch(board.GetPlayerTurn()){
@@ -267,12 +357,12 @@ public class Heuristics {
 			double their_territory_count = 0;
 			for (int i = 0; i < our_degree_map.length; i++) {
 				if (our_degree_map[i] < their_degree_map[i]) {
-					our_territory_count += Math.pow(2, their_degree_map[i] - our_degree_map[i]);
+					our_territory_count += Math.pow(2, their_degree_map[i] - our_degree_map[i] - 1);
 				} else if (our_degree_map[i] > their_degree_map[i]) {
-					their_territory_count += Math.pow(2, our_degree_map[i] - their_degree_map[i]);
+					their_territory_count += Math.pow(2, our_degree_map[i] - their_degree_map[i] - 1);
 				}
 			}
-			return new TerritoryCounts(our_territory_count, their_territory_count);
+			return new TerritoryData(our_territory_count, their_territory_count);
 		}
 
 		private static int[] calculate_degree_map(GameState board, int player) {

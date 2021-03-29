@@ -136,16 +136,19 @@ public class MoveCompiler {
     }
 
     public static Position[] GetNeighbours(int index){
-        Position[] neighbours = new Position[8];
-        neighbours[0] = new Position(index - 1);
-        neighbours[1] = new Position(index + 1);
-        neighbours[2] = new Position(index - 12);
-        neighbours[3] = new Position(index - 11);
-        neighbours[4] = new Position(index - 10);
-        neighbours[5] = new Position(index + 10);
-        neighbours[6] = new Position(index + 11);
-        neighbours[7] = new Position(index + 12);
-        return neighbours;
+        if(index >= 0 && index < 121) {
+            Position[] neighbours = new Position[8];
+            neighbours[0] = new Position(index - 1);
+            neighbours[1] = new Position(index + 1);
+            neighbours[2] = new Position(index - 12);
+            neighbours[3] = new Position(index - 11);
+            neighbours[4] = new Position(index - 10);
+            neighbours[5] = new Position(index + 10);
+            neighbours[6] = new Position(index + 11);
+            neighbours[7] = new Position(index + 12);
+            return neighbours;
+        }
+        return null;
     }
 
     public static int[] ConvertPositions(Position[] positions){
@@ -163,5 +166,19 @@ public class MoveCompiler {
             }
         }
         return converted;
+    }
+
+    public static int[] GetAllValidPositions(){
+        int[] positions = new int[100];
+        int j = 0;
+        for(int x = 1; x < 11; ++x){
+            for(int y = 1; y < 11; ++y){
+                Position p = new Position(x,y);
+                if(p.IsValid()){
+                    positions[j++] = p.CalculateIndex();
+                }
+            }
+        }
+        return positions;
     }
 }

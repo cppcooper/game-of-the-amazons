@@ -1,7 +1,6 @@
 package algorithms.analysis;
 
 import org.junit.jupiter.api.Test;
-import structures.Debug;
 import structures.GameState;
 import tools.RandomGen;
 import static org.junit.jupiter.api.Assertions.*;
@@ -10,7 +9,7 @@ public class MiscTests {
     @Test
     void find_all_possible_moves() {
         GameState board = new GameState();
-        int[] positions = Debug.GetAllPositions();
+        int[] positions = MoveCompiler.GetAllValidPositions();
         var moves = MoveCompiler.GetMoveList(board,positions,true);
         System.out.printf("possible moves (without pieces): %d\n",moves.size());
     }
@@ -18,7 +17,7 @@ public class MiscTests {
     @Test
     void find_first_degree_positions() {
         GameState board = new GameState();
-        int[] positions = Debug.GetAllPositions();
+        int[] positions = MoveCompiler.GetAllValidPositions();
         int[][] first_degree_territory = MoveCompiler.GetOpenPositions(board,positions,false);
         int max = 0;
         int min = Integer.MAX_VALUE;
