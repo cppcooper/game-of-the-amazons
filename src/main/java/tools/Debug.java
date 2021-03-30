@@ -9,7 +9,7 @@ public class Debug {
     private static boolean debugging_level1 = false;
     private static boolean debugging_level2 = true;
     private static boolean debugging_level3 = false;
-    private static boolean debugging_level4 = true;
+    private static boolean debugging_level4 = false;
 
     public static void DebugBreakPoint(){
         if(ZeroEdgesDetected.get() || NoIndexFound.get() || NoParentNodeFound.get()){
@@ -39,4 +39,96 @@ public class Debug {
             fn.run();
         }
     }
+
+    final public static int[] late_state = {
+            //this is upside down compared to the GUI
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 3, 3, 1, 3, 2, 3, 0, 3, 3, 3,
+            0, 3, 3, 0, 0, 0, 3, 0, 0, 3, 3,
+            0, 3, 3, 0, 2, 0, 3, 0, 0, 3, 3,
+            0, 3, 0, 3, 3, 0, 2, 0, 0, 3, 3,
+            0, 3, 0, 0, 3, 3, 0, 0, 0, 3, 3,
+            0, 3, 3, 0, 0, 0, 3, 0, 3, 3, 3,
+            0, 3, 3, 1, 0, 0, 3, 0, 0, 3, 3,
+            0, 3, 3, 3, 3, 2, 3, 1, 0, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
+    final public static int[] test_state_black_winning = {
+            //this is upside down compared to the GUI
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+            0, 3, 0, 1, 3, 1, 2, 3, 3, 3, 3,
+            0, 3, 0, 1, 3, 1, 2, 3, 3, 3, 3,
+            0, 3, 0, 0, 3, 0, 0, 3, 3, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 2, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
+    final public static int[] test_state_white_winning = {
+            //this is upside down compared to the GUI
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+            0, 3, 0, 2, 3, 1, 2, 3, 3, 3, 3,
+            0, 3, 0, 2, 3, 1, 2, 3, 3, 3, 3,
+            0, 3, 0, 0, 3, 0, 0, 3, 3, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 1, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+            0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
+    final public static int[] test_state_black_advantage = {
+            //this is upside down compared to the GUI
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0,
+            0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0,
+            0, 2, 0, 0, 3, 0, 0, 3, 0, 0, 2,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0};
+    final public static int[] test_state_white_advantage = {
+            //this is upside down compared to the GUI
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0,
+            0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0,
+            0, 1, 0, 0, 3, 0, 0, 3, 0, 0, 1,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0};
+    final public static int[] test_state_black_disadvantage = {
+            //this is upside down compared to the GUI
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 1, 3, 1, 0, 0, 0, 1, 0, 0, 1,
+            0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 2,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0};
+    final public static int[] test_state_white_disadvantage = {
+            //this is upside down compared to the GUI
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 2, 3, 2, 0, 0, 0, 2, 0, 0, 2,
+            0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 3, 3, 1, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0};
 }
