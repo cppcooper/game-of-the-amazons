@@ -11,6 +11,7 @@ public class Tuner {
     public static final boolean use_mobility_heuristic = true;
     public static final boolean use_territory_heuristic = false;
     public static final int max_wait_time = 1000 * 20;
+    public static final int wait_time = 1000 * 20;
 
     public static final int coord_min = 0;
     public static final int coord_max = 9;
