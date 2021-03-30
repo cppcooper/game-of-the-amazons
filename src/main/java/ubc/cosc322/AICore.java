@@ -50,8 +50,10 @@ public class AICore {
         if (mc_sim_thread2 != null && mc_sim_thread2.isAlive()) {
             mc_sim_thread2.interrupt();
         }
-        if (heuristics_thread != null && heuristics_thread.isAlive()) {
-            heuristics_thread.interrupt();
+        if(Tuner.use_heuristic_queue) {
+            if (heuristics_thread != null && heuristics_thread.isAlive()) {
+                heuristics_thread.interrupt();
+            }
         }
         if (move_sender_orphan != null && move_sender_orphan.isAlive()) {
             move_sender_orphan.interrupt();
@@ -87,9 +89,11 @@ public class AICore {
         }
         mc_sim_thread1 = new Thread(AICore::ExhaustiveSearch);
         mc_sim_thread2 = new Thread(AICore::MonteCarloTreeSearch);
-        if(heuristics_thread == null) {
-            heuristics_thread = new Thread(Heuristics::ProcessQueue);
-            heuristics_thread.start();
+        if(Tuner.use_heuristic_queue) {
+            if (heuristics_thread == null) {
+                heuristics_thread = new Thread(Heuristics::ProcessQueue);
+                heuristics_thread.start();
+            }
         }
 
         mc_sim_thread1.start();
@@ -230,7 +234,7 @@ public class AICore {
     }
 
     public static void PruneGameTree() {
-        int prev_turn_num = GetState().GetMoveNumber() - 3;
+        int prev_turn_num = GetState().GetMoveNumber() - 2;
         GameTree.remove(prev_turn_num);
     }
 

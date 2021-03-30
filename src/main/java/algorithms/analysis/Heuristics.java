@@ -3,6 +3,7 @@ package algorithms.analysis;
 import data.*;
 import tools.Debug;
 import tools.Maths;
+import tools.Tuner;
 import ubc.cosc322.AICore;
 
 import java.util.*;
@@ -15,7 +16,9 @@ public class Heuristics {
 	public static final AtomicBoolean first_depth_processed = new AtomicBoolean(false);
 
 	public static void enqueue(GameTreeNode job) {
-		queue.push(job);
+		if(Tuner.use_heuristic_queue) {
+			queue.push(job);
+		}
 	}
 
 	public static void ProcessQueue() {
@@ -29,15 +32,12 @@ public class Heuristics {
 					if (board == null || node.move.get() == null) {
 						continue;
 					}
-					if (AICore.GetCurrentTurnNumber() > board.GetMoveNumber()) {
+					if (AICore.GetCurrentTurnNumber() >= board.GetMoveNumber()) {
 						continue;
 					}
 					CalculateHeuristicsAll(board, node);
 					i = Math.max(0, i - 1);
 				} else {
-					if(BreadFirstSearch.first_depth_done.get()){
-						first_depth_processed.set(true);
-					}
 					Thread.sleep(++i * 50);
 				}
 			}

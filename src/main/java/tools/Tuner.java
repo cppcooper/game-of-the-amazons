@@ -1,6 +1,7 @@
 package tools;
 
 public class Tuner {
+    public static final boolean use_heuristic_queue = false;
     public static final int wait_time = 1000 * 3;
     public static final double t1c = 7.0;
     public static final double c1c = 10.0/8.0;
