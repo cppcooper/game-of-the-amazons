@@ -74,6 +74,30 @@ public class GameTreeNode {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        GameTreeNode that = (GameTreeNode) o;
+
+        if (super_nodes != null ? !super_nodes.equals(that.super_nodes) : that.super_nodes != null) return false;
+        if (sub_nodes != null ? !sub_nodes.equals(that.sub_nodes) : that.sub_nodes != null) return false;
+        if (heuristic != null ? !heuristic.equals(that.heuristic) : that.heuristic != null) return false;
+        if (move != null ? !move.equals(that.move) : that.move != null) return false;
+        return state_after_move != null ? state_after_move.equals(that.state_after_move) : that.state_after_move == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super_nodes != null ? super_nodes.hashCode() : 0;
+        result = 31 * result + (sub_nodes != null ? sub_nodes.hashCode() : 0);
+        result = 31 * result + (heuristic != null ? heuristic.hashCode() : 0);
+        result = 31 * result + (move != null ? move.hashCode() : 0);
+        result = 31 * result + (state_after_move != null ? state_after_move.hashCode() : 0);
+        return result;
+    }
+
     // used in PruneMoves to sort moves according to best for us and least beneficial to the enemy
     public static class NodeComparator implements Comparator<GameTreeNode> {
         @Override

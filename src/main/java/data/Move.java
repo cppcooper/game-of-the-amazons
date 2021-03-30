@@ -30,4 +30,12 @@ public class Move {
         Move move = (Move) o;
         return start == move.start && next == move.next && arrow == move.arrow;
     }
+
+    @Override
+    public int hashCode() {
+        int result = start;
+        result = 31 * result + next;
+        result = 31 * result + arrow;
+        return result;
+    }
 }
