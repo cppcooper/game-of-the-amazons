@@ -1,5 +1,7 @@
 package tools;
 
+import org.apache.commons.math3.util.Precision;
+
 public class Maths {
     public static double remap_value(double value, double r1_low, double r1_high, double r2_low, double r2_high) {
         return r2_low + (value - r1_low) * (r2_high - r2_low) / (r1_high - r1_low);
@@ -12,20 +14,26 @@ public class Maths {
     public static double clamp(double v, double min, double max){
         return Math.min(max,Math.max(min,v));
     }
-    public static double f1(double w){
-        return Tuner.t1c * w;
+
+    public static double scale_w(double w){
+        return w/80;
+    }
+    public static double f1(double w) {
+        w = scale_w(w);
+        return Tuner.t1c * (1 - Math.pow(w, Tuner.t1p));
     }
     public static double f2(double w){
-        return Tuner.c1c * w;
+        return Tuner.c1c * scale_w(w) * (1 - f1(w) - f4(w));
     }
     public static double f3(double w){
-        return Tuner.c2c * w;
+        return Tuner.c2c * (1 - f1(w) - f2(w) - f4(w));
     }
-    public static double f4(double w){
-        return Tuner.t2c * w;
+    public static double f4(double w) {
+        w = scale_w(w);
+        return Tuner.t2c * Math.pow(w, Tuner.t2p);
     }
     public static double f(double w, double alpha){
-        return w*alpha;
+        return (Tuner.fw * w)/(alpha + Tuner.falpha);
     }
     public static double sumf(double w, double[] alphas){
         double sum = 0.0;
