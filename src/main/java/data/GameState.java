@@ -96,6 +96,10 @@ public class GameState {
 			}
 			System.out.println();
 		}
+		System.out.print("   ");
+		for(int i = 1; i < 11; ++i){
+			System.out.printf("%2d ", i);
+		}
 	}
 
 	public void FindPieces(){
