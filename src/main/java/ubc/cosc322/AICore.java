@@ -186,9 +186,10 @@ public class AICore {
         int index;
         int null_count = 0;
         do {
-            while(!BreadFirstSearch.first_depth_done.get() || !Heuristics.first_depth_processed.get()){
-                Thread.sleep(500);
-            }
+//            while(!BreadFirstSearch.first_depth_done.get() || !Heuristics.first_depth_processed.get()){
+//                Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: waiting for heuristic queue, this may never end\n"));
+//                Thread.sleep(500);
+//            }
             GameTreeNode current_node = GameTree.get(GetState());
             best = Double.NEGATIVE_INFINITY;
             index = -1;
@@ -198,16 +199,17 @@ public class AICore {
                 } else {
                     Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: found a node with %d edges, now to find the best one\n", current_node.edges()));
                     for (int i = 0; i < current_node.edges(); ++i) {
-                        GameTreeNode sub_node = current_node.get(i);
-                        double heuristic = sub_node.heuristic.value.get();
-
+                        GameTreeNode sub_node = current_node.get(i);;
+                        if(!sub_node.heuristic.has_mobility.get()){
+                            Heuristics.CalculateHeuristicsAll(sub_node.state_after_move.get(), sub_node);
+                        }
                         final int edge = i;
-                        final double h = heuristic;
+                        final double h = sub_node.heuristic.value.get();
                         Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: node %d with a heuristic of %.3f\n", edge, h));
 
-                        if (heuristic > best) {
+                        if (h > best) {
                             Debug.RunLevel2DebugCode(()->System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", h, sub_node.move.get()));
-                            best = heuristic;
+                            best = h;
                             index = i;
                         }
                     }

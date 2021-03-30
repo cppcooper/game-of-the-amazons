@@ -68,9 +68,8 @@ public class Heuristics {
 			double value = h.winner.get() * h.mobility.get() * h.territory.get();
 			h.value.set(value);
 			node.propagate();
-		} else {
-			Debug.RunLevel4DebugCode(()->System.out.printf("CalculateHeuristicAll: NOTHING WAS DONE!! this might be a problem\n"));
 		}
+		h.is_ready.set(true);
 	}
 
 	public static void SetWinner(GameState board, GameTreeNode node) {
@@ -115,7 +114,7 @@ public class Heuristics {
 			if(winner == 0){
 				return 1;
 			}
-			return winner != board.GetPlayerTurn() ? 2 : -1;
+			return winner != board.GetPlayerTurn() ? 2 : 0;
 		}
 
 		private static int calculate_winner(GameState board) {
@@ -170,16 +169,16 @@ public class Heuristics {
 				this.theirs = theirs;
 				for (int piece = 0; piece < ours.length; ++piece) {
 					for (int tile = 0; tile < our_best.king_distances.length; ++tile) {
-						if (our_best.king_distances[tile] > ours[piece].king_distances[tile]) {
+						if (our_best.king_distances[tile] > ours[piece].king_distances[tile] || our_best.king_distances[tile] == 0) {
 							our_best.king_distances[tile] = ours[piece].king_distances[tile];
 						}
-						if (our_best.queen_distances[tile] > ours[piece].queen_distances[tile]){
+						if (our_best.queen_distances[tile] > ours[piece].queen_distances[tile] || our_best.queen_distances[tile] == 0) {
 							our_best.queen_distances[tile] = ours[piece].queen_distances[tile];
 						}
-						if (their_best.king_distances[tile] > theirs[piece].king_distances[tile]) {
+						if (their_best.king_distances[tile] > theirs[piece].king_distances[tile] || their_best.king_distances[tile] == 0) {
 							their_best.king_distances[tile] = theirs[piece].king_distances[tile];
 						}
-						if (their_best.queen_distances[tile] > theirs[piece].queen_distances[tile]){
+						if (their_best.queen_distances[tile] > theirs[piece].queen_distances[tile] || their_best.queen_distances[tile] == 0) {
 							their_best.queen_distances[tile] = theirs[piece].queen_distances[tile];
 						}
 					}
@@ -188,8 +187,8 @@ public class Heuristics {
 		}
 
 		private static class DistanceData {
-			public int[] queen_distances;
-			public int[] king_distances;
+			public int[] queen_distances = new int[121];
+			public int[] king_distances = new int[121];
 		}
 
 		public static double CalculateHeuristic(GameState board) {
@@ -230,7 +229,8 @@ public class Heuristics {
 				}
 			}
 			double m = Maths.sumf(w, p2_a) - Maths.sumf(w, p1_a);
-			return t + m;
+			double h = t + m;
+			return h;
 		}
 
 		private static MobilityData get_territories(GameState board) {
@@ -241,9 +241,12 @@ public class Heuristics {
 
 		private static DistanceData[] calculate_territory(GameState board, BoardPiece[] pieces) {
 			DistanceData[] territory = new DistanceData[pieces.length];
-			for (DistanceData piece_territory : territory) {
-				find_best_king_distances(board, MoveCompiler.ConvertPositions(pieces), piece_territory.king_distances, 1);
-				find_best_queen_distances(board, MoveCompiler.ConvertPositions(pieces), piece_territory.queen_distances, 1);
+			int[] position = new int[1];
+			for (int i = 0; i < territory.length; ++i) {
+				territory[i] = new DistanceData();
+				position[0] = pieces[i].CalculateIndex();
+				find_best_king_distances(board, position, territory[i].king_distances, 1);
+				find_best_queen_distances(board, position, territory[i].queen_distances, 1);
 			}
 			return territory;
 		}
@@ -256,7 +259,7 @@ public class Heuristics {
 					if(neighbours != null) {
 						for (Position n : neighbours) {
 							int n_index = n.CalculateIndex();
-							if (n.IsValid() && board.ReadTile(n_index) == 0 && distance_map[n_index] > distance) {
+							if (n.IsValid() && board.ReadTile(n_index) == 0 && (distance_map[n_index] > distance || distance_map[n_index] == 0)) {
 								next_positions[n.CalculateIndex()] = n.CalculateIndex();
 								distance_map[n_index] = distance;
 							}
@@ -298,7 +301,7 @@ public class Heuristics {
 				if(index < 0){
 					break;
 				}
-				if (distance_map[index] > distance) {
+				if (distance_map[index] >= distance) {
 					pruned_positions[i++] = index;
 				}
 			}
@@ -336,57 +339,36 @@ public class Heuristics {
 			var counts = calculate_territories(board);
 			double total = counts.ours + counts.theirs;
 			double heuristic;
-			// todo: figure it out part 2?
-			//  Maybe this is the part that needs to be flipped?
-			if(counts.ours > counts.theirs){
-				heuristic = 1-((double) counts.theirs / total);
-			} else {
-				heuristic = ((double) counts.ours / total);
-			}
+			heuristic = counts.ours / total;
 			heuristic = Math.pow(4*heuristic, 2);
 			heuristic /= 16;
-			return Maths.clamp(heuristic,0,1);
+			return heuristic;
 		}
 
 		private static TerritoryData calculate_territories(GameState board) {
-			int[] our_degree_map = null;
-			int[] their_degree_map = null;
-			switch(board.GetPlayerTurn()){
-				// todo: figure it out
-				//  Not sure why this isn't flipped.. I think it should be flipped.. but the game is way smarter this way
-				//  very confused why this happens.
-				//  IT IS BECAUSE THE EDGES PROVIDE THE MOST TERRITORY!
-				case 1:
-					our_degree_map = calculate_degree_map(board,2);
-					their_degree_map = calculate_degree_map(board,1);
-					break;
-				case 2:
-					our_degree_map = calculate_degree_map(board,1);
-					their_degree_map = calculate_degree_map(board,2);
-					break;
-				default: // this will never happen
-					our_degree_map = new int[121];
-					their_degree_map = new int[121];
-			}
+			int[] our_distance_map = null;
+			int[] their_distance_map = null;
+			our_distance_map = calculate_distance_map(board, board.GetPrevTurnPieces());
+			their_distance_map = calculate_distance_map(board, board.GetTurnPieces());
 			double our_territory_count = 0;
 			double their_territory_count = 0;
-			for (int i = 0; i < our_degree_map.length; i++) {
-				if (our_degree_map[i] < their_degree_map[i]) {
-					our_territory_count += Math.pow(2, their_degree_map[i] - our_degree_map[i] - 1);
-				} else if (our_degree_map[i] > their_degree_map[i]) {
-					their_territory_count += Math.pow(2, our_degree_map[i] - their_degree_map[i] - 1);
+			for (int i = 0; i < our_distance_map.length; i++) {
+				if (our_distance_map[i] < their_distance_map[i]) {
+					our_territory_count += Math.pow(2, their_distance_map[i] - our_distance_map[i] - 1);
+				} else if (our_distance_map[i] > their_distance_map[i]) {
+					their_territory_count += Math.pow(2, our_distance_map[i] - their_distance_map[i] - 1);
 				}
 			}
 			return new TerritoryData(our_territory_count, their_territory_count);
 		}
 
-		private static int[] calculate_degree_map(GameState board, int player) {
-			int[] degree_map = new int[121];
-			find_lowest_degrees(board, BoardPiece.GetIndices(Objects.requireNonNull(board.GetPlayerPieces(player))), degree_map, 1);
-			return degree_map;
+		private static int[] calculate_distance_map(GameState board, BoardPiece[] pieces) {
+			int[] distance_map = new int[121];
+			find_shortest_distances(board, MoveCompiler.ConvertPositions(pieces), distance_map, 1);
+			return distance_map;
 		}
 
-		private static void find_lowest_degrees(GameState board, int[] starting_positions, int[] degree_mapping, int degree) {
+		private static void find_shortest_distances(GameState board, int[] starting_positions, int[] distance_map, int distance) {
 			int[][] new_positions = MoveCompiler.GetOpenPositions(board, starting_positions, false); //[starting index][index of open positions]
 			for (int[] position_list : new_positions) {
 				if (position_list != null) {
@@ -394,8 +376,8 @@ public class Heuristics {
 						if (index == -1) {
 							break;
 						}
-						if (degree_mapping[index] == 0 || degree_mapping[index] > degree) {
-							degree_mapping[index] = degree;
+						if (distance_map[index] == 0 || distance_map[index] > distance) {
+							distance_map[index] = distance;
 						}
 					}
 				}
@@ -403,19 +385,19 @@ public class Heuristics {
 
 			for (int[] position_list : new_positions) {
 				if (position_list != null) {
-					find_lowest_degrees(board, prune_positions(degree_mapping, position_list, degree), degree_mapping, degree + 1);
+					find_shortest_distances(board, prune_positions(distance_map, position_list, distance), distance_map, distance + 1);
 				}
 			}
 		}
 
-		private static int[] prune_positions(int[] degree_mapping, int[] positions, int degree) {
+		private static int[] prune_positions(int[] distance_map, int[] positions, int distance) {
 			int[] pruned_positions = new int[positions.length];
 			int i = 0;
 			for (int index : positions) {
 				if(index < 0){
 					break;
 				}
-				if (degree_mapping[index] > degree) {
+				if (distance_map[index] >= distance) {
 					pruned_positions[i++] = index;
 				}
 			}
