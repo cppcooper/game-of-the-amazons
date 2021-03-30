@@ -1,5 +1,7 @@
 package data;
 
+import tools.Debug;
+
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -35,8 +37,15 @@ public class GameTreeNode {
 
     private void add_parent(GameTreeNode parent){
         super_nodes.add(parent);
+        // deal with merging tree branches [part 1]
         if(heuristic.has_propagated.get()){
             force_propagate();
+        }
+        // deal with merging tree branches [part 2]
+        if(heuristic.has_aggregated.get()){
+            double parents_new_aggregate = parent.heuristic.aggregate.get() + heuristic.aggregate.get();
+            int parents_new_aggregate_count = parent.heuristic.aggregate_count.get() + heuristic.aggregate_count.get();
+            parent.update_aggregate(parents_new_aggregate, parents_new_aggregate_count);
         }
     }
     public void adopt(GameTreeNode node){
@@ -59,6 +68,9 @@ public class GameTreeNode {
         if(!heuristic.has_propagated.get()){
             force_propagate();
         }
+        if(!heuristic.has_aggregated.get()){
+            update_aggregate(heuristic.value.get(), 1);
+        }
     }
     private void force_propagate(){
         heuristic.has_propagated.set(true);
@@ -71,6 +83,27 @@ public class GameTreeNode {
             if(parent.heuristic.minimum_sub.get() > h){
                 parent.heuristic.minimum_sub.set(h);
             }
+        }
+    }
+    private void update_aggregate(double new_aggregate, int new_aggregate_count){
+        heuristic.has_aggregated.set(true);
+        int delta_count = new_aggregate_count - heuristic.aggregate_count.get();
+        if(delta_count != 0) {
+            double old_aggregate = heuristic.aggregate.get();
+            double delta_aggregate = new_aggregate - old_aggregate;
+            heuristic.aggregate.set(new_aggregate);
+            heuristic.aggregate_avg.set(new_aggregate / new_aggregate_count);
+            heuristic.aggregate_count.set(new_aggregate_count);
+            for (int i = 0; i < super_nodes.size(); ++i) {
+                GameTreeNode parent = super_nodes.get(i);
+                double new_p_aggregate = parent.heuristic.aggregate.get() + delta_aggregate;;
+                int new_p_aggregate_count = parent.heuristic.aggregate_count.get() + delta_count;
+                parent.update_aggregate(new_p_aggregate, new_p_aggregate_count);
+            }
+//            Debug.RunLevel2DebugCode(()-> {
+//                double v = heuristic.aggregate.get();
+//                System.out.printf("aggregate total: %.3f\naggregate count: %d\naggregate: %.3f\n-----\n",new_aggregate, new_aggregate_count,v);
+//            });
         }
     }
 
