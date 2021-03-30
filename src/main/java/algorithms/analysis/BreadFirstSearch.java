@@ -56,10 +56,6 @@ public class BreadFirstSearch {
                     }
                 }
             }
-            if (depth == 0) {
-                Heuristics.first_depth_processed.set(false);
-                first_depth_done.set(true);
-            }
             while(!branch_jobs.isEmpty()){
                 var job = branch_jobs.poll();
                 Search(job.getFirst(), job.getSecond(),1);
