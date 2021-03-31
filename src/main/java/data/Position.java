@@ -8,6 +8,7 @@ public class Position {
     public int x;
     public int y;
     private int index = -1;
+
     public Position(Position other){
         this(other.x,other.y);
     }
@@ -18,28 +19,10 @@ public class Position {
     public Position(ArrayList<Integer> msg_pos){
         // msg = (row,col)
         x = msg_pos.get(1) - Tuner.coord_offset;
-        y = msg_pos.get(0) - Tuner.coord_offset;
+        y = Tuner.coord_upper - msg_pos.get(0) ;
     }
     public Position(int index){
         UpdatePosition(index);
-    }
-    public boolean equals(Position other){
-        if(x == other.x && y == other.y){
-            return true;
-        }
-        return false;
-    }
-    public boolean equals(int x, int y){
-        if(this.x == x && this.y == y){
-            return true;
-        }
-        return false;
-    }
-    public int row(){
-        return Tuner.coord_upper - y;
-    }
-    public int col(){
-        return x+Tuner.coord_offset;
     }
     public void UpdatePosition(int index){
         this.index = index;
@@ -51,21 +34,42 @@ public class Position {
             y = -1;
         }
     }
+    
+    public int col(){
+        return x+Tuner.coord_offset;
+    }
+    public int row(){
+        return Tuner.coord_upper - y;
+    }
+
     public int CalculateIndex(){
         if(index < 0) {
             index = CalculateIndex(x, y);
         }
         return index;
     }
+    public static int CalculateIndex(int x, int y){
+        return (y*Tuner.coord_upper)+x;
+    }
+
     public boolean IsValid(){
         return IsValid(x,y);
     }
-
-    static public int CalculateIndex(int x, int y){
-        return (y*Tuner.coord_upper)+x;
-    }
-    static public boolean IsValid(int x, int y){
+    public static boolean IsValid(int x, int y){
         return (x >= Tuner.coord_min && y >= Tuner.coord_min) && (x <= Tuner.coord_max && y <= Tuner.coord_max);
+    }
+
+    public boolean equals(Position other){
+        if(x == other.x && y == other.y){
+            return true;
+        }
+        return false;
+    }
+    public boolean equals(int x, int y){
+        if(this.x == x && this.y == y){
+            return true;
+        }
+        return false;
     }
 
     @Override
