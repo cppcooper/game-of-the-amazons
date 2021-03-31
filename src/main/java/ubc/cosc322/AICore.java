@@ -143,120 +143,161 @@ public class AICore {
         }
     }
 
-    public static void SendMessage() {
-        move_sender_orphan = new Thread(()->{
-            try {
-                System.out.println("SendDelayedMessage: now waiting..");
-                if(!game_tree_is_explored.get()) {
-                    Thread.sleep(Tuner.min_wait_time);
+    public static void SendDelayedMessage() {
+        if(move_sender_orphan == null || !move_sender_orphan.isAlive()) {
+            move_sender_orphan = new Thread(() -> {
+                try {
+                    System.out.println("SendDelayedMessage: now waiting..");
+                    if (!game_tree_is_explored.get() || HeuristicsQueue.isProcessing()) {
+                        Thread.sleep(Tuner.send_delay);
+                    }
+                    if (!Thread.currentThread().isInterrupted()) {
+                        GameTreeNode node = GetBestNode();
+                        Move move = null;
+                        if (node != null) {
+                            move = node.move.get();
+                            if (move == null) {
+                                throw new IllegalStateException("We found a node with a null move. This shouldn't even be possible.");
+                            }
+                        } else {
+                            GameState copy = GetStateCopy();
+                            ArrayList<Move> options = MoveCompiler.GetMoveList(copy, copy.GetTurnPieces(), true);
+                            for (Move m : options) {
+                                if (m.IsValidFor(copy)) {
+                                    move = m;
+                                    break;
+                                }
+                            }
+                            if (options.size() == 0 || move == null) {
+                                throw new IllegalStateException("We cannot find any moves for some reason. Even the MoveCompiler can't find a valid move. If the game is over, this thread should have been terminated.");
+                            }
+                        }
+                        if(!Thread.currentThread().isInterrupted()) {
+                            current_board_state.MakeMove(move, true, true);
+                            InterruptSimulations();
+                            var msg = MakeMessage(move);
+                            player.makeMove(msg);
+                            player.getGameClient().sendMoveMessage(msg);
+                            System.out.println("Move sent to server.");
+                            PruneGameTree();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-                if(!Thread.interrupted()) {
-                    Move move = GetBestMove();
-                    current_board_state.MakeMove(move, true, true);
-                    InterruptSimulations();
-                    var msg = MakeMessage(move);
-                    player.makeMove(msg);
-                    player.getGameClient().sendMoveMessage(msg);
-                    System.out.println("Move sent to server.");
-                    PruneGameTree();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        move_sender_orphan.start();
+            });
+            move_sender_orphan.start();
+        } else {
+            System.out.println("We are Desynchronized for some reason. SendDelayedMessage is already running.");
+        }
     }
 
-    private static Move GetBestMove() throws InterruptedException {
-        Move move = null;
+    private static GameTreeNode GetBestNode() throws Exception {
         double best_low;
         double best_high;
         int index;
-        int index_low;
-        int index_high;
+        GameTreeNode best_low_node = null;
+        GameTreeNode best_high_node = null;
         int bad_loop_count = 0;
         Benchmarker B = new Benchmarker();
         B.Start();
         do {
-            GameTreeNode current_node = GameTree.get(GetState());
+            GameTreeNode root = GameTree.get(GetState());
             best_low = Double.POSITIVE_INFINITY;//Double.NEGATIVE_INFINITY;
             best_high = Double.NEGATIVE_INFINITY;
-            index_low = -1;
-            index_high = -1;
-            if(current_node != null) {
-                if(current_node.edges() == 0){
-                    Debug.ZeroEdgesDetected.set(true);
-                    System.out.println("GetBestMove: Zero edges");
-                } else {
-                    Debug.RunLevel2DebugCode(()->System.out.printf("GetBestMove: found a node with %d edges, now to find the best one\n", current_node.edges()));
-                    for (int i = 0; i < current_node.edges(); ++i) {
-                        GameTreeNode sub_node = current_node.get(i);;
-                        if(!sub_node.heuristic.is_ready.get() && B.Elapsed() <= Tuner.max_wait_time){
-                            Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: node not ready. [Node: %s]\n", sub_node));
-                            HeuristicsQueue.CalculateHeuristicsAll(sub_node.state_after_move.get(), sub_node, true);
-                            sub_node.one_node_aggregation();
-                        }
-                        double heuristic = 0.0;
-                        if(Tuner.use_aggregate_heuristic){
-                            heuristic = sub_node.heuristic.aggregate.get();
-                        } else {
-                            heuristic = sub_node.heuristic.value.get();
-                        }
-                        final int edge = i;
-                        final double h = heuristic;
-                        Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: node %d with a heuristic of %.3f\n", edge, h));
-
-                        if (Tuner.use_lowest_heuristic && h < best_low) {
-                            Debug.RunLevel2DebugCode(()->System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", h, sub_node.move.get()));
-                            best_low = h;
-                            index_low = i;
-                        }
-                        if (Tuner.use_highest_heuristic && h > best_high) {
-                            Debug.RunLevel2DebugCode(()->System.out.printf("GetBestMove: at least one good heuristic (%.2f) - Move: %s\n", h, sub_node.move.get()));
-                            best_high = h;
-                            index_high = i;
-                        }
-                    }
-                    Heuristic h_low = null;
-                    if(index_low >= 0 && Tuner.use_lowest_heuristic) {
-                        h_low = current_node.get(index_low).heuristic;
-                    }
-                    Heuristic h_high = null;
-                    if(index_high >= 0 && Tuner.use_highest_heuristic){
-                        h_high = current_node.get(index_high).heuristic;
-                    }
-                    if (h_low != null && h_high != null) {
-                        if(h_low.territory.get() > h_high.territory.get()){
-                            index = index_low;
-                        } else {
-                            index = index_high;
-                        }
-                    } else {
-                        index = index_high >= 0 ? index_high : index_low;
-                    }
-                    if(index >= 0){
-                        move = current_node.get(index).move.get();
-                        System.out.println("GetBestMove: found a move");
-                    } else {
-                        Debug.NoIndexFound.set(true);
-                        System.out.println("GetBestMove: Could not find a move.. try again?");
-                    }
-                }
-            } else {
+            /* Control Structure
+             * check that we have a root to search from
+             * check that the root has edges
+             * compare edges
+             * */
+            if (root == null) {
                 Debug.NoParentNodeFound.set(true);
-                System.out.println("GetBestMove: GameTree can't find the state");
-            }
-        } while (move == null && ++bad_loop_count < 50);
-        if(move == null){
-            GameState copy = GetStateCopy();
-            ArrayList<Move> options = MoveCompiler.GetMoveList(copy, copy.GetTurnPieces(), true);
-            for(Move m : options){
-                if(m.IsValidFor(copy)){
-                    return m;
+                System.out.println("GetBestNode: GameTree can't find the state");
+                throw new IllegalStateException("There absolutely should be a root node, and we can't find it.");
+            } else if (root.edges() == 0) {
+                Debug.ZeroEdgesDetected.set(true);
+                System.out.println("GetBestNode: Zero edges");
+                throw new IllegalStateException(
+                        String.format("This should mean we have lost the game, in which case this thread should have been terminated.\n" +
+                                "[game can continue: %B]", GetState().CanGameContinue()));
+            } else {
+                Debug.RunLevel2DebugCode(() -> System.out.printf("GetBestNode: our root node has %d edges, now to find the best edge\n", root.edges()));
+                for (int i = 0; i < root.edges(); ++i) {
+                    final int edge = i;
+                    GameTreeNode sub_node = root.get(i);
+                    if (!sub_node.heuristic.is_ready.get() && B.Elapsed() < Tuner.max_wait_time) {
+                        Debug.RunLevel1DebugCode(() -> System.out.printf("GetBestNode: node not ready. [Node: %s]\n", sub_node));
+                        HeuristicsQueue.CalculateHeuristicsAll(sub_node.state_after_move.get(), sub_node, true);
+                        sub_node.one_node_aggregation();
+                    }
+                    Debug.RunLevel1DebugCode(() -> System.out.printf("GetBestNode: node %d\n%s", edge, sub_node));
+
+                    // need to check if this node is better than previous nodes
+                    if (Tuner.use_aggregate_heuristic) {
+                        double heuristic = sub_node.heuristic.aggregate.get();
+                        if (Tuner.use_lowest_heuristic && heuristic < best_low) {
+                            Debug.RunLevel2DebugCode(() -> System.out.printf("GetBestNode: new lowest node\n%s", sub_node));
+                            best_low = heuristic;
+                            best_low_node = sub_node;
+                        }
+                        if (Tuner.use_highest_heuristic && heuristic > best_high) {
+                            Debug.RunLevel2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
+                            best_high = heuristic;
+                            best_high_node = sub_node;
+                        }
+                    } else {
+                        double heuristic = sub_node.heuristic.value.get();
+                        if (Tuner.use_lowest_heuristic && heuristic < best_low) {
+                            Debug.RunLevel2DebugCode(() -> System.out.printf("GetBestNode: new lowest node\n%s", sub_node));
+                            best_low = heuristic;
+                            best_low_node = sub_node;
+                        }
+                        if (Tuner.use_highest_heuristic && heuristic > best_high) {
+                            Debug.RunLevel2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
+                            best_high = heuristic;
+                            best_high_node = sub_node;
+                        }
+                    }
+                }
+                // We've found our best nodes, now we need to return
+                Heuristic h_low = null;
+                if (best_low_node != null && best_high_node != null) {
+                    System.out.println("GetBestNode: found two");
+                    Heuristic h1 = best_low_node.heuristic;
+                    Heuristic h2 = best_high_node.heuristic;
+                    if(h1.has_winner.get() && h2.has_winner.get()) {
+                        if (h1.winner.get() > h2.winner.get()) {
+                            return best_low_node;
+                        } else if (h2.winner.get() > h1.winner.get()) {
+                            return best_high_node;
+                        }
+                    }
+                    if(h1.has_mobility.get() && h2.has_mobility.get()){
+                        if (h1.mobility.get() > h2.mobility.get()) {
+                            return best_low_node;
+                        } else if (h2.mobility.get() > h1.mobility.get()) {
+                            return best_high_node;
+                        }
+                    }
+                    if(h1.has_territory.get() && h2.has_territory.get()){
+                        if (h1.territory.get() > h2.territory.get()) {
+                            return best_low_node;
+                        } else if (h2.territory.get() > h1.territory.get()) {
+                            return best_high_node;
+                        }
+                    }
+                } else if (best_high_node != null) {
+                    System.out.println("GetBestNode: found one");
+                    return best_high_node;
+                } else if (best_low_node != null){
+                    System.out.println("GetBestNode: found one");
+                    return best_low_node;
+                } else {
+                    System.out.println("GetBestNode: Could not find a good node.. try again?");
                 }
             }
-        }
-        return move;
+        } while (B.Elapsed() < Tuner.max_wait_time);
+        return null;
     }
 
     private static Map<String, Object> MakeMessage(Move move) {
@@ -264,7 +305,7 @@ public class AICore {
             Position start = new Position(move.start);
             Position next = new Position(move.next);
             Position arrow = new Position(move.arrow);
-            // Yuuup, this (y,x; row,col) is how Gao sends the variables.. verified with debugging inside HumanPlayerTest in the mouse event
+            // coords are (row, col) and not (x, y)
             ArrayList<Integer> msg_start = new ArrayList<>(Arrays.asList(start.row(), start.col()));
             ArrayList<Integer> msg_next = new ArrayList<>(Arrays.asList(next.row(), next.col()));
             ArrayList<Integer> msg_arrow = new ArrayList<>(Arrays.asList(arrow.row(), arrow.col()));
@@ -272,10 +313,6 @@ public class AICore {
             msg.put("queen-position-current", msg_start);
             msg.put("queen-position-next", msg_next);
             msg.put("arrow-position", msg_arrow);
-            Debug.RunLevel3DebugCode(()->{
-                current_board_state.DebugPrint();
-                System.out.println(move);
-            });
             return msg;
         }
         return null;
@@ -308,10 +345,6 @@ public class AICore {
                 p2.CalculateIndex(),
                 p3.CalculateIndex());
         GameTreeNode parent = GameTree.get(current_board_state);
-        Debug.RunLevel3DebugCode(()->{
-            current_board_state.DebugPrint();
-            System.out.println(move);
-        });
         if(!current_board_state.MakeMove(move, true, true)){
             current_board_state.DebugPrint();
             System.out.println("ILLEGAL MOVE");
@@ -328,6 +361,16 @@ public class AICore {
             child = new GameTreeNode(move,parent,copy);
             GameTree.put(child);
         }
+        GameTreeNode finalChild = child;
+        Debug.RunLevel3DebugCode(()->{
+            double h;
+            if(!finalChild.heuristic.is_ready.get()){
+                HeuristicsQueue.CalculateHeuristicsAll(copy, finalChild, true);
+            }
+            System.out.println(move);
+            current_board_state.DebugPrint();
+            System.out.println(finalChild.heuristic);
+        });
     }
 
     private static synchronized GameState GetState() {

@@ -58,7 +58,7 @@ public class AIPlayer extends GamePlayer{
 			// interrupt the monte carlo algorithms to restart from our current state
 			AICore.InterruptSimulations();
 			// open up a thread to send a delayed message
-			AICore.SendMessage();
+			AICore.SendDelayedMessage();
 			AICore.PruneGameTree(); // last thing for this thread to do is clean up the Game Tree
 
 		} else if (messageType.equals(GameMessage.GAME_STATE_BOARD)) {
@@ -74,7 +74,7 @@ public class AIPlayer extends GamePlayer{
 			if(userName.equals(msgDetails.get("player-black"))){
 				System.out.printf("black: %s\n", msgDetails.get("player-black"));
 				System.out.printf("white: %s\n", msgDetails.get("player-white"));
-				AICore.SendMessage();
+				AICore.SendDelayedMessage();
 			} else {
 				System.out.printf("white: %s\n", msgDetails.get("player-white"));
 				System.out.printf("black: %s\n", msgDetails.get("player-black"));

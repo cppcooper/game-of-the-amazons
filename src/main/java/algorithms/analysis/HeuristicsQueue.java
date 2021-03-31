@@ -14,8 +14,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class HeuristicsQueue {
 	private static final ConcurrentLinkedDeque<GameTreeNode> queue = new ConcurrentLinkedDeque<>();
 
-	public static final AtomicBoolean first_depth_processed = new AtomicBoolean(false);
-
 	public static void add(GameTreeNode job) {
 		if(Tuner.use_heuristic_queue) {
 			int this_move_num = job.state_after_move.get().GetMoveNumber()-1;
@@ -57,6 +55,10 @@ public class HeuristicsQueue {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static boolean isProcessing(){
+		return !queue.isEmpty();
 	}
 
 	public static void CalculateHeuristicsAll(GameState board, GameTreeNode node, boolean skip_propagation) {
