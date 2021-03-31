@@ -142,19 +142,32 @@ public class GameState {
 
 	public void DebugPrint(){
 		final char[] col = {' ','a','b','c','d','e','f','g','h','i','j'};
+		System.out.print("    ");
+		for(int i = 0; i < 10; ++i){
+			System.out.printf("%2d ", i);
+		}
+		System.out.print("\n    ------------------------------\n");
 		for(int y = 0; y <= Tuner.coord_upper; ++y){
 			for(int x = -Tuner.coord_offset; x <= Tuner.coord_max; ++x){
 				if(y != 10){
-					System.out.printf("%2d ", x != -Tuner.coord_offset ? board.get(Position.CalculateIndex(x,y)) : y);
+					if(x != -Tuner.coord_offset){
+						if(x == Tuner.coord_max){
+							System.out.printf("%2d | %2d", board.get(Position.CalculateIndex(x,y)), Tuner.coord_upper - y);
+						} else {
+							System.out.printf("%2d ", board.get(Position.CalculateIndex(x,y)));
+						}
+					} else {
+						System.out.printf("%2d |", y);
+					}
 				} else {
-					System.out.printf(" %c ", col[x+Tuner.coord_offset]);
+					if(x == -Tuner.coord_offset){
+						System.out.print("    ------------------------------\n    ");
+					} else {
+						System.out.printf(" %c ", col[x+Tuner.coord_offset]);
+					}
 				}
 			}
 			System.out.println();
-		}
-		System.out.print("   ");
-		for(int i = 1; i < 11; ++i){
-			System.out.printf("%2d ", i);
 		}
 		System.out.println();
 	}
