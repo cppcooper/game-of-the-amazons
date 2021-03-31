@@ -34,7 +34,7 @@ public class Position {
             y = -1;
         }
     }
-    
+
     public int col(){
         return x+Tuner.coord_offset;
     }
