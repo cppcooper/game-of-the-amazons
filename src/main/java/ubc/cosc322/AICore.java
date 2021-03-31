@@ -1,6 +1,7 @@
 package ubc.cosc322;
 
 import algorithms.search.BreadFirstSearch;
+import algorithms.search.MoveCompiler;
 import data.Heuristic;
 import algorithms.analysis.HeuristicsQueue;
 import algorithms.search.MonteCarlo;
@@ -145,14 +146,20 @@ public class AICore {
     public static void SendMessage() {
         move_sender_orphan = new Thread(()->{
             try {
-                Move move = GetBestMove();
-                current_board_state.MakeMove(move, true, true);
-                InterruptSimulations();
-                var msg = MakeMessage(move);
-                player.makeMove(msg);
-                player.getGameClient().sendMoveMessage(msg);
-                System.out.println("Move sent to server.");
-                PruneGameTree();
+                System.out.println("SendDelayedMessage: now waiting..");
+                if(!game_tree_is_explored.get()) {
+                    Thread.sleep(Tuner.min_wait_time);
+                }
+                if(!Thread.interrupted()) {
+                    Move move = GetBestMove();
+                    current_board_state.MakeMove(move, true, true);
+                    InterruptSimulations();
+                    var msg = MakeMessage(move);
+                    player.makeMove(msg);
+                    player.getGameClient().sendMoveMessage(msg);
+                    System.out.println("Move sent to server.");
+                    PruneGameTree();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -167,7 +174,7 @@ public class AICore {
         int index;
         int index_low;
         int index_high;
-        int null_count = 0;
+        int bad_loop_count = 0;
         Benchmarker B = new Benchmarker();
         B.Start();
         do {
@@ -179,16 +186,15 @@ public class AICore {
             if(current_node != null) {
                 if(current_node.edges() == 0){
                     Debug.ZeroEdgesDetected.set(true);
+                    System.out.println("GetBestMove: Zero edges");
                 } else {
                     Debug.RunLevel2DebugCode(()->System.out.printf("GetBestMove: found a node with %d edges, now to find the best one\n", current_node.edges()));
                     for (int i = 0; i < current_node.edges(); ++i) {
                         GameTreeNode sub_node = current_node.get(i);;
                         if(!sub_node.heuristic.is_ready.get() && B.Elapsed() <= Tuner.max_wait_time){
-                            Debug.RunLevel2DebugCode(()->System.out.printf("GetBestMove: node not ready. [Node: %s]\n", sub_node));
+                            Debug.RunLevel1DebugCode(()->System.out.printf("GetBestMove: node not ready. [Node: %s]\n", sub_node));
                             HeuristicsQueue.CalculateHeuristicsAll(sub_node.state_after_move.get(), sub_node, true);
-                            if(sub_node.heuristic.has_aggregated.get()){
-
-                            }
+                            sub_node.one_node_aggregation();
                         }
                         double heuristic = 0.0;
                         if(Tuner.use_aggregate_heuristic){
@@ -233,14 +239,23 @@ public class AICore {
                         System.out.println("GetBestMove: found a move");
                     } else {
                         Debug.NoIndexFound.set(true);
+                        System.out.println("GetBestMove: Could not find a move.. try again?");
                     }
                 }
             } else {
-                //null_count = 0;
                 Debug.NoParentNodeFound.set(true);
                 System.out.println("GetBestMove: GameTree can't find the state");
             }
-        } while (move == null);
+        } while (move == null && ++bad_loop_count < 50);
+        if(move == null){
+            GameState copy = GetStateCopy();
+            ArrayList<Move> options = MoveCompiler.GetMoveList(copy, copy.GetTurnPieces(), true);
+            for(Move m : options){
+                if(m.IsValidFor(copy)){
+                    return m;
+                }
+            }
+        }
         return move;
     }
 

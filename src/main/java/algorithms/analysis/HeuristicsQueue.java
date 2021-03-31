@@ -45,7 +45,7 @@ public class HeuristicsQueue {
 					if (board == null || node.move.get() == null) {
 						continue;
 					}
-					if (AICore.GetCurrentMoveNumber() >= board.GetMoveNumber()) {
+					if (AICore.GetCurrentMoveNumber()-1 >= board.GetMoveNumber()) {
 						continue;
 					}
 					CalculateHeuristicsAll(board, node, false);

@@ -35,7 +35,6 @@ public class MonteCarlo {
     private static void RunSimulation(RandomGen rng, GameState board, GameTreeNode parent, int depth, SimPolicy policy) {
         if (depth < policy.depth && board.CanGameContinue() && !Thread.currentThread().isInterrupted()) {
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
-            Debug.DebugBreakPoint();
             if (moves == null || moves.size() == 0) {
                 return;
             }

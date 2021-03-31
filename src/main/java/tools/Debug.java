@@ -8,7 +8,7 @@ public class Debug {
     public static AtomicBoolean NoParentNodeFound = new AtomicBoolean(false);
     private static boolean debugging_level1 = false;
     private static boolean debugging_level2 = true;
-    private static boolean debugging_level3 = false;
+    private static boolean debugging_level3 = true;
     private static boolean debugging_level4 = false;
 
     public static void DebugBreakPoint(){

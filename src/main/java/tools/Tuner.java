@@ -11,7 +11,9 @@ public class Tuner {
     public static final boolean use_amazongs_heuristic = true;
     public static final boolean use_mobility_heuristic = false;
     public static final boolean use_territory_heuristic = false;
+    public static final int min_wait_time = 1000 * 5;
     public static final int max_wait_time = 1000 * 20;
+    public static final int max_getbest_loops = 50;
 
     public static final int coord_min = 0;
     public static final int coord_max = 9;
