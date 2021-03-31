@@ -27,4 +27,12 @@ public class Heuristic {
     public final AtomicBoolean has_mobility = new AtomicBoolean(false);
     public final AtomicBoolean has_territory = new AtomicBoolean(false);
 
+
+    @Override
+    public String toString() {
+        return String.format("value: %.4f\naggregate: %.4f\n" +
+                "amazongs: %.4f\nwinning: %.4f\n" +
+                "mobility: %.4f\nterritory: %.4f\n",
+                value.get(), aggregate_avg.get(), amazongs.get(), winner.get(), mobility.get(), territory.get());
+    }
 }

@@ -140,6 +140,11 @@ public class GameTreeNode {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s%s",move,heuristic);
+    }
+
     // used in PruneMoves to sort moves according to best for us and least beneficial to the enemy
     public static class NodeComparator implements Comparator<GameTreeNode> {
         @Override
