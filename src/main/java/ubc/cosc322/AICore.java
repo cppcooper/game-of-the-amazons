@@ -258,9 +258,7 @@ public class AICore {
             msg.put("arrow-position", msg_arrow);
             Debug.RunLevel3DebugCode(()->{
                 current_board_state.DebugPrint();
-                System.out.printf("QCurr: [%c, %d]: %d\n",64 + start.x, start.y, start.CalculateIndex());
-                System.out.printf("QNew: [%c, %d]: %d\n",64 + next.x, next.y, next.CalculateIndex());
-                System.out.printf("Arrow: [%c, %d]: %d\n",64 + arrow.x, arrow.y, arrow.CalculateIndex());
+                System.out.println(move);
             });
             return msg;
         }
@@ -296,17 +294,12 @@ public class AICore {
         GameTreeNode parent = GameTree.get(current_board_state);
         Debug.RunLevel3DebugCode(()->{
             current_board_state.DebugPrint();
-            System.out.printf("QCurr: [%c, %d]: %d\n",64 + p1.x, p1.y, p1.CalculateIndex());
-            System.out.printf("QNew: [%c, %d]: %d\n",64 + p2.x, p2.y, p2.CalculateIndex());
-            System.out.printf("Arrow: [%c, %d]: %d\n",64 + p3.x, p3.y, p3.CalculateIndex());
+            System.out.println(move);
         });
         if(!current_board_state.MakeMove(move, true, true)){
             current_board_state.DebugPrint();
             System.out.println("ILLEGAL MOVE");
-            // Yuuup, this (y,x) is how Gao sends the variables.. verified with debugging inside HumanPlayerTest in the mouse event
-            //System.out.printf("QCurr: [%c, %d]: %d\n",64 + p1.x, p1.y, p1.CalculateIndex());
-            //System.out.printf("QNew: [%c, %d]: %d\n",64 + p2.x, p2.y, p2.CalculateIndex());
-            //System.out.printf("Arrow: [%c, %d]: %d\n",64 + p3.x, p3.y, p3.CalculateIndex());
+            System.out.println(move);
             TerminateThreads();
             player.kill();
             System.exit(1);

@@ -17,8 +17,8 @@ public class Position {
     }
     public Position(ArrayList<Integer> msg_pos){
         // msg = (row,col)
-        x = msg_pos.get(1) - 1;
-        y = msg_pos.get(0) - 1;
+        x = msg_pos.get(1) - Tuner.coord_offset;
+        y = msg_pos.get(0) - Tuner.coord_offset;
     }
     public Position(int index){
         UpdatePosition(index);
@@ -36,14 +36,14 @@ public class Position {
         return false;
     }
     public int row(){
-        return y+Tuner.coord_offset;
+        return Tuner.coord_upper - y;
     }
     public int col(){
         return x+Tuner.coord_offset;
     }
     public void UpdatePosition(int index){
         this.index = index;
-        if(index > 0 && index < Tuner.state_size) {
+        if(index >= 0 && index < Tuner.state_size) {
             y = index / (Tuner.coord_upper);
             x = index - (y * Tuner.coord_upper);
         } else {
@@ -66,5 +66,10 @@ public class Position {
     }
     static public boolean IsValid(int x, int y){
         return (x >= Tuner.coord_min && y >= Tuner.coord_min) && (x <= Tuner.coord_max && y <= Tuner.coord_max);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[%c,%2d]: %d", col()+64, row(), CalculateIndex());
     }
 }

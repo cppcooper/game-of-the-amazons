@@ -25,6 +25,8 @@ public class Move {
         return false;
     }
 
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -39,5 +41,13 @@ public class Move {
         result = 31 * result + next;
         result = 31 * result + arrow;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        Position s = new Position(start);
+        Position n = new Position(next);
+        Position a = new Position(arrow);
+        return String.format("start: %s\nnext:  %s\narrow: %s\n",s,n,a);
     }
 }
