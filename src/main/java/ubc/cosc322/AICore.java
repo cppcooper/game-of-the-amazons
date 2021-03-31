@@ -112,6 +112,7 @@ public class AICore {
         while (!game_tree_is_explored.get() && copy.CanGameContinue() && !terminate_threads.get()) {
             if(BreadFirstSearch.Search(copy)){
                 game_tree_is_explored.set(true);
+                System.out.println("\nGAME TREE IS NOW FULLY EXPLORED.\n");
                 return;
             }
             copy = GetStateCopy();
