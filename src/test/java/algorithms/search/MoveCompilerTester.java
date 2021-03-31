@@ -1,9 +1,9 @@
-package algorithms.analysis;
+package algorithms.search;
 
 import org.junit.jupiter.api.Test;
 import data.BoardPiece;
-import data.GameState;
-import data.MovePool;
+import data.structures.GameState;
+import data.structures.MovePool;
 import data.Position;
 import tools.Benchmarker;
 import tools.RandomGen;

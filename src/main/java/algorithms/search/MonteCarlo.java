@@ -1,5 +1,9 @@
-package algorithms.analysis;
+package algorithms.search;
 
+import algorithms.analysis.HeuristicsQueue;
+import data.structures.GameState;
+import data.structures.GameTree;
+import data.structures.GameTreeNode;
 import org.apache.commons.math3.util.Pair;
 import data.*;
 import tools.Debug;
@@ -29,7 +33,7 @@ public class MonteCarlo {
     }
 
     private static void RunSimulation(RandomGen rng, GameState board, GameTreeNode parent, int depth, SimPolicy policy) {
-        if (depth < policy.depth && !board.IsGameOver() && !Thread.currentThread().isInterrupted()) {
+        if (depth < policy.depth && board.CanGameContinue() && !Thread.currentThread().isInterrupted()) {
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
             Debug.DebugBreakPoint();
             if (moves == null || moves.size() == 0) {
@@ -43,7 +47,7 @@ public class MonteCarlo {
                 return;
             }
             List<Integer> rng_set = rng.GetDistinctSequenceShuffled(0, moves.size()-1, Math.min(policy.branches, moves.size()));
-            Queue<Pair<GameState,GameTreeNode>> branch_jobs = new LinkedList<>();
+            Queue<Pair<GameState, GameTreeNode>> branch_jobs = new LinkedList<>();
             for (int b = 0; b < policy.branches && b < moves.size(); ++b) {
                 if (Thread.currentThread().isInterrupted()) {
                     break;
@@ -56,7 +60,7 @@ public class MonteCarlo {
                         // LocalState is a new position
                         node = new GameTreeNode(m, parent, new_state);
                         parent.adopt(node);
-                        Heuristics.enqueue(node);
+                        HeuristicsQueue.add(node);
                         GameTree.put(node);
                     } else {
                         // This LocalState + Node have already been seen once.
@@ -78,6 +82,7 @@ public class MonteCarlo {
             MOBILITY,
             WINNER_LOSER,
             TERRITORY,
+            AMAZONGS,
             ALL_HEURISTICS,
             DO_NOTHING
         }
@@ -98,6 +103,7 @@ public class MonteCarlo {
         if(tree_policy.max_return == moves.size() || tree_policy.sample_size == 0){
             return moves;
         }
+        TreePolicy.policy_type policy_type = rng.get_random_policy(board.GetMoveNumber());
         TreeSet<GameTreeNode> sample = new TreeSet<>(new GameTreeNode.NodeComparator());
         List<Integer> selection = rng.GetDistinctSequenceShuffled(0, moves.size()-1, tree_policy.sample_size);
         for(int i = 0; i < tree_policy.sample_size; ++i){
@@ -114,22 +120,24 @@ public class MonteCarlo {
                     GameTree.put(node);
                 }
                 sample.add(node);
-                switch (rng.get_random_policy(board.GetMoveNumber())) {
-                    case WINNER_LOSER:
-                        Heuristics.SetWinner(copy, node);
-                        Heuristics.enqueue(node);
-                        break;
+                switch (policy_type) {
                     case MOBILITY:
-                        Heuristics.SetMobility(copy, node);
-                        Heuristics.enqueue(node);
+                        HeuristicsQueue.SetMobility(copy, node);
+                        HeuristicsQueue.add(node);
                         break;
+                    case WINNER_LOSER:
+                        HeuristicsQueue.SetWinner(copy, node);
                     case TERRITORY:
-                        Heuristics.SetTerritory(copy, node);
-                        Heuristics.enqueue(node);
+                        HeuristicsQueue.SetTerritory(copy, node);
+                        HeuristicsQueue.add(node);
+                        break;
+                    case AMAZONGS:
+                        HeuristicsQueue.SetAmazongs(copy, node);
+                        HeuristicsQueue.add(node);
                         break;
                     case ALL_HEURISTICS:
                         // all of the above combined
-                        Heuristics.CalculateHeuristicsAll(copy, node);
+                        HeuristicsQueue.CalculateHeuristicsAll(copy, node, false);
                         break;
                 }
             }

@@ -1,9 +1,10 @@
-package algorithms.analysis;
+package algorithms.search;
 
+import algorithms.analysis.HeuristicsQueue;
+import data.structures.GameTreeNode;
 import org.apache.commons.math3.util.Pair;
-import data.GameState;
-import data.GameTree;
-import data.GameTreeNode;
+import data.structures.GameState;
+import data.structures.GameTree;
 import data.Move;
 
 import java.util.ArrayList;
@@ -26,12 +27,12 @@ public class BreadFirstSearch {
     }
 
     public static void Search(GameState board, GameTreeNode parent, int depth){
-        if(!board.IsGameOver() && !Thread.currentThread().isInterrupted()) {
+        if(board.CanGameContinue() && !Thread.currentThread().isInterrupted()) {
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
-            if (moves == null || moves.size() == 0) {
+            if (moves == null || moves.isEmpty()) {
                 return;
             }
-            Queue<Pair<GameState,GameTreeNode>> branch_jobs = new LinkedList<>();
+            Queue<Pair<GameState, GameTreeNode>> branch_jobs = new LinkedList<>();
             for(Move m : moves){
                 if(Thread.currentThread().isInterrupted()){
                     return;
@@ -43,7 +44,11 @@ public class BreadFirstSearch {
                         // LocalState is a new position
                         node = new GameTreeNode(m, parent, new_state);
                         parent.adopt(node);
-                        Heuristics.enqueue(node);
+                        if(depth > 1) {
+                            HeuristicsQueue.add(node);
+                        } else {
+                            HeuristicsQueue.push(node);
+                        }
                         GameTree.put(node);
                     } else { //no idea why parent == node
                         // This LocalState + Node have already been seen once.

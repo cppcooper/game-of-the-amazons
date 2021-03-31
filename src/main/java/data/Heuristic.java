@@ -1,5 +1,7 @@
 package data;
 
+import data.parallel.AtomicDouble;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,7 +14,8 @@ public class Heuristic {
     public final AtomicDouble maximum_sub = new AtomicDouble();
     public final AtomicDouble minimum_sub = new AtomicDouble();
 
-    public final AtomicInteger winner = new AtomicInteger();
+    public final AtomicDouble winner = new AtomicDouble();
+    public final AtomicDouble amazongs = new AtomicDouble();
     public final AtomicDouble mobility = new AtomicDouble();
     public final AtomicDouble territory = new AtomicDouble();
 
@@ -20,6 +23,7 @@ public class Heuristic {
     public final AtomicBoolean has_propagated = new AtomicBoolean(false);
     public final AtomicBoolean has_aggregated = new AtomicBoolean(false);
     public final AtomicBoolean has_winner = new AtomicBoolean(false);
+    public final AtomicBoolean has_amazongs = new AtomicBoolean(false);
     public final AtomicBoolean has_mobility = new AtomicBoolean(false);
     public final AtomicBoolean has_territory = new AtomicBoolean(false);
 

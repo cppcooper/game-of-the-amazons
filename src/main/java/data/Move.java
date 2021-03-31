@@ -1,5 +1,7 @@
 package data;
 
+import data.structures.GameState;
+
 public class Move {
     public int start = -1;
     public int next = -1;

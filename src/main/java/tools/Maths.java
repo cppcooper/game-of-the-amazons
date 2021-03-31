@@ -1,7 +1,5 @@
 package tools;
 
-import org.apache.commons.math3.util.Precision;
-
 public class Maths {
     public static double remap_value(double value, double r1_low, double r1_high, double r2_low, double r2_high) {
         return r2_low + (value - r1_low) * (r2_high - r2_low) / (r1_high - r1_low);
@@ -33,7 +31,8 @@ public class Maths {
         return Tuner.t2c * Math.pow(w, Tuner.t2p);
     }
     public static double f(double w, double alpha){
-        return (Tuner.fw * w)/(alpha + Tuner.falpha);
+        return (Tuner.fw * Math.pow(w,Tuner.fwp)) /
+                (Tuner.falpha * (Math.pow(alpha, Tuner.falphap) + Tuner.falphab));
     }
     public static double sumf(double w, double[] alphas){
         double sum = 0.0;
@@ -41,5 +40,8 @@ public class Maths {
             sum += f(w, alpha);
         }
         return sum;
+    }
+    public static double h(double t1, double t2, double w){
+        return (t1 + w) * (w * t2 + w);
     }
 }

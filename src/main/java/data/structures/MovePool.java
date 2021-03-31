@@ -1,6 +1,8 @@
-package data;
+package data.structures;
 
-import algorithms.analysis.MoveCompiler;
+import algorithms.search.MoveCompiler;
+import data.Move;
+import data.structures.GameState;
 
 import java.util.HashMap;
 

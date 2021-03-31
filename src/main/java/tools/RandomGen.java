@@ -1,8 +1,8 @@
 package tools;
 
-import algorithms.analysis.MonteCarlo;
+import algorithms.search.MonteCarlo;
 import data.BoardPiece;
-import data.GameState;
+import data.structures.GameState;
 import data.Position;
 
 import java.util.ArrayList;
@@ -52,9 +52,9 @@ public class RandomGen extends Random {
     }
 
     public ArrayList<Integer> GetRandomState(){
-        ArrayList<Integer> arr = new ArrayList<>(121);
-        double threshold = nextDouble() * 0.75;
-        for(int i = 0; i < 121; ++i){
+        ArrayList<Integer> arr = new ArrayList<>(Tuner.state_size);
+        double threshold = nextDouble();
+        for(int i = 0; i < Tuner.state_size; ++i){
             if(nextDouble() < threshold){
                 int v = nextInt(4);
                 if(v == 1 || v == 2){
@@ -79,8 +79,8 @@ public class RandomGen extends Random {
     }
 
     public ArrayList<Integer> GetRandomState(double threshold){
-        ArrayList<Integer> arr = new ArrayList<>(121);
-        for(int i = 0; i < 121; ++i){
+        ArrayList<Integer> arr = new ArrayList<>(Tuner.state_size);
+        for(int i = 0; i < Tuner.state_size; ++i){
             if(nextDouble() < threshold){
                 arr.add(3);
             } else {
@@ -138,7 +138,6 @@ public class RandomGen extends Random {
     }
 
     public MonteCarlo.TreePolicy.policy_type get_random_policy(int move_num){
-        // todo (tuning): improve ability to aid in pruning moves
         double progression = move_num / 92.0;
         double p1 = 0.75 * (1 - progression); // high -> low
         double p2 = 0.75 * progression * (1 - p1); // low -> high
@@ -157,5 +156,5 @@ public class RandomGen extends Random {
         } else {
             return MonteCarlo.TreePolicy.policy_type.ALL_HEURISTICS;
         }
-    }/**/
+    }
 }

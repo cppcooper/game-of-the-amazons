@@ -1,10 +1,10 @@
-package data;
+package data.structures;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GameTree {
     private static final ConcurrentHashMap<Integer,
-            ConcurrentHashMap<GameState,GameTreeNode>> game_tree = new ConcurrentHashMap<>();
+            ConcurrentHashMap<GameState, GameTreeNode>> game_tree = new ConcurrentHashMap<>();
 
     public static void put(GameTreeNode node){
         GameState board = node.state_after_move.get();

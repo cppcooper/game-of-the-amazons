@@ -1,4 +1,4 @@
-package data;
+package data.parallel;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -8,11 +8,12 @@ public class AtomicDouble {
     public double get(){
         return Double.longBitsToDouble(value.get());
     }
-    public void set(double new_value){
+    public synchronized void set(double new_value){
         cached = new_value;
         value.set(Double.doubleToLongBits(new_value));
     }
-    public void add(double value){
+    public double add(double value){
         set(cached + value);
+        return cached;
     }
 }

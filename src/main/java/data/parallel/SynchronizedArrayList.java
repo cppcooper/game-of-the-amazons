@@ -1,4 +1,4 @@
-package data;
+package data.parallel;
 
 import java.util.ArrayList;
 

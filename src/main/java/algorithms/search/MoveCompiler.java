@@ -1,6 +1,9 @@
-package algorithms.analysis;
+package algorithms.search;
 
 import data.*;
+import data.structures.GameState;
+import data.structures.MovePool;
+import tools.Tuner;
 
 import java.util.*;
 import java.util.function.*;
@@ -74,15 +77,15 @@ public class MoveCompiler {
     //40 bottom level operations for every starting position.
     public static int[][] GetOpenPositions(GameState board, int[] starting_positions, boolean use_interrupts){
         if(starting_positions != null) {
-            int[][] all_moves = new int[starting_positions.length][];
+            int[][] open_positions = new int[starting_positions.length][];
             for (int i = 0; i < starting_positions.length; ++i) {
                 if (starting_positions[i] < 0 || (use_interrupts && Thread.currentThread().isInterrupted())){
                     break; // -1 marks the end of valid values
                 }
-                all_moves[i] = ScanAllDirections(board, starting_positions[i],use_interrupts);
+                open_positions[i] = ScanAllDirections(board, starting_positions[i],use_interrupts);
             }
             // all the null arrays are at the end of our array [of arrays]
-            return all_moves;
+            return open_positions;
         }
         // the array we received was null
         return null;
@@ -119,7 +122,7 @@ public class MoveCompiler {
         x += xi;
         y += yi;
         int i = start_index;
-        Function<Integer, Boolean> check_in_range = (v) -> (v < 11 && v > 0); //JVM should inline this =)
+        Function<Integer, Boolean> check_in_range = (v) -> (v <= Tuner.coord_max && v >= Tuner.coord_min); //JVM should inline this =)
         while(check_in_range.apply(x) && check_in_range.apply(y)){
             if(use_interrupts && Thread.currentThread().isInterrupted()){
                 break;
@@ -136,16 +139,16 @@ public class MoveCompiler {
     }
 
     public static Position[] GetNeighbours(int index){
-        if(index >= 0 && index < 121) {
+        if(index >= 0 && index < Tuner.state_size) {
             Position[] neighbours = new Position[8];
             neighbours[0] = new Position(index - 1);
             neighbours[1] = new Position(index + 1);
-            neighbours[2] = new Position(index - 12);
-            neighbours[3] = new Position(index - 11);
-            neighbours[4] = new Position(index - 10);
-            neighbours[5] = new Position(index + 10);
-            neighbours[6] = new Position(index + 11);
-            neighbours[7] = new Position(index + 12);
+            neighbours[2] = new Position(index - Tuner.coord_upper - 1);
+            neighbours[3] = new Position(index - Tuner.coord_upper);
+            neighbours[4] = new Position(index - Tuner.coord_upper + 1);
+            neighbours[5] = new Position(index + Tuner.coord_upper - 1);
+            neighbours[6] = new Position(index + Tuner.coord_upper);
+            neighbours[7] = new Position(index + Tuner.coord_upper + 1);
             return neighbours;
         }
         return null;
@@ -168,13 +171,13 @@ public class MoveCompiler {
         return converted;
     }
 
-    public static int[] GetAllValidPositions(){
+    public static int[] GetAllValidPositions() {
         int[] positions = new int[100];
         int j = 0;
-        for(int x = 1; x < 11; ++x){
-            for(int y = 1; y < 11; ++y){
-                Position p = new Position(x,y);
-                if(p.IsValid()){
+        for (int y = Tuner.coord_min; y <= Tuner.coord_max; ++y) {
+            for (int x = Tuner.coord_min; x <= Tuner.coord_max; ++x) {
+                Position p = new Position(x, y);
+                if (p.IsValid()) {
                     positions[j++] = p.CalculateIndex();
                 }
             }

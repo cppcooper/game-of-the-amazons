@@ -1,5 +1,7 @@
 package data;
 
+import tools.Tuner;
+
 import java.util.ArrayList;
 
 public class Position {
@@ -15,8 +17,8 @@ public class Position {
     }
     public Position(ArrayList<Integer> msg_pos){
         // msg = (row,col)
-        x = msg_pos.get(1);
-        y = msg_pos.get(0);
+        x = msg_pos.get(1) - 1;
+        y = msg_pos.get(0) - 1;
     }
     public Position(int index){
         UpdatePosition(index);
@@ -34,16 +36,16 @@ public class Position {
         return false;
     }
     public int row(){
-        return y;
+        return y+Tuner.coord_offset;
     }
     public int col(){
-        return x;
+        return x+Tuner.coord_offset;
     }
     public void UpdatePosition(int index){
         this.index = index;
-        if(index > 0 && index < 121) {
-            y = index / 11;
-            x = index - (y * 11);
+        if(index > 0 && index < Tuner.state_size) {
+            y = index / (Tuner.coord_upper);
+            x = index - (y * Tuner.coord_upper);
         } else {
             x = -1;
             y = -1;
@@ -60,9 +62,9 @@ public class Position {
     }
 
     static public int CalculateIndex(int x, int y){
-        return (y*11)+x;
+        return (y*Tuner.coord_upper)+x;
     }
     static public boolean IsValid(int x, int y){
-        return (x > 0 && y > 0) && (x < 11 && y < 11);
+        return (x >= Tuner.coord_min && y >= Tuner.coord_min) && (x <= Tuner.coord_max && y <= Tuner.coord_max);
     }
 }
