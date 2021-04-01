@@ -16,4 +16,12 @@ public class AtomicDouble {
         set(cached + value);
         return cached;
     }
+
+    @Override
+    public String toString() {
+        return "AtomicDouble{" +
+                "value=" + value +
+                ", cached=" + cached +
+                '}';
+    }
 }

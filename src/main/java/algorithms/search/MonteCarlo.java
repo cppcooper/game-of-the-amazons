@@ -6,6 +6,7 @@ import data.structures.GameTree;
 import data.structures.GameTreeNode;
 import org.apache.commons.math3.util.Pair;
 import data.*;
+import tools.Benchmarker;
 import tools.Debug;
 import tools.RandomGen;
 
@@ -21,14 +22,16 @@ public class MonteCarlo {
         }
     }
 
-    public static boolean RunSimulation(GameState board, SimPolicy sim_policy) {
+    public static boolean RunSimulation(GameState board, GameTreeNode sim_root, SimPolicy sim_policy) {
         RandomGen rng = new RandomGen();
-        GameTreeNode sim_root = GameTree.get(board);
-        if(sim_root == null){
-            sim_root = new GameTreeNode(new Move(),null, board);
-            GameTree.put(sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
-        }
+        Debug.RunLevel4DebugCode(()-> {
+            System.out.printf("Tree size: %d\n", GameTree.size());
+            System.out.printf("Exploring %d branches of %d depths of the game tree.\n", sim_policy.branches, sim_policy.depth);
+        });
+        Benchmarker B = new Benchmarker();
+        B.Start();
         RunSimulation(rng, board, sim_root, 1, sim_policy);
+        //System.out.printf("Search took %d ms\n", B.Elapsed());
         return !Thread.interrupted(); //Assuming execution was interrupted then we need to clear that flag, and restart from the current LocalState
     }
 
@@ -118,20 +121,19 @@ public class MonteCarlo {
                     parent.adopt(node);
                     GameTree.put(node);
                 }
-                sample.add(node);
                 switch (policy_type) {
+                    case WINNER_LOSER:
+                        HeuristicsQueue.FillWinner(copy, node.heuristic);
                     case MOBILITY:
-                        HeuristicsQueue.SetMobility(copy, node);
+                        HeuristicsQueue.FillMobility(copy, node.heuristic);
                         HeuristicsQueue.add(node);
                         break;
-                    case WINNER_LOSER:
-                        HeuristicsQueue.SetWinner(copy, node);
                     case TERRITORY:
-                        HeuristicsQueue.SetTerritory(copy, node);
+                        HeuristicsQueue.FillTerritory(copy, node.heuristic);
                         HeuristicsQueue.add(node);
                         break;
                     case AMAZONGS:
-                        HeuristicsQueue.SetAmazongs(copy, node);
+                        HeuristicsQueue.FillAmazongs(copy, node.heuristic);
                         HeuristicsQueue.add(node);
                         break;
                     case ALL_HEURISTICS:
@@ -139,6 +141,7 @@ public class MonteCarlo {
                         HeuristicsQueue.CalculateHeuristicsAll(copy, node, false);
                         break;
                 }
+                sample.add(node);
             }
         }
         moves = new ArrayList<>(tree_policy.max_return);

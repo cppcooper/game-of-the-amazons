@@ -21,19 +21,24 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class AICore {
     private static GameState current_board_state = null;
     private static AIPlayer player = null;
-    private static Thread mc_sim_thread1 = null;
-    private static Thread mc_sim_thread2 = null;
+    private static Thread search_thread0 = null;
+    private static Thread search_thread1 = null;
+    private static Thread search_thread2 = null;
     private static Thread heuristics_thread = null;
     private static Thread move_sender_orphan = null;
     private static final AtomicBoolean terminate_threads = new AtomicBoolean(false);
     private static final AtomicBoolean game_tree_is_explored = new AtomicBoolean(false);
+    private static final AtomicBoolean is_searching = new AtomicBoolean(false);
+    private static AtomicReference<GameTreeNode> root = new AtomicReference<>();
 
     public static void main(String[] args) {
         try {
+            assert Tuner.use_amazongs_heuristic || Tuner.use_winner_heuristic || Tuner.use_territory_heuristic || Tuner.use_mobility_heuristic;
             MovePool.generate_pool();
             RandomGen rng = new RandomGen();
             player = new AIPlayer("coopstar" + rng.nextInt(4488), "secure_password");
@@ -43,7 +48,13 @@ public class AICore {
                     player.Go();
                 }
             });
-
+            search_thread0 = Thread.currentThread();
+            while(player.isRunning()){
+                if(is_searching.get()){
+                    MonteCarloTreeSearch();
+                }
+                Thread.sleep(500);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -51,11 +62,11 @@ public class AICore {
 
     public static void TerminateThreads() {
         terminate_threads.set(true);
-        if (mc_sim_thread1 != null && mc_sim_thread1.isAlive()) {
-            mc_sim_thread1.interrupt();
+        if (search_thread1 != null && search_thread1.isAlive()) {
+            search_thread1.interrupt();
         }
-        if (mc_sim_thread2 != null && mc_sim_thread2.isAlive()) {
-            mc_sim_thread2.interrupt();
+        if (search_thread2 != null && search_thread2.isAlive()) {
+            search_thread2.interrupt();
         }
         if(Tuner.use_heuristic_queue) {
             if (heuristics_thread != null && heuristics_thread.isAlive()) {
@@ -67,35 +78,36 @@ public class AICore {
         }
         try {
             while (
-                    (mc_sim_thread1 != null && mc_sim_thread1.isAlive())
-                    || (mc_sim_thread2 != null && mc_sim_thread2.isAlive())
+                    (search_thread1 != null && search_thread1.isAlive())
+                    || (search_thread2 != null && search_thread2.isAlive())
                     || (heuristics_thread != null && heuristics_thread.isAlive())
             ) {
                 Thread.sleep(100);
             }
-            mc_sim_thread1 = null;
-            mc_sim_thread2 = null;
+            search_thread1 = null;
+            search_thread2 = null;
             heuristics_thread = null;
         } catch (Exception e) {
             e.printStackTrace();
         }
         terminate_threads.set(false);
+        is_searching.set(false);
     }
 
     public static void InterruptSimulations(){
-        mc_sim_thread1.interrupt();
-        mc_sim_thread2.interrupt();
+        search_thread1.interrupt();
+        search_thread2.interrupt();
     }
 
     public static void LaunchThreads(){
-        if(mc_sim_thread1 != null && mc_sim_thread1.isAlive() && !mc_sim_thread1.isInterrupted()){
-            mc_sim_thread1.interrupt();
+        if(search_thread1 != null && search_thread1.isAlive() && !search_thread1.isInterrupted()){
+            search_thread1.interrupt();
         }
-        if(mc_sim_thread2 != null && mc_sim_thread2.isAlive() && !mc_sim_thread2.isInterrupted()){
-            mc_sim_thread2.interrupt();
+        if(search_thread2 != null && search_thread2.isAlive() && !search_thread2.isInterrupted()){
+            search_thread2.interrupt();
         }
-        mc_sim_thread1 = new Thread(AICore::ExhaustiveSearch);
-        mc_sim_thread2 = new Thread(AICore::MonteCarloTreeSearch);
+        search_thread1 = new Thread(AICore::ExhaustiveSearch);
+        search_thread2 = new Thread(AICore::MonteCarloTreeSearch);
         if(Tuner.use_heuristic_queue) {
             if (heuristics_thread == null) {
                 heuristics_thread = new Thread(HeuristicsQueue::ProcessQueue);
@@ -103,8 +115,9 @@ public class AICore {
             }
         }
 
-        mc_sim_thread1.start();
-        mc_sim_thread2.start();
+        search_thread1.start();
+        search_thread2.start();
+        is_searching.set(true);
     }
 
     private static void ExhaustiveSearch() {
@@ -122,20 +135,19 @@ public class AICore {
 
     private static void MonteCarloTreeSearch(){
         Debug.PrintThreadID("MonteCarloSearch");
-        final int initial_branches = 3;
-        final int initial_depth = 6;
-        final float binc = 2.f;
-        final float dinc = 1.5f;
+        final int initial_branches = 500;
+        final float initial_binc = 17.f;
         float branches = initial_branches;
-        float depth = initial_depth;
+        float binc = initial_binc;
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && copy.CanGameContinue() && !terminate_threads.get()) {
-            if(MonteCarlo.RunSimulation(copy, new MonteCarlo.SimPolicy((int)branches,(int)depth))){
+            float p = copy.GetMoveNumber() / 92.0f;
+            float d = Math.abs(0.5f - p) / 0.5f;
+            if(MonteCarlo.RunSimulation(copy, root.get(), new MonteCarlo.SimPolicy((int)branches,3))){
                 branches += binc;
-                depth += dinc;
             } else {
-                branches = initial_branches;
-                depth = initial_depth;
+                branches = Math.max(initial_branches, p * initial_branches * initial_branches);
+                binc = (p * initial_binc) * initial_binc;
             }
             if(copy.GetMoveNumber() != GetState().GetMoveNumber()) {
                 copy = GetStateCopy();
@@ -179,6 +191,9 @@ public class AICore {
                             player.makeMove(msg);
                             player.getGameClient().sendMoveMessage(msg);
                             System.out.println("Move sent to server.");
+                            Debug.RunLevel3DebugCode(()->{
+                                PrintChoice(node);
+                            });
                             PruneGameTree();
                         }
                     }
@@ -202,7 +217,6 @@ public class AICore {
         Benchmarker B = new Benchmarker();
         B.Start();
         do {
-            GameTreeNode root = GameTree.get(GetState());
             best_low = Double.POSITIVE_INFINITY;//Double.NEGATIVE_INFINITY;
             best_high = Double.NEGATIVE_INFINITY;
             /* Control Structure
@@ -210,6 +224,7 @@ public class AICore {
              * check that the root has edges
              * compare edges
              * */
+            GameTreeNode root = AICore.root.get();
             if (root == null) {
                 Debug.NoParentNodeFound.set(true);
                 System.out.println("GetBestNode: GameTree can't find the state");
@@ -228,12 +243,11 @@ public class AICore {
                     if (!sub_node.heuristic.is_ready.get() && B.Elapsed() < Tuner.max_wait_time) {
                         Debug.RunLevel1DebugCode(() -> System.out.printf("GetBestNode: node not ready. [Node: %s]\n", sub_node));
                         HeuristicsQueue.CalculateHeuristicsAll(sub_node.state_after_move.get(), sub_node, true);
-                        sub_node.one_node_aggregation();
                     }
                     Debug.RunLevel1DebugCode(() -> System.out.printf("GetBestNode: node %d\n%s", edge, sub_node));
 
                     // need to check if this node is better than previous nodes
-                    if (Tuner.use_aggregate_heuristic) {
+                    if (Tuner.find_best_aggregate) {
                         double heuristic = sub_node.heuristic.aggregate.get();
                         if (Tuner.use_lowest_heuristic && heuristic < best_low) {
                             Debug.RunLevel2DebugCode(() -> System.out.printf("GetBestNode: new lowest node\n%s", sub_node));
@@ -329,6 +343,7 @@ public class AICore {
 
     public static synchronized void SetState(ArrayList<Integer> state) {
         current_board_state = new GameState(state, true, false); // saves state reference instead of copying
+        root.set(new GameTreeNode(null,null, current_board_state));
         game_tree_is_explored.set(false);
         current_board_state.DebugPrint();
     }
@@ -344,8 +359,8 @@ public class AICore {
                 p1.CalculateIndex(),
                 p2.CalculateIndex(),
                 p3.CalculateIndex());
-        GameTreeNode parent = GameTree.get(current_board_state);
-        if(!current_board_state.MakeMove(move, true, true)){
+        GameTreeNode parent = root.get();
+        if(!current_board_state.MakeMove(move, true, false)){
             current_board_state.DebugPrint();
             System.out.println("ILLEGAL MOVE");
             System.out.println(move);
@@ -361,16 +376,23 @@ public class AICore {
             child = new GameTreeNode(move,parent,copy);
             GameTree.put(child);
         }
+        root.set(child);
         GameTreeNode finalChild = child;
         Debug.RunLevel3DebugCode(()->{
-            double h;
             if(!finalChild.heuristic.is_ready.get()){
                 HeuristicsQueue.CalculateHeuristicsAll(copy, finalChild, true);
             }
-            System.out.println(move);
-            current_board_state.DebugPrint();
-            System.out.println(finalChild.heuristic);
+            PrintChoice(finalChild);
         });
+    }
+
+    private static void PrintChoice(GameTreeNode node){
+        if(node != null) {
+            node.state_after_move.get().DebugPrint();
+            System.out.printf("\n========\nNode chosen\n%s\n", node);
+        } else {
+            System.out.println("\n\n=========\nNULL NODE\n=========\n\n");
+        }
     }
 
     private static synchronized GameState GetState() {

@@ -12,6 +12,11 @@ public class StateEvaluationTests {
     @Test
     void evaluate_states(){
         int[][] states = new int[][]{
+                Debug.test_state_white_good_opening,
+                Debug.test_state_white_good_opening,
+                Debug.test_state_black_good_opening,
+                Debug.test_state_black_good_opening,
+
                 Debug.test_state_black_winning,
                 Debug.test_state_black_winning,
                 Debug.test_state_black_clear_advantage,
@@ -36,6 +41,11 @@ public class StateEvaluationTests {
                 Debug.late_state,
         };
         String[] state_info = new String[]{
+                "white opening",
+                "white opening",
+                "black opening",
+                "black opening",
+
                 "black winning",
                 "black winning",
                 "black clear advantage",

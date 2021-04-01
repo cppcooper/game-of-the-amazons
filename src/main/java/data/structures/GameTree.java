@@ -6,6 +6,14 @@ public class GameTree {
     private static final ConcurrentHashMap<Integer,
             ConcurrentHashMap<GameState, GameTreeNode>> game_tree = new ConcurrentHashMap<>();
 
+    public static long size(){
+        long size = 0;
+        for(var pair : game_tree.entrySet()){
+            size += pair.getValue().size();
+        }
+        return size;
+    }
+
     public static void put(GameTreeNode node){
         GameState board = node.state_after_move.get();
         var inner_map = game_tree.get(board.GetMoveNumber()-1);

@@ -34,6 +34,10 @@ public class AIPlayer extends GamePlayer{
     	this.gamegui = new OurGameGUI(this);
     }
 
+    public boolean isRunning(){
+    	return !gamegui.is_closed.get();
+	}
+
     @Override
 	public void onLogin() {
 		userName = gameClient.getUserName();

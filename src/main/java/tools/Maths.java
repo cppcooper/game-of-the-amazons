@@ -41,7 +41,24 @@ public class Maths {
         }
         return sum;
     }
-    public static double h(double t1, double t2, double w){
-        return (t1 + w) * (w * t2 + w);
+    public static double h(double t1, double t2, double w) {
+        if(Tuner.use_mobility_heuristic || Tuner.use_territory_heuristic) {
+            if (Tuner.use_winner_heuristic) {
+                if(Tuner.use_amazongs_heuristic) {
+                    return (t1 + w) * (w * t2 + w);
+                }
+                return (w * t2 + w);
+            }
+            if(Tuner.use_amazongs_heuristic) {
+                return t1 * t2;
+            }
+        }
+        if(Tuner.use_amazongs_heuristic) {
+            if (Tuner.use_winner_heuristic) {
+                return t1 + w;
+            }
+            return t1;
+        }
+        return 0;
     }
 }

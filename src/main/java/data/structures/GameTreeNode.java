@@ -4,6 +4,7 @@ import data.BoardPiece;
 import data.Heuristic;
 import data.Move;
 import data.parallel.SynchronizedArrayList;
+import tools.Maths;
 
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicReference;
@@ -100,6 +101,7 @@ public class GameTreeNode {
 
     private synchronized void update_aggregate(double new_aggregate, int new_aggregate_count) {
         heuristic.has_aggregated.set(true);
+        new_aggregate = Math.max(new_aggregate,0);
         int delta_count = new_aggregate_count - heuristic.aggregate_count.get();
         if (delta_count != 0) {
             double delta_aggregate = new_aggregate - heuristic.aggregate.get();
@@ -122,22 +124,10 @@ public class GameTreeNode {
         if (o == null || getClass() != o.getClass()) return false;
 
         GameTreeNode that = (GameTreeNode) o;
-
-        if (super_nodes != null ? !super_nodes.equals(that.super_nodes) : that.super_nodes != null) return false;
-        if (sub_nodes != null ? !sub_nodes.equals(that.sub_nodes) : that.sub_nodes != null) return false;
-        if (heuristic != null ? !heuristic.equals(that.heuristic) : that.heuristic != null) return false;
-        if (move != null ? !move.equals(that.move) : that.move != null) return false;
-        return state_after_move != null ? state_after_move.equals(that.state_after_move) : that.state_after_move == null;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super_nodes != null ? super_nodes.hashCode() : 0;
-        result = 31 * result + (sub_nodes != null ? sub_nodes.hashCode() : 0);
-        result = 31 * result + (heuristic != null ? heuristic.hashCode() : 0);
-        result = 31 * result + (move != null ? move.hashCode() : 0);
-        result = 31 * result + (state_after_move != null ? state_after_move.hashCode() : 0);
-        return result;
+        if(move.get().equals(that.move.get())){
+            return state_after_move.get().equals(that.state_after_move.get());
+        }
+        return false;
     }
 
     @Override
@@ -151,23 +141,32 @@ public class GameTreeNode {
         public int compare(GameTreeNode o1, GameTreeNode o2) {
             Heuristic h1 = o1.heuristic;
             Heuristic h2 = o2.heuristic;
-            if(h1.has_aggregated.get()){
-                if(h2.has_aggregated.get()){
-                    return Double.compare(h1.aggregate_avg.get(), h2.aggregate_avg.get());
-                }
+            if (h1.has_aggregated.get() && h2.has_aggregated.get()) {
+                return Double.compare(h1.aggregate_avg.get(), h2.aggregate_avg.get());
             }
             if (h1.is_ready.get()) {
-                if(h2.is_ready.get()){
-                    return Double.compare(h1.value.get(),h2.value.get());
-                } else if (h2.has_territory.get()){
-                    return Double.compare(h1.territory.get(), h2.territory.get());
-                } else if (h2.has_mobility.get()){
+                if (h2.is_ready.get()) {
+                    return Double.compare(h1.value.get(), h2.value.get());
+                } else if (h2.has_mobility.get()) {
                     return Double.compare(h1.mobility.get(), h2.mobility.get());
+                } else if (h2.has_territory.get()) {
+                    return Double.compare(h1.territory.get(), h2.territory.get());
                 }
-            } else if(h2.is_ready.get()){
-                return 1;
             }
-            return -1;
+            if (h2.is_ready.get()) {
+                if (h1.has_mobility.get()) {
+                    return Double.compare(h1.mobility.get(), h2.mobility.get());
+                } else if (h1.has_territory.get()) {
+                    return Double.compare(h1.territory.get(), h2.territory.get());
+                }
+            }
+            if (h1.has_mobility.get() && h2.has_mobility.get()){
+                return Double.compare(h1.mobility.get(), h2.mobility.get());
+            }
+            if (h1.has_territory.get() && h2.has_territory.get()){
+                return Double.compare(h1.territory.get(), h2.territory.get());
+            }
+            return 0;
         }
     }
 }

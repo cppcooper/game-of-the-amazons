@@ -71,15 +71,23 @@ public class Amazongs {
         for (int tile : valid_tiles) {
             double p1_d1 = data.p1_best.queen_distances[tile];
             double p2_d1 = data.p2_best.queen_distances[tile];
-            double dd1 = data.p1_best.queen_distances[tile] - data.p2_best.queen_distances[tile];
-            double dd2 = p1_d1 - p2_d1;
+            double p1_d2 = data.p1_best.king_distances[tile];
+            double p2_d2 = data.p2_best.king_distances[tile];
+            p1_d1 = Double.isFinite(p1_d1) ? p1_d1 : 101;
+            p2_d1 = Double.isFinite(p2_d1) ? p2_d1 : 101;
+            p1_d2 = Double.isFinite(p1_d2) ? p1_d2 : 10001;
+            p2_d2 = Double.isFinite(p2_d2) ? p2_d2 : 10001;
+            double dd1 = p1_d1 - p2_d1;
+            double dd2 = p2_d2 - p1_d2;
+            double pre_c1 = Math.pow(2, -p1_d1) - Math.pow(2, -p2_d1);
+            double pre_c2 = Math.min(1, Math.max(-1, dd2 / -6.0));
             t1 += dd1;
-            c1 += Math.pow(2, -p1_d1) - Math.pow(2, -p2_d1);
-            c2 += Math.min(1, Math.max(-1, dd2 / -6.0));
+            c1 += pre_c1;
+            c2 += pre_c2;
             if (Double.isFinite(dd1)) {
                 w += Math.pow(2, -Math.abs(dd1));
             }
-            t2 += dd2;
+            t2 += p1_d2 - p2_d2;
         }
         c1 *= 2;
         double term1 = Maths.f1(w) * t1;
@@ -94,10 +102,10 @@ public class Amazongs {
             p2_a[piece] = 0;
             for (int tile : valid_tiles) {
                 int N_b = count_neighbours(board, tile);
-                if (data.p1[piece].queen_distances[tile] == 1 && data.p2_best.queen_distances[tile] != 0) {
+                if (data.p1[piece].queen_distances[tile] == 1 && data.p2_best.queen_distances[tile] < Double.POSITIVE_INFINITY) {
                     p1_a[piece] += Math.pow(2, -data.p1[piece].king_distances[tile]) * N_b;
                 }
-                if (data.p2[piece].queen_distances[tile] == 1 && data.p1_best.queen_distances[tile] != 0) {
+                if (data.p2[piece].queen_distances[tile] == 1 && data.p1_best.queen_distances[tile] < Double.POSITIVE_INFINITY) {
                     p2_a[piece] += Math.pow(2, -data.p2[piece].king_distances[tile]) * N_b;
                 }
             }
@@ -110,13 +118,27 @@ public class Amazongs {
         }
         double m = Maths.sumf(w, p2_a) - Maths.sumf(w, p1_a);
         double h = t + m;
-        return h;
+        if(Tuner.use_static_pieces) {
+            return h;
+        } else {
+            h *= -1;
+            if(Tuner.rescale_negative_amazongs && h < 0){
+                h = Maths.remap_value(h, h, 0, 0, 1);
+            }
+            return h;
+        }
     }
 
     static UberDistanceData calculate_all_distances(GameState board) {
-        BoardPiece[] p1 = board.GetPlayerPieces(1);
-        BoardPiece[] p2 = board.GetPlayerPieces(2);
-        return new UberDistanceData(calculate_distances(board, p1), calculate_distances(board, p2));
+        if(Tuner.use_static_pieces) {
+            BoardPiece[] p1 = board.GetPlayerPieces(1);
+            BoardPiece[] p2 = board.GetPlayerPieces(2);
+            return new UberDistanceData(calculate_distances(board, p1), calculate_distances(board, p2));
+        } else {
+            BoardPiece[] p1 = board.GetPrevTurnPieces();
+            BoardPiece[] p2 = board.GetTurnPieces();
+            return new UberDistanceData(calculate_distances(board, p1), calculate_distances(board, p2));
+        }
     }
 
 

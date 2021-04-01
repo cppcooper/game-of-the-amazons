@@ -1,16 +1,17 @@
 package tools;
 
 public class Tuner {
-    public static final boolean use_static_pieces = true;
+    public static final boolean use_static_pieces = false;
     public static final boolean use_heuristic_queue = true;
-    public static final boolean use_lowest_heuristic = true;
-    public static final boolean use_highest_heuristic = false;
+    public static final boolean use_lowest_heuristic = false;
+    public static final boolean use_highest_heuristic = true;
 
-    public static final boolean use_aggregate_heuristic = true;
+    public static final boolean find_best_aggregate = false;
     public static final boolean use_winner_heuristic = false;
     public static final boolean use_amazongs_heuristic = true;
-    public static final boolean use_mobility_heuristic = false;
+    public static final boolean use_mobility_heuristic = true;
     public static final boolean use_territory_heuristic = false;
+    public static final boolean rescale_negative_amazongs = true;
     public static final int send_delay = 1000 * 5;
     public static final int max_wait_time = 1000 * 20;
 
