@@ -47,7 +47,7 @@ public class Maths {
         System.out.println();
         for(double alpha : alphas){
             double temp = f(w, alpha);
-            Debug.RunLevel1DebugCode(()->{
+            Debug.RunVerboseDebugCode(()->{
                 System.out.printf("     alpha_i: %.4f\nf(w,alpha_i): %.4f\n", alpha, temp);
             });
             sum += temp;

@@ -6,9 +6,9 @@ public class Debug {
     public static AtomicBoolean ZeroEdgesDetected = new AtomicBoolean(false);
     public static AtomicBoolean NoIndexFound = new AtomicBoolean(false);
     public static AtomicBoolean NoParentNodeFound = new AtomicBoolean(false);
-    private static boolean debugging_level1 = true;
-    private static boolean debugging_level2 = true;
-    private static boolean debugging_level3 = true;
+    private static boolean debug_info_L1 = true;
+    private static boolean debug_info_L2 = true;
+    private static boolean debug_verbose = true;
     private static boolean debugging_level4 = false;
 
     public static void DebugBreakPoint(){
@@ -19,18 +19,18 @@ public class Debug {
     public static void PrintThreadID(String method_name){
         System.out.printf("Thread: %s - %s\n", Thread.currentThread().getName(),method_name);
     }
-    public static void RunLevel1DebugCode(Runnable fn){
-        if(debugging_level1){
+    public static void RunInfoL1DebugCode(Runnable fn){
+        if(debug_info_L1){
             fn.run();
         }
     }
-    public static void RunLevel2DebugCode(Runnable fn){
-        if(debugging_level2){
+    public static void RunInfoL2DebugCode(Runnable fn){
+        if(debug_info_L2){
             fn.run();
         }
     }
-    public static void RunLevel3DebugCode(Runnable fn){
-        if(debugging_level3){
+    public static void RunVerboseDebugCode(Runnable fn){
+        if(debug_verbose){
             fn.run();
         }
     }

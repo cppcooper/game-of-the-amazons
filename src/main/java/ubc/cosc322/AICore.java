@@ -191,7 +191,7 @@ public class AICore {
                             player.makeMove(msg);
                             player.getGameClient().sendMoveMessage(msg);
                             System.out.println("Move sent to server.");
-                            Debug.RunLevel3DebugCode(()->{
+                            Debug.RunInfoL1DebugCode(()->{
                                 PrintChoice(node);
                             });
                             PruneGameTree();
@@ -236,38 +236,38 @@ public class AICore {
                         String.format("This should mean we have lost the game, in which case this thread should have been terminated.\n" +
                                 "[game can continue: %B]", GetState().CanGameContinue()));
             } else {
-                Debug.RunLevel2DebugCode(() -> System.out.printf("GetBestNode: our root node has %d edges, now to find the best edge\n", root.edges()));
+                Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: our root node has %d edges, now to find the best edge\n", root.edges()));
                 for (int i = 0; i < root.edges(); ++i) {
                     final int edge = i;
                     GameTreeNode sub_node = root.get(i);
                     if (!sub_node.heuristic.is_ready.get() && B.Elapsed() < Tuner.max_wait_time) {
-                        Debug.RunLevel1DebugCode(() -> System.out.printf("GetBestNode: node not ready. [Node: %s]\n", sub_node));
+                        Debug.RunVerboseDebugCode(() -> System.out.printf("GetBestNode: node not ready. [Node: %s]\n", sub_node));
                         HeuristicsQueue.CalculateHeuristicsAll(sub_node.state_after_move.get(), sub_node, true);
                     }
-                    Debug.RunLevel1DebugCode(() -> System.out.printf("GetBestNode: node %d\n%s", edge, sub_node));
+                    Debug.RunVerboseDebugCode(() -> System.out.printf("GetBestNode: node %d\n%s", edge, sub_node));
 
                     // need to check if this node is better than previous nodes
                     if (Tuner.find_best_aggregate) {
                         double heuristic = sub_node.heuristic.aggregate.get();
                         if (Tuner.use_lowest_heuristic && heuristic < best_low) {
-                            Debug.RunLevel2DebugCode(() -> System.out.printf("GetBestNode: new lowest node\n%s", sub_node));
+                            Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new lowest node\n%s", sub_node));
                             best_low = heuristic;
                             best_low_node = sub_node;
                         }
                         if (Tuner.use_highest_heuristic && heuristic > best_high) {
-                            Debug.RunLevel2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
+                            Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
                             best_high = heuristic;
                             best_high_node = sub_node;
                         }
                     } else {
                         double heuristic = sub_node.heuristic.value.get();
                         if (Tuner.use_lowest_heuristic && heuristic < best_low) {
-                            Debug.RunLevel2DebugCode(() -> System.out.printf("GetBestNode: new lowest node\n%s", sub_node));
+                            Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new lowest node\n%s", sub_node));
                             best_low = heuristic;
                             best_low_node = sub_node;
                         }
                         if (Tuner.use_highest_heuristic && heuristic > best_high) {
-                            Debug.RunLevel2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
+                            Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
                             best_high = heuristic;
                             best_high_node = sub_node;
                         }
@@ -378,7 +378,7 @@ public class AICore {
         }
         root.set(child);
         GameTreeNode finalChild = child;
-        Debug.RunLevel3DebugCode(()->{
+        Debug.RunInfoL1DebugCode(()->{
             if(!finalChild.heuristic.is_ready.get()){
                 HeuristicsQueue.CalculateHeuristicsAll(copy, finalChild, true);
             }
