@@ -184,4 +184,14 @@ public class MoveCompiler {
         }
         return positions;
     }
+
+    public static int[] GetEmptyTiles(GameState board){
+        int[] valid_tiles = GetAllValidPositions();
+        for(int tile = 0; tile < valid_tiles.length; ++tile){
+            if(board.ReadTile(tile) != 0){
+                valid_tiles[tile] = -1;
+            }
+        }
+        return Arrays.stream(valid_tiles).filter((tile)->tile >= 0).toArray();
+    }
 }

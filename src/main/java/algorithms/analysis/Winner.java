@@ -19,7 +19,7 @@ public class Winner {
     public static double CalculateHeuristic(GameState board) {
         int winner = calculate_winner(board);
         if(winner != 0){
-            return winner == board.GetNextPlayerTurn() ? 2 : 0.5;
+            return 2;
         }
         return 1;
     }

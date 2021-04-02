@@ -6,7 +6,7 @@ public class Debug {
     public static AtomicBoolean ZeroEdgesDetected = new AtomicBoolean(false);
     public static AtomicBoolean NoIndexFound = new AtomicBoolean(false);
     public static AtomicBoolean NoParentNodeFound = new AtomicBoolean(false);
-    private static boolean debugging_level1 = false;
+    private static boolean debugging_level1 = true;
     private static boolean debugging_level2 = true;
     private static boolean debugging_level3 = true;
     private static boolean debugging_level4 = false;
@@ -59,14 +59,14 @@ public class Debug {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 2, 0, 0, 1, 0, 0, 3, 0, 0, 2,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0,
+            0, 2, 0, 0, 0, 0, 0, 3, 0, 0, 2,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0};
     final public static int[] test_state_white_good_opening = {
             //this is upside down compared to the GUI
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

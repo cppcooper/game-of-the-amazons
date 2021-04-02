@@ -14,30 +14,42 @@ public class Maths {
     }
 
     public static double scale_w(double w){
-        return w/80;
+        if(w<=70) {
+            return w / 70;
+        }
+        return 1;
     }
     public static double f1(double w) {
         w = scale_w(w);
-        return Tuner.t1c * (1 - Math.pow(w, Tuner.t1p));
+        w = 0 - ((1-0.25+0.001)/(1-w+(1-0.25+0.001))) + 1;
+        return w;
     }
-    public static double f2(double w){
-        return Tuner.c1c * scale_w(w) * (1 - f1(w) - f4(w));
+    public static double f2(double w) {
+        return Math.max(0, Tuner.c1c * scale_w(w) * (1 - f1(w) - f4(w)));
     }
-    public static double f3(double w){
-        return Tuner.c2c * (1 - f1(w) - f2(w) - f4(w));
+    public static double f3(double w) {
+        return Math.max(0, Tuner.c2c * (1 - f1(w) - f2(w) - f4(w)));
     }
     public static double f4(double w) {
         w = scale_w(w);
         return Tuner.t2c * Math.pow(w, Tuner.t2p);
     }
     public static double f(double w, double alpha){
+        if(Tuner.use_decreasing_alpha_asymptote){
+            return w * (0-((1-Tuner.alpha_curve) /
+                    (1-Math.min(1,alpha/30.0)+(1-Tuner.alpha_curve)))+1);
+        }
         return (Tuner.fw * Math.pow(w,Tuner.fwp)) /
                 (Tuner.falpha * (Math.pow(alpha, Tuner.falphap) + Tuner.falphab));
     }
     public static double sumf(double w, double[] alphas){
         double sum = 0.0;
         for(double alpha : alphas){
-            sum += f(w, alpha);
+            double temp = f(w, alpha);
+            Debug.RunLevel1DebugCode(()->{
+                System.out.printf("alpha_i: %.4f\n", temp);
+            });
+            sum += temp;
         }
         return sum;
     }
@@ -60,5 +72,17 @@ public class Maths {
             return t1;
         }
         return 0;
+    }
+    public static double delta(double left, double right){
+        if(Double.isNaN(left) && Double.isNaN(right)){
+            return 0.0;
+        } else if ((int)left == (int)right){
+            return Tuner.move_first_advantage;
+        } else if (left < right){
+            return 1.0;
+        } else {
+            return -1.0;
+        }
+
     }
 }

@@ -3,15 +3,21 @@ package algorithms.analysis;
 import algorithms.search.MoveCompiler;
 import data.BoardPiece;
 import data.structures.GameState;
+import tools.Maths;
 
 public class Mobility {
     private static final int max_moves = 4*35*35;
 
     public static double CalculateHeuristic(GameState board){
-        return (CalculateMobilityHeuristic(board) + CalculateReductionHeuristic(board)) / 2.0;
+        double r = CalculateReductionHeuristic(board);
+        double f = CalculateFreedomHeuristic(board);
+        double p = board.GetMoveNumber() / 92.0;
+        r = (Maths.lerp(r,f,1-p) + r) / 2.0;
+        f = Maths.lerp(f,r,p);
+        return r+f;
     }
 
-    public static double CalculateMobilityHeuristic(GameState board){
+    public static double CalculateFreedomHeuristic(GameState board){
         return (double)count_first_degree_moves(board, board.GetPrevTurnPieces()) / max_moves;
     }
 

@@ -84,7 +84,7 @@ public class StateEvaluationTests {
             board = new GameState(state);
             board.SetMoveNumber(i+1);
             board.FindPieces();
-            System.out.printf("(%s::MN%d)\n responsible: %s\n", state_info[i++], board.GetMoveNumber(), board.GetNextPlayerTurn() == 1 ? "black" : "white");
+            System.out.printf("(%s::MN%d)\n  %s evaluation\n", state_info[i++], board.GetMoveNumber(), board.GetNextPlayerTurn() == 1 ? "black" : "white");
             board.DebugPrint();
             w = Winner.CalculateHeuristic(board);
             m = Mobility.CalculateHeuristic(board);

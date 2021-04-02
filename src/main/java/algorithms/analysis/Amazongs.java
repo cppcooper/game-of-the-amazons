@@ -5,11 +5,13 @@ import data.BoardPiece;
 import data.structures.GameState;
 import data.Position;
 import org.junit.jupiter.api.Test;
+import tools.Debug;
 import tools.Maths;
 import tools.RandomGen;
 import tools.Tuner;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class Amazongs {
     static class UberDistanceData {
@@ -62,7 +64,7 @@ public class Amazongs {
     public static double CalculateHeuristic(GameState board) {
         UberDistanceData data = calculate_all_distances(board);
         final int num_pieces = data.p1.length;
-        int[] valid_tiles = MoveCompiler.GetAllValidPositions();
+        int[] valid_tiles = MoveCompiler.GetEmptyTiles(board);
         double c1 = 0;
         double c2 = 0;
         double w = 0;
@@ -73,21 +75,19 @@ public class Amazongs {
             double p2_d1 = data.p2_best.queen_distances[tile];
             double p1_d2 = data.p1_best.king_distances[tile];
             double p2_d2 = data.p2_best.king_distances[tile];
-            p1_d1 = Double.isFinite(p1_d1) ? p1_d1 : 101;
-            p2_d1 = Double.isFinite(p2_d1) ? p2_d1 : 101;
-            p1_d2 = Double.isFinite(p1_d2) ? p1_d2 : 10001;
-            p2_d2 = Double.isFinite(p2_d2) ? p2_d2 : 10001;
+            t1 += Maths.delta(p1_d1, p2_d1);
+            c1 += Math.pow(2, -p1_d1) - Math.pow(2, -p2_d1);
+            double dd2 = Double.isNaN(p2_d2) && Double.isNaN(p1_d2)
+                    ? 0 : Double.isNaN(p2_d2) || Double.isNaN(p1_d2)
+                        ? p2_d2 > p1_d2
+                            ? 1 : -1
+                    : p2_d2 - p1_d2;
+            c2 += Math.min(1, Math.max(-1, dd2/ -6.0));
             double dd1 = p1_d1 - p2_d1;
-            double dd2 = p2_d2 - p1_d2;
-            double pre_c1 = Math.pow(2, -p1_d1) - Math.pow(2, -p2_d1);
-            double pre_c2 = Math.min(1, Math.max(-1, dd2 / -6.0));
-            t1 += dd1;
-            c1 += pre_c1;
-            c2 += pre_c2;
-            if (Double.isFinite(dd1)) {
+            if(Double.isFinite(dd1)) {
                 w += Math.pow(2, -Math.abs(dd1));
             }
-            t2 += p1_d2 - p2_d2;
+            t2 += Maths.delta(p1_d2, p2_d2);
         }
         c1 *= 2;
         double term1 = Maths.f1(w) * t1;
@@ -110,23 +110,29 @@ public class Amazongs {
                 }
             }
         }
-        double p1a = 0;
-        double p2a = 0;
-        for (int i = 0; i < num_pieces; ++i) {
-            p1a += p1_a[i];
-            p2a += p2_a[i];
-        }
+        Debug.RunLevel1DebugCode(()->{
+            int i = 0;
+            System.out.println("white pieces:");
+            for(BoardPiece p : Objects.requireNonNull(board.GetPlayerPieces(2))){
+                System.out.printf("piece %d [index: %d]\n",i++,p.CalculateIndex());
+            }
+            i = 0;
+            System.out.println("black pieces:");
+            for(BoardPiece p : Objects.requireNonNull(board.GetPlayerPieces(1))){
+                System.out.printf("piece %d [index: %d]\n",i++,p.CalculateIndex());
+            }
+        });
         double m = Maths.sumf(w, p2_a) - Maths.sumf(w, p1_a);
         double h = t + m;
-        if(Tuner.use_static_pieces) {
-            return h;
-        } else {
-            h *= -1;
-            if(Tuner.rescale_negative_amazongs && h < 0){
-                h = Maths.remap_value(h, h, 0, 0, 1);
-            }
-            return h;
-        }
+        double finalC = c2;
+        double finalT = t1;
+        double finalT1 = t2;
+        double finalC1 = c1;
+        Debug.RunLevel1DebugCode(()->{
+            System.out.printf("t1: %.4f\nt2: %.4f\nc1: %.4f\nc2: %.4f\nterm1: %.4f\nterm2: %.4f\nterm3: %.4f\nterm4: %.4f\nt: %.4f\nm: %.4f\n"
+                    , finalT, finalT1, finalC1, finalC,term1,term2,term3,term4,t,m);
+        });
+        return h;
     }
 
     static UberDistanceData calculate_all_distances(GameState board) {
@@ -147,9 +153,6 @@ public class Amazongs {
         int[] position = new int[1];
         for (int i = 0; i < territory.length; ++i) {
             territory[i] = new DistanceData();
-            position[0] = pieces[i].CalculateIndex();
-            territory[i].king_distances[position[0]] = 0;
-            territory[i].queen_distances[position[0]] = 0;
             find_best_king_distances(board, position, territory[i].king_distances, 1);
             find_best_queen_distances(board, position, territory[i].queen_distances, 1);
         }
@@ -266,6 +269,55 @@ public class Amazongs {
             if (new_value) {
                 board.DebugPrint();
                 System.out.printf("--------\nnew min: %.3f\nnew max: %.3f\n", min, max);
+            }
+        }
+        System.out.printf("min: %.3f\nmax: %.3f\n", min, max);
+    }
+
+    @Test
+    void alpha_values(){
+        final RandomGen rng = new RandomGen();
+        final int trials = 1000000;
+        double max = Double.NEGATIVE_INFINITY;
+        double min = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < trials; ++i) {
+            GameState board;
+            if (i == 0) {
+                board = new GameState();
+            } else {
+                board = rng.GetRandomBoard(Math.min(1, (double)i/trials + 0.2));
+            }
+            UberDistanceData data = Amazongs.calculate_all_distances(board);
+            int[] valid_tiles = MoveCompiler.GetEmptyTiles(board);
+            double[] p1_a = new double[4];
+            double[] p2_a = new double[4];
+            for (int piece = 0; piece < 4; ++piece) {
+                p1_a[piece] = 0;
+                p2_a[piece] = 0;
+                boolean new_value = false;
+                for (int tile : valid_tiles) {
+                    int N_b = count_neighbours(board, tile);
+                    if (data.p1[piece].queen_distances[tile] == 1 && data.p2_best.queen_distances[tile] < Double.POSITIVE_INFINITY) {
+                        p1_a[piece] += Math.pow(2, -data.p1[piece].king_distances[tile]) * N_b;
+                    }
+                    if (data.p2[piece].queen_distances[tile] == 1 && data.p1_best.queen_distances[tile] < Double.POSITIVE_INFINITY) {
+                        p2_a[piece] += Math.pow(2, -data.p2[piece].king_distances[tile]) * N_b;
+                    }
+                    double l = Math.min(p1_a[piece], p2_a[piece]);
+                    double h = Math.max(p1_a[piece], p2_a[piece]);
+                    if (h > max) {
+                        new_value = true;
+                        max = h;
+                    }
+                    if (l < min) {
+                        new_value = true;
+                        min = l;
+                    }
+                }
+                if (new_value) {
+                    board.DebugPrint();
+                    System.out.printf("--------\nnew min: %.3f\nnew max: %.3f\n", min, max);
+                }
             }
         }
         System.out.printf("min: %.3f\nmax: %.3f\n", min, max);
