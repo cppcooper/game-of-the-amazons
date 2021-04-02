@@ -77,12 +77,12 @@ public class Amazongs {
             double p2_d2 = data.p2_best.king_distances[tile];
             t1 += Maths.delta(p1_d1, p2_d1);
             c1 += Math.pow(2, -p1_d1) - Math.pow(2, -p2_d1);
-            double dd2 = Double.isNaN(p2_d2) && Double.isNaN(p1_d2)
-                    ? 0 : Double.isNaN(p2_d2) || Double.isNaN(p1_d2)
-                        ? p2_d2 > p1_d2
-                            ? 1 : -1
-                    : p2_d2 - p1_d2;
-            c2 += Math.min(1, Math.max(-1, dd2/ -6.0));
+            double dd2 = Double.isInfinite(p2_d2) || Double.isInfinite(p1_d2)
+                    ? (Double.isInfinite(p2_d2) && Double.isInfinite(p1_d2)
+                        ? 0 : (p2_d2 > p1_d2
+                            ? 1 : -1))
+                    : (p2_d2 - p1_d2)/6.0;
+            c2 += Math.min(1, Math.max(-1, dd2));
             double dd1 = p1_d1 - p2_d1;
             if(Double.isFinite(dd1)) {
                 w += Math.pow(2, -Math.abs(dd1));
@@ -153,6 +153,7 @@ public class Amazongs {
         int[] position = new int[1];
         for (int i = 0; i < territory.length; ++i) {
             territory[i] = new DistanceData();
+            position[0] = pieces[i].CalculateIndex();
             find_best_king_distances(board, position, territory[i].king_distances, 1);
             find_best_queen_distances(board, position, territory[i].queen_distances, 1);
         }

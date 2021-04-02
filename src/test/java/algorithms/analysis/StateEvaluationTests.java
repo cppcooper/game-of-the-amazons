@@ -12,6 +12,7 @@ public class StateEvaluationTests {
     @Test
     void evaluate_states(){
         int[][] states = new int[][]{
+                Debug.test_state_alpha_debug,
                 Debug.test_state_white_good_opening,
                 Debug.test_state_white_good_opening,
                 Debug.test_state_black_good_opening,
@@ -41,6 +42,7 @@ public class StateEvaluationTests {
                 Debug.late_state,
         };
         String[] state_info = new String[]{
+                "black piece alpha debug",
                 "white opening",
                 "white opening",
                 "black opening",
@@ -177,6 +179,7 @@ public class StateEvaluationTests {
         assertEquals(Double.NEGATIVE_INFINITY < 0, true);
         System.out.println(Maths.clamp(Double.POSITIVE_INFINITY,0,10));
         System.out.println(Math.pow(2, -Double.POSITIVE_INFINITY));
+        System.out.println(Double.isNaN(Double.POSITIVE_INFINITY));
     }
 
 }

@@ -1,7 +1,7 @@
 package tools;
 
 public class Tuner {
-    public static final boolean use_static_pieces = false;
+    public static final boolean use_static_pieces = true;
     public static final boolean use_heuristic_queue = true;
     public static final boolean use_lowest_heuristic = false;
     public static final boolean use_highest_heuristic = true;
@@ -31,7 +31,7 @@ public class Tuner {
     public static final double fwp = 1;
     public static final double fw = 20.0;
     public static final double alpha_curve = 0.25;
-    public static final double alpha_cap = 50;
+    public static final double alpha_cap = 30;
     public static final double falpha = 1.5;
     public static final double falphap = 1.5;
     public static final double falphab = 20;
