@@ -24,7 +24,7 @@ public class MonteCarlo {
 
     public static boolean RunSimulation(GameState board, GameTreeNode sim_root, SimPolicy sim_policy) {
         RandomGen rng = new RandomGen();
-        Debug.RunLevel4DebugCode(()-> {
+        Debug.RunInfoL3DebugCode(()-> {
             System.out.printf("Tree size: %d\n", GameTree.size());
             System.out.printf("Exploring %d branches of %d depths of the game tree.\n", sim_policy.branches, sim_policy.depth);
         });

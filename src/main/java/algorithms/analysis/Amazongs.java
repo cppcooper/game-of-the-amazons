@@ -110,7 +110,7 @@ public class Amazongs {
                 }
             }
         }
-        Debug.RunVerboseDebugCode(() -> {
+        Debug.RunVerboseL2DebugCode(() -> {
             int i = 0;
             System.out.println("white pieces:");
             for (BoardPiece p : Objects.requireNonNull(board.GetPlayerPieces(2))) {
@@ -129,7 +129,7 @@ public class Amazongs {
         double finalT1 = t2;
         double finalC1 = c1;
         double finalW = w;
-        Debug.RunVerboseDebugCode(() -> {
+        Debug.RunVerboseL2DebugCode(() -> {
             System.out.printf("t1: %.4f\nt2: %.4f\nc1: %.4f\nc2: %.4f\nw: %.4f\nterm1: %.4f\nterm2: %.4f\nterm3: %.4f\nterm4: %.4f\nt: %.4f\nm: %.4f\n"
                     , finalT, finalT1, finalC1, finalC, finalW, term1, term2, term3, term4, t, m);
         });

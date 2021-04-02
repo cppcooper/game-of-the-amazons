@@ -241,10 +241,10 @@ public class AICore {
                     final int edge = i;
                     GameTreeNode sub_node = root.get(i);
                     if (!sub_node.heuristic.is_ready.get() && B.Elapsed() < Tuner.max_wait_time) {
-                        Debug.RunVerboseDebugCode(() -> System.out.printf("GetBestNode: node not ready. [Node: %s]\n", sub_node));
+                        Debug.RunVerboseL1DebugCode(() -> System.out.printf("GetBestNode: node not ready. [Node: %s]\n", sub_node));
                         HeuristicsQueue.CalculateHeuristicsAll(sub_node.state_after_move.get(), sub_node, true);
                     }
-                    Debug.RunVerboseDebugCode(() -> System.out.printf("GetBestNode: node %d\n%s", edge, sub_node));
+                    Debug.RunVerboseL1DebugCode(() -> System.out.printf("GetBestNode: node %d\n%s", edge, sub_node));
 
                     // need to check if this node is better than previous nodes
                     if (Tuner.find_best_aggregate) {

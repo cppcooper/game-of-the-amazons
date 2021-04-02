@@ -8,8 +8,9 @@ public class Debug {
     public static AtomicBoolean NoParentNodeFound = new AtomicBoolean(false);
     private static boolean debug_info_L1 = true;
     private static boolean debug_info_L2 = true;
-    private static boolean debug_verbose = true;
-    private static boolean debugging_level4 = false;
+    private static boolean debug_info_L3 = false;
+    private static boolean debug_verbose_L1 = true;
+    private static boolean debug_verbose_L2 = true;
 
     public static void DebugBreakPoint(){
         if(ZeroEdgesDetected.get() || NoIndexFound.get() || NoParentNodeFound.get()){
@@ -29,13 +30,18 @@ public class Debug {
             fn.run();
         }
     }
-    public static void RunVerboseDebugCode(Runnable fn){
-        if(debug_verbose){
+    public static void RunInfoL3DebugCode(Runnable fn){
+        if(debug_info_L3){
             fn.run();
         }
     }
-    public static void RunLevel4DebugCode(Runnable fn){
-        if(debugging_level4){
+    public static void RunVerboseL1DebugCode(Runnable fn){
+        if(debug_verbose_L1){
+            fn.run();
+        }
+    }
+    public static void RunVerboseL2DebugCode(Runnable fn){
+        if(debug_verbose_L2){
             fn.run();
         }
     }
