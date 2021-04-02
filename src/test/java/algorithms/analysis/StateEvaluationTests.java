@@ -93,7 +93,7 @@ public class StateEvaluationTests {
             t = Territory.CalculateHeuristic(board);
             a = Amazongs.CalculateHeuristic(board);
             double value = Maths.h(a, m+t, w);
-            System.out.printf("w: %.4f\nm: %.4f\nt: %.4f\na: %.4f\nvalue: %.4f\n\n", w, m, t, a, value);
+            System.out.printf("winner: %.4f\nmobility: %.4f\nterritory: %.4f\namazongs: %.4f\ncombined: %.4f\n\n", w, m, t, a, value);
         }
     }
 

@@ -79,12 +79,12 @@ public class Amazongs {
             c1 += Math.pow(2, -p1_d1) - Math.pow(2, -p2_d1);
             double dd2 = Double.isInfinite(p2_d2) || Double.isInfinite(p1_d2)
                     ? (Double.isInfinite(p2_d2) && Double.isInfinite(p1_d2)
-                        ? 0 : (p2_d2 > p1_d2
-                            ? 1 : -1))
-                    : (p2_d2 - p1_d2)/6.0;
+                    ? 0 : (p2_d2 > p1_d2
+                    ? 1 : -1))
+                    : (p2_d2 - p1_d2) / 6.0;
             c2 += Math.min(1, Math.max(-1, dd2));
             double dd1 = p1_d1 - p2_d1;
-            if(Double.isFinite(dd1)) {
+            if (Double.isFinite(dd1)) {
                 w += Math.pow(2, -Math.abs(dd1));
             }
             t2 += Maths.delta(p1_d2, p2_d2);
@@ -110,16 +110,16 @@ public class Amazongs {
                 }
             }
         }
-        Debug.RunLevel1DebugCode(()->{
+        Debug.RunLevel1DebugCode(() -> {
             int i = 0;
             System.out.println("white pieces:");
-            for(BoardPiece p : Objects.requireNonNull(board.GetPlayerPieces(2))){
-                System.out.printf("piece %d [index: %d]\n",i++,p.CalculateIndex());
+            for (BoardPiece p : Objects.requireNonNull(board.GetPlayerPieces(2))) {
+                System.out.printf("piece %d [index: %d]\n", i++, p.CalculateIndex());
             }
             i = 0;
             System.out.println("black pieces:");
-            for(BoardPiece p : Objects.requireNonNull(board.GetPlayerPieces(1))){
-                System.out.printf("piece %d [index: %d]\n",i++,p.CalculateIndex());
+            for (BoardPiece p : Objects.requireNonNull(board.GetPlayerPieces(1))) {
+                System.out.printf("piece %d [index: %d]\n", i++, p.CalculateIndex());
             }
         });
         double m = Maths.sumf(w, p2_a) - Maths.sumf(w, p1_a);
@@ -128,9 +128,10 @@ public class Amazongs {
         double finalT = t1;
         double finalT1 = t2;
         double finalC1 = c1;
-        Debug.RunLevel1DebugCode(()->{
-            System.out.printf("t1: %.4f\nt2: %.4f\nc1: %.4f\nc2: %.4f\nterm1: %.4f\nterm2: %.4f\nterm3: %.4f\nterm4: %.4f\nt: %.4f\nm: %.4f\n"
-                    , finalT, finalT1, finalC1, finalC,term1,term2,term3,term4,t,m);
+        double finalW = w;
+        Debug.RunLevel1DebugCode(() -> {
+            System.out.printf("t1: %.4f\nt2: %.4f\nc1: %.4f\nc2: %.4f\nw: %.4f\nterm1: %.4f\nterm2: %.4f\nterm3: %.4f\nterm4: %.4f\nt: %.4f\nm: %.4f\n"
+                    , finalT, finalT1, finalC1, finalC, finalW, term1, term2, term3, term4, t, m);
         });
         return h;
     }
