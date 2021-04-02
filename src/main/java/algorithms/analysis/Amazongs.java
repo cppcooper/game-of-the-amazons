@@ -103,10 +103,10 @@ public class Amazongs {
             for (int tile : valid_tiles) {
                 int N_b = count_neighbours(board, tile);
                 if (data.p1[piece].queen_distances[tile] == 1 && data.p2_best.queen_distances[tile] < Double.POSITIVE_INFINITY) {
-                    p1_a[piece] += Math.pow(2, -data.p1[piece].king_distances[tile]) * N_b;
+                    p1_a[piece] += (Math.pow(2, -data.p1[piece].king_distances[tile])) * N_b;
                 }
                 if (data.p2[piece].queen_distances[tile] == 1 && data.p1_best.queen_distances[tile] < Double.POSITIVE_INFINITY) {
-                    p2_a[piece] += Math.pow(2, -data.p2[piece].king_distances[tile]) * N_b;
+                    p2_a[piece] += (Math.pow(2, -data.p2[piece].king_distances[tile])) * N_b;
                 }
             }
         }

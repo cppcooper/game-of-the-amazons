@@ -44,10 +44,11 @@ public class Maths {
     }
     public static double sumf(double w, double[] alphas){
         double sum = 0.0;
+        System.out.println();
         for(double alpha : alphas){
             double temp = f(w, alpha);
             Debug.RunLevel1DebugCode(()->{
-                System.out.printf("alpha_i: %.4f\n", temp);
+                System.out.printf("alpha_i: %.4f\nf(w,alpha): %.4f\n", alpha, temp);
             });
             sum += temp;
         }
