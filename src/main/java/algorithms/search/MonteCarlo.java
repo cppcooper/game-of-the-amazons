@@ -9,6 +9,7 @@ import data.*;
 import tools.Benchmarker;
 import tools.Debug;
 import tools.RandomGen;
+import ubc.cosc322.AICore;
 
 import java.util.*;
 
@@ -120,21 +121,19 @@ public class MonteCarlo {
                     node = new GameTreeNode(move, parent, copy);
                     parent.adopt(node);
                     GameTree.put(node);
+                    HeuristicsQueue.add(node);
                 }
                 switch (policy_type) {
                     case WINNER_LOSER:
                         HeuristicsQueue.FillWinner(copy, node.heuristic);
                     case MOBILITY:
                         HeuristicsQueue.FillMobility(copy, node.heuristic);
-                        HeuristicsQueue.add(node);
                         break;
                     case TERRITORY:
                         HeuristicsQueue.FillTerritory(copy, node.heuristic);
-                        HeuristicsQueue.add(node);
                         break;
                     case AMAZONGS:
                         HeuristicsQueue.FillAmazongs(copy, node.heuristic);
-                        HeuristicsQueue.add(node);
                         break;
                     case ALL_HEURISTICS:
                         // all of the above combined

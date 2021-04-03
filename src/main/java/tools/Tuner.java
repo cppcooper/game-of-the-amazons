@@ -7,6 +7,7 @@ public class Tuner {
     public static final boolean use_highest_heuristic = true;
     public static final boolean use_decreasing_alpha_asymptote = true;
 
+    public static final boolean disable_propagation_code = true;
     public static final boolean find_best_aggregate = false;
     public static final boolean use_winner_heuristic = false;
     public static final boolean use_amazongs_heuristic = true;

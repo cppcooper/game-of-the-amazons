@@ -31,7 +31,7 @@ public class AICore {
     private static Thread search_thread2 = null;
     private static Thread heuristics_thread = null;
     private static Thread move_sender_orphan = null;
-    private static final AtomicBoolean terminate_threads = new AtomicBoolean(false);
+    private static final AtomicBoolean threads_terminating = new AtomicBoolean(false);
     private static final AtomicBoolean game_tree_is_explored = new AtomicBoolean(false);
     private static final AtomicBoolean is_searching = new AtomicBoolean(false);
     private static AtomicReference<GameTreeNode> root = new AtomicReference<>();
@@ -53,7 +53,7 @@ public class AICore {
                 if(is_searching.get()){
                     MonteCarloTreeSearch();
                 }
-                Thread.sleep(500);
+                Thread.sleep(2500);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -61,7 +61,10 @@ public class AICore {
     }
 
     public static void TerminateThreads() {
-        terminate_threads.set(true);
+        threads_terminating.set(true);
+        if (search_thread0 != null && search_thread0.isAlive()) {
+            search_thread0.interrupt();
+        }
         if (search_thread1 != null && search_thread1.isAlive()) {
             search_thread1.interrupt();
         }
@@ -78,7 +81,8 @@ public class AICore {
         }
         try {
             while (
-                    (search_thread1 != null && search_thread1.isAlive())
+                    (search_thread0 != null && search_thread0.isAlive())
+                    || (search_thread1 != null && search_thread1.isAlive())
                     || (search_thread2 != null && search_thread2.isAlive())
                     || (heuristics_thread != null && heuristics_thread.isAlive())
             ) {
@@ -90,11 +94,12 @@ public class AICore {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        terminate_threads.set(false);
+        threads_terminating.set(false);
         is_searching.set(false);
     }
 
     public static void InterruptSimulations(){
+        search_thread0.interrupt();
         search_thread1.interrupt();
         search_thread2.interrupt();
     }
@@ -123,7 +128,7 @@ public class AICore {
     private static void ExhaustiveSearch() {
         Debug.PrintThreadID("ExhaustiveSearch");
         GameState copy = GetStateCopy();
-        while (!game_tree_is_explored.get() && copy.CanGameContinue() && !terminate_threads.get()) {
+        while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
             if(BreadFirstSearch.Search(copy)){
                 game_tree_is_explored.set(true);
                 System.out.println("\nGAME TREE IS NOW FULLY EXPLORED.\n");
@@ -140,7 +145,7 @@ public class AICore {
         float branches = initial_branches;
         float binc = initial_binc;
         GameState copy = GetStateCopy();
-        while (!game_tree_is_explored.get() && copy.CanGameContinue() && !terminate_threads.get()) {
+        while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
             float p = copy.GetMoveNumber() / 92.0f;
             float d = Math.abs(0.5f - p) / 0.5f;
             if(MonteCarlo.RunSimulation(copy, root.get(), new MonteCarlo.SimPolicy((int)branches,3))){
