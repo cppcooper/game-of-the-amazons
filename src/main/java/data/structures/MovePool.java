@@ -1,16 +1,17 @@
-package structures;
+package data.structures;
 
-import algorithms.analysis.MoveCompiler;
+import algorithms.search.MoveCompiler;
+import data.Move;
+import data.structures.GameState;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MovePool {
     private static HashMap<Integer, Move> pool = new HashMap<>(1200000, 1.f);
 
     public static void generate_pool(){
-        int[] all_positions = Debug.GetAllPositions();
-        MoveCompiler.GetMoveList(new LocalState(),all_positions,true);
+        int[] all_positions = MoveCompiler.GetAllValidPositions();
+        MoveCompiler.GetMoveList(new GameState(),all_positions,true);
     }
 
     private static int make_key(int start, int next, int arrow){

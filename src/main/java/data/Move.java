@@ -1,6 +1,6 @@
-package structures;
+package data;
 
-import java.util.Objects;
+import data.structures.GameState;
 
 public class Move {
     public int start = -1;
@@ -12,7 +12,7 @@ public class Move {
         this.next = next;
         this.arrow = arrow;
     }
-    public boolean IsValidFor(LocalState state){
+    public boolean IsValidFor(GameState state){
         if(!(start < 0)) {
             int start_pos = state.ReadTile(start);
             if (start_pos > 0 && start_pos < 3) {
@@ -25,11 +25,29 @@ public class Move {
         return false;
     }
 
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Move move = (Move) o;
         return start == move.start && next == move.next && arrow == move.arrow;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = start;
+        result = 31 * result + next;
+        result = 31 * result + arrow;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        Position s = new Position(start);
+        Position n = new Position(next);
+        Position a = new Position(arrow);
+        return String.format("start: %s\nnext:  %s\narrow: %s\n",s,n,a);
     }
 }
