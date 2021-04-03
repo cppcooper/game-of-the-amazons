@@ -9,10 +9,10 @@ public class Tuner {
 
     public static final boolean disable_propagation_code = true;
     public static final boolean find_best_aggregate = false;
-    public static final boolean use_winner_heuristic = false;
+    public static final boolean use_winner_heuristic = true;
     public static final boolean use_amazongs_heuristic = true;
     public static final boolean use_mobility_heuristic = true;
-    public static final boolean use_territory_heuristic = false;
+    public static final boolean use_territory_heuristic = true;
     public static final int send_delay = 1000 * 5;
     public static final int max_wait_time = 1000 * 15;
 
