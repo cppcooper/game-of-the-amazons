@@ -46,8 +46,6 @@ public class BreadFirstSearch {
                         parent.adopt(node);
                         if(depth > 1) {
                             HeuristicsQueue.add(node);
-                        } else if (rng.nextBoolean()) {
-                            HeuristicsQueue.push(node);
                         } else {
                             HeuristicsQueue.CalculateHeuristicsAll(new_state, node, true);
                         }
