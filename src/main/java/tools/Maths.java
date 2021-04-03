@@ -36,8 +36,10 @@ public class Maths {
     }
     public static double f(double w, double alpha){
         if(Tuner.use_decreasing_alpha_asymptote){
-            return w * (0-((1-Tuner.alpha_curve) /
-                    (1-Math.min(1,alpha/Tuner.alpha_cap)+(1-Tuner.alpha_curve)))+1);
+            final double c = 1-Tuner.alpha_curve;
+            double ascale = 1 - Math.min(1,alpha/Tuner.alpha_cap);
+            double wscale = Math.min(1,w/Tuner.w_cap);
+            return ascale * ((Tuner.fw * w)/(alpha + Tuner.falphab)) * ((c)/(wscale+c));
         }
         return (Tuner.fw * Math.pow(w,Tuner.fwp)) /
                 (Tuner.falpha * (Math.pow(alpha, Tuner.falphap) + Tuner.falphab));

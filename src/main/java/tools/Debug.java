@@ -9,8 +9,8 @@ public class Debug {
     private static boolean debug_info_L1 = true;
     private static boolean debug_info_L2 = true;
     private static boolean debug_info_L3 = false;
-    private static boolean debug_verbose_L1 = true;
-    private static boolean debug_verbose_L2 = true;
+    private static boolean debug_verbose_L1 = false;
+    private static boolean debug_verbose_L2 = false;
 
     public static void DebugBreakPoint(){
         if(ZeroEdgesDetected.get() || NoIndexFound.get() || NoParentNodeFound.get()){

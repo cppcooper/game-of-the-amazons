@@ -13,6 +13,7 @@ public class StateEvaluationTests {
     void evaluate_states(){
         int[][] states = new int[][]{
                 Debug.test_state_alpha_debug,
+                Debug.test_state_alpha_debug,
                 Debug.test_state_white_good_opening,
                 Debug.test_state_white_good_opening,
                 Debug.test_state_black_good_opening,
@@ -42,6 +43,7 @@ public class StateEvaluationTests {
                 Debug.late_state,
         };
         String[] state_info = new String[]{
+                "black piece alpha debug",
                 "black piece alpha debug",
                 "white opening",
                 "white opening",
