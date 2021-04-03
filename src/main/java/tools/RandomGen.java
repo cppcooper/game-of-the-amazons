@@ -1,9 +1,9 @@
 package tools;
 
-import algorithms.analysis.MonteCarlo;
-import structures.BoardPiece;
-import structures.LocalState;
-import structures.Position;
+import algorithms.search.MonteCarlo;
+import data.BoardPiece;
+import data.structures.GameState;
+import data.Position;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +12,12 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class RandomGen extends Random {
+
+    public RandomGen(){}
+
+    public RandomGen(int seed){
+        setSeed(seed);
+    }
 
     public List<Integer> DEPRECATED_GetDistinctSequenceShuffled(int min, int max, int N){
         assert (++max-min) >= N;
@@ -52,9 +58,9 @@ public class RandomGen extends Random {
     }
 
     public ArrayList<Integer> GetRandomState(){
-        ArrayList<Integer> arr = new ArrayList<>(121);
-        double threshold = nextDouble() * 0.75;
-        for(int i = 0; i < 121; ++i){
+        ArrayList<Integer> arr = new ArrayList<>(Tuner.state_size);
+        double threshold = nextDouble();
+        for(int i = 0; i < Tuner.state_size; ++i){
             if(nextDouble() < threshold){
                 int v = nextInt(4);
                 if(v == 1 || v == 2){
@@ -79,8 +85,8 @@ public class RandomGen extends Random {
     }
 
     public ArrayList<Integer> GetRandomState(double threshold){
-        ArrayList<Integer> arr = new ArrayList<>(121);
-        for(int i = 0; i < 121; ++i){
+        ArrayList<Integer> arr = new ArrayList<>(Tuner.state_size);
+        for(int i = 0; i < Tuner.state_size; ++i){
             if(nextDouble() < threshold){
                 arr.add(3);
             } else {
@@ -99,12 +105,12 @@ public class RandomGen extends Random {
         return arr;
     }
 
-    public LocalState GetRandomBoard(){
-        return new LocalState(GetRandomState(),true,true);
+    public GameState GetRandomBoard(){
+        return new GameState(GetRandomState(),true,true);
     }
 
-    public LocalState GetRandomBoard(double threshold){
-        return new LocalState(GetRandomState(threshold),true,true);
+    public GameState GetRandomBoard(double threshold){
+        return new GameState(GetRandomState(threshold),true,true);
     }
 
     public Position[] GetRandomPositions(int N){
@@ -138,18 +144,23 @@ public class RandomGen extends Random {
     }
 
     public MonteCarlo.TreePolicy.policy_type get_random_policy(int move_num){
-        // todo (tuning): improve ability to aid in pruning moves
-        double progression = move_num / 100.0;
-        double p1 = 0.75 * (1 - progression);
-        double p2 = 0.9 * (1 - p1);
-        assert (p1+p2) <= 1;
+        double progression = move_num / 92.0;
+        double p1 = 0.75 * (1 - progression); // high -> low
+        double p2 = 0.75 * progression * (1 - p1); // low -> high
+        double p3 = (0.5 + 0.5 * progression) * (1 - (p1+p2)); // low -> high -> less high
+        assert (p1+p2+p3) <= 1;
         double x = nextDouble();
-        if (x < p1) {
-            return MonteCarlo.TreePolicy.policy_type.MOBILITY;
-        } else if (x < p1+p2) {
+        if(x < p1){
+            //early game
             return MonteCarlo.TreePolicy.policy_type.TERRITORY;
+        } else if (x < p1+p2) {
+            //late game
+            return MonteCarlo.TreePolicy.policy_type.WINNER_LOSER;
+        } else if (x < p1+p2+p3) {
+            //mid game (parabola)
+            return MonteCarlo.TreePolicy.policy_type.MOBILITY;
         } else {
             return MonteCarlo.TreePolicy.policy_type.ALL_HEURISTICS;
         }
-    }/**/
+    }
 }

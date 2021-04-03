@@ -1,4 +1,10 @@
-package structures;
+package data;
+
+import data.parallel.SynchronizedArrayList;
+import data.structures.GameState;
+
+import java.util.Comparator;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class BoardPiece extends Position {
     public int player; //3 if non-player or 0 if not a piece
@@ -25,4 +31,5 @@ public class BoardPiece extends Position {
         }
         return indices;
     }
+
 }

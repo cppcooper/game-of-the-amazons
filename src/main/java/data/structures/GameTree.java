@@ -1,12 +1,21 @@
-package structures;
+package data.structures;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GameTree {
     private static final ConcurrentHashMap<Integer,
-            ConcurrentHashMap<LocalState,GameTreeNode>> game_tree = new ConcurrentHashMap<>();
+            ConcurrentHashMap<GameState, GameTreeNode>> game_tree = new ConcurrentHashMap<>();
 
-    public static void put(LocalState board, GameTreeNode node){
+    public static long size(){
+        long size = 0;
+        for(var pair : game_tree.entrySet()){
+            size += pair.getValue().size();
+        }
+        return size;
+    }
+
+    public static void put(GameTreeNode node){
+        GameState board = node.state_after_move.get();
         var inner_map = game_tree.get(board.GetMoveNumber()-1);
         if(inner_map == null) {
             inner_map = new ConcurrentHashMap<>();
@@ -17,7 +26,7 @@ public class GameTree {
         }
     }
 
-    public static GameTreeNode get(LocalState board){
+    public static GameTreeNode get(GameState board){
         var inner_map = game_tree.get(board.GetMoveNumber()-1);
         if(inner_map != null){
             return inner_map.get(board);

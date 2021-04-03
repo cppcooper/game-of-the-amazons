@@ -1,15 +1,12 @@
-package algorithms.analysis;
+package algorithms.search;
 
-import algorithms.analysis.MoveCompiler;
 import org.junit.jupiter.api.Test;
-import structures.BoardPiece;
-import structures.LocalState;
-import structures.MovePool;
-import structures.Position;
+import data.BoardPiece;
+import data.structures.GameState;
+import data.structures.MovePool;
+import data.Position;
 import tools.Benchmarker;
 import tools.RandomGen;
-
-import java.util.ArrayList;
 
 class MoveCompilerTester {
     @Test
@@ -73,7 +70,7 @@ class MoveCompilerTester {
     }
 
     long RandomizedMoveCompilerTest(Position[] positions, RandomGen rng, boolean use_pooling){
-        LocalState board = new LocalState(rng.GetRandomState(0.35),false,false);
+        GameState board = new GameState(rng.GetRandomState(0.35),false,false);
         BoardPiece[] pieces = new BoardPiece[4];
         for(int i = 0; i < 4; ++i){
             pieces[i] = new BoardPiece(positions[i].CalculateIndex(),1);

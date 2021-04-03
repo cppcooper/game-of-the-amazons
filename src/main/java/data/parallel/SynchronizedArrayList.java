@@ -1,4 +1,4 @@
-package structures;
+package data.parallel;
 
 import java.util.ArrayList;
 

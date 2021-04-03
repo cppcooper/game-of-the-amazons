@@ -2,11 +2,8 @@ package ubc.cosc322;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Map;
 
-import structures.LocalState;
-import structures.Position;
 import ygraph.ai.smartfox.games.*;
 
 /**
@@ -36,6 +33,10 @@ public class AIPlayer extends GamePlayer{
     	//and implement the method getGameGUI() accordingly
     	this.gamegui = new OurGameGUI(this);
     }
+
+    public boolean isRunning(){
+    	return !gamegui.is_closed.get();
+	}
 
     @Override
 	public void onLogin() {
