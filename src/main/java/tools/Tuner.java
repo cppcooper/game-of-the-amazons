@@ -1,7 +1,7 @@
 package tools;
 
 public class Tuner {
-    public static final boolean use_static_pieces = false;
+    public static final boolean use_static_pieces = true;
     public static final boolean use_heuristic_queue = true;
     public static final boolean use_lowest_heuristic = false;
     public static final boolean use_highest_heuristic = true;

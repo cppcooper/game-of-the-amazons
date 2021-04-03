@@ -186,9 +186,10 @@ public class Amazongs {
 
     private static void find_best_queen_distances(GameState board, int[] starting_positions, double[] distance_map, int distance) {
         int[][] new_positions = MoveCompiler.GetOpenPositions(board, starting_positions, false); //[starting index][index of open positions]
-        for (int[] position_list : new_positions) {
-            if (position_list != null) {
-                for (int index : position_list) {
+        for (int i = 0; i < new_positions.length; ++i) {
+            if (new_positions[i] != null) {
+                new_positions[i] = prune_positions(new_positions[i], distance_map, distance);
+                for (int index : new_positions[i]) {
                     if (index == -1) {
                         break;
                     }
@@ -201,12 +202,16 @@ public class Amazongs {
 
         for (int[] position_list : new_positions) {
             if (position_list != null) {
-                find_best_queen_distances(board, prune_positions(position_list, distance_map, distance), distance_map, distance + 1);
+                find_best_queen_distances(board, position_list, distance_map, distance + 1);
             }
         }
     }
 
     private static int[] prune_positions(int[] positions, double[] distance_map, int distance) {
+        Debug.RunVerboseL3DebugCode(()->{
+            System.out.println("positions we just looked at:");
+            System.out.println(Arrays.toString(positions));
+        });
         int[] pruned_positions = new int[positions.length];
         int i = 0;
         for (int index : positions) {
@@ -220,6 +225,10 @@ public class Amazongs {
         if (i < pruned_positions.length) {
             pruned_positions[i] = -1;
         }
+        Debug.RunVerboseL3DebugCode(()->{
+            System.out.println("pruned positions:");
+            System.out.println(Arrays.toString(pruned_positions));
+        });
         return pruned_positions;
     }
 
@@ -323,5 +332,16 @@ public class Amazongs {
             }
         }
         System.out.printf("min: %.3f\nmax: %.3f\n", min, max);
+    }
+
+    @Test
+    void queen_distances(){
+        GameState board = new GameState(Debug.test_state_black_disadvantage);
+        board.FindPieces();
+        double[] distances = new double[Tuner.state_size];
+        Arrays.fill(distances, Double.POSITIVE_INFINITY);
+        find_best_queen_distances(board,MoveCompiler.ConvertPositions(board.GetPlayerPieces(1)),distances,1);
+        System.out.println(Arrays.toString(distances));
+        board.DebugPrint();
     }
 }

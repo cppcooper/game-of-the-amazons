@@ -13,6 +13,12 @@ import java.util.stream.Collectors;
 
 public class RandomGen extends Random {
 
+    public RandomGen(){}
+
+    public RandomGen(int seed){
+        setSeed(seed);
+    }
+
     public List<Integer> DEPRECATED_GetDistinctSequenceShuffled(int min, int max, int N){
         assert (++max-min) >= N;
         return ints(min,max).distinct()

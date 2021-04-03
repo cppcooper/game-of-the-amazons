@@ -11,6 +11,7 @@ public class Debug {
     private static boolean debug_info_L3 = false;
     private static boolean debug_verbose_L1 = false;
     private static boolean debug_verbose_L2 = false;
+    private static boolean debug_verbose_L3 = false;
 
     public static void DebugBreakPoint(){
         if(ZeroEdgesDetected.get() || NoIndexFound.get() || NoParentNodeFound.get()){
@@ -42,6 +43,11 @@ public class Debug {
     }
     public static void RunVerboseL2DebugCode(Runnable fn){
         if(debug_verbose_L2){
+            fn.run();
+        }
+    }
+    public static void RunVerboseL3DebugCode(Runnable fn){
+        if(debug_verbose_L3){
             fn.run();
         }
     }

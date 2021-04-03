@@ -46,7 +46,7 @@ public class Maths {
     }
     public static double sumf(double w, double[] alphas){
         double sum = 0.0;
-        System.out.println();
+        Debug.RunVerboseL2DebugCode(()-> System.out.println());
         for(double alpha : alphas){
             double temp = f(w, alpha);
             Debug.RunVerboseL2DebugCode(()->{
