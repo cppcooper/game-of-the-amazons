@@ -53,7 +53,7 @@ public class AICore {
                 if(is_searching.get()){
                     MonteCarloTreeSearch();
                 }
-                Thread.sleep(500);
+                Thread.sleep(2500);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -49,7 +49,7 @@ public class HeuristicsQueue {
 						CalculateHeuristicsAll(board, node, false);
 						i = Math.max(0, i - 1);
 					} else {
-						Thread.sleep(++i * 50);
+						Thread.sleep(++i * 1500);
 					}
 				}
 			} catch (Exception e) {

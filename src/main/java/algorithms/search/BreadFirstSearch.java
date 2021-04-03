@@ -10,13 +10,13 @@ import data.Move;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BreadFirstSearch {
-    public static final AtomicBoolean first_depth_done = new AtomicBoolean(false);
+    private static Random rng = new Random();
 
     public static boolean Search(GameState board){
-        first_depth_done.set(false);
         GameTreeNode sim_root = GameTree.get(board);
         if(sim_root == null){
             sim_root = new GameTreeNode(new Move(),null, board);
@@ -46,8 +46,10 @@ public class BreadFirstSearch {
                         parent.adopt(node);
                         if(depth > 1) {
                             HeuristicsQueue.add(node);
-                        } else {
+                        } else if (rng.nextBoolean()) {
                             HeuristicsQueue.push(node);
+                        } else {
+                            HeuristicsQueue.CalculateHeuristicsAll(new_state, node, true);
                         }
                         GameTree.put(node);
                     } else { //no idea why parent == node
