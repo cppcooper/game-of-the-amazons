@@ -100,6 +100,16 @@ public class StateEvaluationTests {
     }
 
     @Test
+    void debug_move_compiler(){
+        GameState board = new GameState(Debug.no_moves_state);
+        board.FindPieces();
+        var moves = MoveCompiler.GetMoveList(board, board.GetPlayerPieces(1), true);
+        System.out.printf("Moves player 1: %d\n", moves != null ? moves.size() : 0);
+        moves = MoveCompiler.GetMoveList(board, board.GetPlayerPieces(2), true);
+        System.out.printf("Moves player 2: %d\n", moves != null ? moves.size() : 0);
+    }
+
+    @Test
     void find_all_possible_moves() {
         GameState board = new GameState();
         int[] positions = MoveCompiler.GetAllValidPositions();

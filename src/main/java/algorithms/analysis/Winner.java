@@ -17,11 +17,17 @@ public class Winner {
     }
 
     public static double CalculateHeuristic(GameState board) {
-        int winner = calculate_winner(board);
-        if(winner != 0){
-            return 2;
+        if(Tuner.alter_winner_heuristic) {
+            int p1 = count_accessible_positions(board, Tuner.our_player_num);
+            int p2 = count_accessible_positions(board, 3 - Tuner.our_player_num);
+            return p1 > p2 ? p1 - p2 : 0;
+        } else {
+            int winner = calculate_winner(board);
+            if(winner != 0){
+                return 2;
+            }
+            return 1;
         }
-        return 1;
     }
 
     private static int calculate_winner(GameState board) {

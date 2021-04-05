@@ -49,20 +49,17 @@ class RandomGenTest {
         RandomGen rng = new RandomGen();
         for(int i = 0; i < trials; ++i){
             switch(rng.get_random_policy(90)){
-                case MOBILITY:
+                case REDUCTION:
                     counts[0]++;
                     break;
-                case TERRITORY:
+                case FREEDOM:
                     counts[1]++;
                     break;
-                case ALL_HEURISTICS:
+                case TERRITORY:
                     counts[2]++;
                     break;
-                case WINNER_LOSER:
+                case AMAZONGS:
                     counts[3]++;
-                    break;
-                case DO_NOTHING:
-                    counts[4]++;
                     break;
             }
         }

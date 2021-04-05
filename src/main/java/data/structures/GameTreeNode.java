@@ -73,16 +73,16 @@ public class GameTreeNode {
         if(!Tuner.disable_propagation_code) {
             if (!heuristic.has_propagated.get()) {
                 force_propagate();
-                update_aggregate(heuristic.aggregate.get() + heuristic.value.get(), 1);
+                update_aggregate(Tuner.get_aggregate_base(heuristic), 1);
             }
         }
     }
 
     public void one_node_aggregation(){
         if(!Tuner.disable_propagation_code) {
-            if (!heuristic.is_ready.get()) {
-                heuristic.is_ready.set(true);
-                double aggregate = heuristic.aggregate.add(heuristic.value.get());
+            if (!heuristic.has_aggregated.get()) {
+                heuristic.has_aggregated.set(true);
+                double aggregate = heuristic.aggregate.add(Tuner.get_aggregate_base(heuristic));
                 heuristic.aggregate_avg.set(aggregate / heuristic.aggregate_count.incrementAndGet());
             }
         }
@@ -91,7 +91,7 @@ public class GameTreeNode {
     private void force_propagate() {
         if(!Tuner.disable_propagation_code) {
             heuristic.has_propagated.set(true);
-            double h = heuristic.value.get();
+            double h = Tuner.get_aggregate_base(heuristic);
             for (int i = 0; i < super_nodes.size(); ++i) {
                 GameTreeNode parent = super_nodes.get(i);
                 if (parent.heuristic.maximum_sub.get() < h) {

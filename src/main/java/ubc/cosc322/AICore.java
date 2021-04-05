@@ -53,7 +53,9 @@ public class AICore {
                 if(is_searching.get()){
                     MonteCarloTreeSearch();
                 }
-                Thread.sleep(2500);
+                try {
+                    Thread.sleep(2500);
+                } catch (Exception e){}
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,8 +83,7 @@ public class AICore {
         }
         try {
             while (
-                    (search_thread0 != null && search_thread0.isAlive())
-                    || (search_thread1 != null && search_thread1.isAlive())
+                    (search_thread1 != null && search_thread1.isAlive())
                     || (search_thread2 != null && search_thread2.isAlive())
                     || (heuristics_thread != null && heuristics_thread.isAlive())
             ) {
@@ -140,19 +141,15 @@ public class AICore {
 
     private static void MonteCarloTreeSearch(){
         Debug.PrintThreadID("MonteCarloSearch");
-        final int initial_branches = 500;
-        final float initial_binc = 17.f;
-        float branches = initial_branches;
-        float binc = initial_binc;
+        int branches = 2;
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
             float p = copy.GetMoveNumber() / 92.0f;
             float d = Math.abs(0.5f - p) / 0.5f;
-            if(MonteCarlo.RunSimulation(copy, root.get(), new MonteCarlo.SimPolicy((int)branches,3))){
-                branches += binc;
+            if(MonteCarlo.RunSimulation(copy, root.get(), branches)){
+                branches++;
             } else {
-                branches = Math.max(initial_branches, p * initial_branches * initial_branches);
-                binc = (p * initial_binc) * initial_binc;
+                branches = 2;
             }
             if(copy.GetMoveNumber() != GetState().GetMoveNumber()) {
                 copy = GetStateCopy();
@@ -213,17 +210,15 @@ public class AICore {
     }
 
     private static GameTreeNode GetBestNode() throws Exception {
-        double best_low;
-        double best_high;
-        int index;
-        GameTreeNode best_low_node = null;
-        GameTreeNode best_high_node = null;
+        double best_agg;
+        double best_value;
+        GameTreeNode best_node = null;
         int bad_loop_count = 0;
         Benchmarker B = new Benchmarker();
         B.Start();
         do {
-            best_low = Double.POSITIVE_INFINITY;//Double.NEGATIVE_INFINITY;
-            best_high = Double.NEGATIVE_INFINITY;
+            best_agg = Double.NEGATIVE_INFINITY;
+            best_value = Double.NEGATIVE_INFINITY;
             /* Control Structure
              * check that we have a root to search from
              * check that the root has edges
@@ -252,65 +247,40 @@ public class AICore {
                     Debug.RunVerboseL1DebugCode(() -> System.out.printf("GetBestNode: node %d\n%s", edge, sub_node));
 
                     // need to check if this node is better than previous nodes
-                    if (Tuner.find_best_aggregate) {
-                        double heuristic = sub_node.heuristic.aggregate.get();
-                        if (Tuner.use_lowest_heuristic && heuristic < best_low) {
-                            Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new lowest node\n%s", sub_node));
-                            best_low = heuristic;
-                            best_low_node = sub_node;
-                        }
-                        if (Tuner.use_highest_heuristic && heuristic > best_high) {
-                            Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
-                            best_high = heuristic;
-                            best_high_node = sub_node;
+                    double heuristic = Double.NEGATIVE_INFINITY;
+                    double aggregate = 0;
+                    if (Tuner.find_best_aggregate && sub_node.heuristic.has_aggregated.get()) {
+                        aggregate = sub_node.heuristic.aggregate_avg.get();
+                        aggregate = aggregate >= 0.1 ? aggregate : 0;
+                    }
+                    if(sub_node.heuristic.is_ready.get()) {
+                        heuristic = sub_node.heuristic.value.get();
+                    }
+
+                    if(Tuner.find_best_value_first){
+                        if(heuristic > best_value){
+                            if (aggregate >= best_agg) {
+                                Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
+                                best_value = heuristic;
+                                best_agg = aggregate;
+                                best_node = sub_node;
+                            }
                         }
                     } else {
-                        double heuristic = sub_node.heuristic.value.get();
-                        if (Tuner.use_lowest_heuristic && heuristic < best_low) {
-                            Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new lowest node\n%s", sub_node));
-                            best_low = heuristic;
-                            best_low_node = sub_node;
-                        }
-                        if (Tuner.use_highest_heuristic && heuristic > best_high) {
-                            Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
-                            best_high = heuristic;
-                            best_high_node = sub_node;
+                        if (aggregate > best_agg) {
+                            if (heuristic >= best_value) {
+                                Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
+                                best_value = heuristic;
+                                best_agg = aggregate;
+                                best_node = sub_node;
+                            }
                         }
                     }
                 }
                 // We've found our best nodes, now we need to return
-                Heuristic h_low = null;
-                if (best_low_node != null && best_high_node != null) {
-                    System.out.println("GetBestNode: found two");
-                    Heuristic h1 = best_low_node.heuristic;
-                    Heuristic h2 = best_high_node.heuristic;
-                    if(h1.has_winner.get() && h2.has_winner.get()) {
-                        if (h1.winner.get() > h2.winner.get()) {
-                            return best_low_node;
-                        } else if (h2.winner.get() > h1.winner.get()) {
-                            return best_high_node;
-                        }
-                    }
-                    if(h1.has_mobility.get() && h2.has_mobility.get()){
-                        if (h1.mobility.get() > h2.mobility.get()) {
-                            return best_low_node;
-                        } else if (h2.mobility.get() > h1.mobility.get()) {
-                            return best_high_node;
-                        }
-                    }
-                    if(h1.has_territory.get() && h2.has_territory.get()){
-                        if (h1.territory.get() > h2.territory.get()) {
-                            return best_low_node;
-                        } else if (h2.territory.get() > h1.territory.get()) {
-                            return best_high_node;
-                        }
-                    }
-                } else if (best_high_node != null) {
+                if (best_node != null) {
                     System.out.println("GetBestNode: found one");
-                    return best_high_node;
-                } else if (best_low_node != null){
-                    System.out.println("GetBestNode: found one");
-                    return best_low_node;
+                    return best_node;
                 } else {
                     System.out.println("GetBestNode: Could not find a good node.. try again?");
                 }
