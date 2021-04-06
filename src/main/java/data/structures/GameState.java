@@ -221,30 +221,23 @@ public class GameState {
 					return p2_has_moves;
 				break;
 		}
-		Function<Integer, Boolean> has_a_move = index -> {
-			Position[] neighbours = MoveCompiler.GetNeighbours(index);
-			if(neighbours != null) {
-				for (Position p : neighbours) {
-					if (p.IsValid() && ReadTile(p.CalculateIndex()) == 0) {
-						return true;
-					}
-				}
-			}
-			return false;
-		};
 		var pieces = player_num == 1 ? player1 : player2;
 		for (BoardPiece piece : pieces) {
-			if (has_a_move.apply(piece.CalculateIndex())) {
-				switch (player_num) {
-					case 1:
-						p1_has_moves = true;
-						p1_state_analyzed = true;
-						break;
-					case 2:
-						p2_has_moves = true;
-						p2_state_analyzed = true;
+			Position[] neighbours = MoveCompiler.GetNeighbours(piece.CalculateIndex());
+			for(Position n : neighbours){
+				if(n.IsValid() && ReadTile(n.CalculateIndex()) == 0){
+					switch (player_num) {
+						case 1:
+							p1_has_moves = true;
+							p1_state_analyzed = true;
+							break;
+						case 2:
+							p2_has_moves = true;
+							p2_state_analyzed = true;
+							break;
+					}
+					return true;
 				}
-				return true;
 			}
 		}
 		switch(player_num){
