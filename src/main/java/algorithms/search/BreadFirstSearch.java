@@ -7,6 +7,7 @@ import data.structures.GameState;
 import data.structures.GameTree;
 import data.Move;
 import tools.Debug;
+import tools.Tuner;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -45,7 +46,7 @@ public class BreadFirstSearch {
                         // LocalState is a new position
                         node = new GameTreeNode(m, parent, new_state);
                         parent.adopt(node);
-                        if(depth > 1) {
+                        if(Tuner.use_heuristic_queue && depth > 1) {
                             HeuristicsQueue.add(node);
                         } else {
                             HeuristicsQueue.CalculateHeuristicsAll(new_state, node, true);

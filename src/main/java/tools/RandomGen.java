@@ -144,7 +144,7 @@ public class RandomGen extends Random {
     }
 
     public MonteCarlo.policy_type get_random_policy(int move_num){
-        double progression = Math.min(1, move_num / 50.0);
+        double progression = Math.min(1, move_num / 30.0);
         double p1 = 0.75 * Math.pow((1 - progression), 2); // high -> low
         double p2 = 0.75 * progression * (1 - p1); // low -> high
         double p3 = (0.25 + 0.6 * progression) * (1 - (p1+p2)); // low -> high -> less high

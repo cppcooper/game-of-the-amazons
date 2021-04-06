@@ -87,7 +87,9 @@ public class HeuristicsQueue {
 				term1 = h.amazongs.get();
 			}
 			if (Tuner.use_territory_heuristic) {
-				term2 += h.territory.get();
+				double t = h.territory.get();
+				term1 *= t;
+				term2 += t;
 			}
 			if (Tuner.use_mobility_heuristic) {
 				term2 += h.mobility.get();
@@ -97,7 +99,7 @@ public class HeuristicsQueue {
 			}
 			double value = Maths.h(term1, term2, w);
 			h.value.set(value);
-			if(!Tuner.use_winner_aggregate) {
+			if(!Tuner.use_winner_aggregate || Tuner.use_winner_heuristic) {
 				if (!skip_propagation) {
 					node.propagate();
 				} else {

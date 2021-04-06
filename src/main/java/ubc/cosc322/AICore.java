@@ -2,7 +2,6 @@ package ubc.cosc322;
 
 import algorithms.search.BreadFirstSearch;
 import algorithms.search.MoveCompiler;
-import data.Heuristic;
 import algorithms.analysis.HeuristicsQueue;
 import algorithms.search.MonteCarlo;
 import data.*;
@@ -51,7 +50,7 @@ public class AICore {
             search_thread0 = Thread.currentThread();
             while(player.isRunning()){
                 if(is_searching.get()){
-                    MonteCarloTreeSearch();
+                    MonteCarloTreeSearch_breadthfirst();
                 }
                 try {
                     Thread.sleep(2500);
@@ -113,7 +112,7 @@ public class AICore {
             search_thread2.interrupt();
         }
         search_thread1 = new Thread(AICore::ExhaustiveSearch);
-        search_thread2 = new Thread(AICore::MonteCarloTreeSearch);
+        search_thread2 = new Thread(AICore::MonteCarloTreeSearch_depthfirst);
         if(Tuner.use_heuristic_queue) {
             if (heuristics_thread == null) {
                 heuristics_thread = new Thread(HeuristicsQueue::ProcessQueue);
@@ -139,14 +138,32 @@ public class AICore {
         }
     }
 
-    private static void MonteCarloTreeSearch(){
+    private static void MonteCarloTreeSearch_depthfirst(){
         Debug.PrintThreadID("MonteCarloSearch");
-        int branches = 2;
+        int branches = 3;
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
             float p = copy.GetMoveNumber() / 92.0f;
             float d = Math.abs(0.5f - p) / 0.5f;
-            if(MonteCarlo.RunSimulation(copy, root.get(), branches)){
+            if(MonteCarlo.RunSimulation(copy, root.get(), false, branches)){
+                branches++;
+            } else {
+                branches = 2;
+            }
+            if(copy.GetMoveNumber() != GetState().GetMoveNumber()) {
+                copy = GetStateCopy();
+            }
+        }
+    }
+
+    private static void MonteCarloTreeSearch_breadthfirst(){
+        Debug.PrintThreadID("MonteCarloSearch");
+        int branches = 3;
+        GameState copy = GetStateCopy();
+        while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
+            float p = copy.GetMoveNumber() / 92.0f;
+            float d = Math.abs(0.5f - p) / 0.5f;
+            if(MonteCarlo.RunSimulation(copy, root.get(), true, branches)){
                 branches++;
             } else {
                 branches = 2;
@@ -212,6 +229,7 @@ public class AICore {
     private static GameTreeNode GetBestNode() throws Exception {
         double best_agg;
         double best_value;
+        boolean first_pass = true;
         GameTreeNode best_node = null;
         int bad_loop_count = 0;
         Benchmarker B = new Benchmarker();
@@ -248,33 +266,19 @@ public class AICore {
 
                     // need to check if this node is better than previous nodes
                     double heuristic = Double.NEGATIVE_INFINITY;
-                    double aggregate = 0;
+                    double aggregate = Double.NEGATIVE_INFINITY;
                     if (Tuner.find_best_aggregate && sub_node.heuristic.has_aggregated.get()) {
                         aggregate = sub_node.heuristic.aggregate_avg.get();
-                        aggregate = aggregate >= 0.1 ? aggregate : 0;
                     }
                     if(sub_node.heuristic.is_ready.get()) {
                         heuristic = sub_node.heuristic.value.get();
                     }
 
-                    if(Tuner.find_best_value_first){
-                        if(heuristic > best_value){
-                            if (aggregate >= best_agg) {
-                                Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
-                                best_value = heuristic;
-                                best_agg = aggregate;
-                                best_node = sub_node;
-                            }
-                        }
-                    } else {
-                        if (aggregate > best_agg) {
-                            if (heuristic >= best_value) {
-                                Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
-                                best_value = heuristic;
-                                best_agg = aggregate;
-                                best_node = sub_node;
-                            }
-                        }
+                    if((heuristic > 0 || !first_pass) && heuristic >= best_value && aggregate >= best_agg) {
+                        Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
+                        best_value = heuristic;
+                        best_agg = aggregate;
+                        best_node = sub_node;
                     }
                 }
                 // We've found our best nodes, now we need to return
@@ -285,6 +289,7 @@ public class AICore {
                     System.out.println("GetBestNode: Could not find a good node.. try again?");
                 }
             }
+            first_pass = false;
         } while (B.Elapsed() < Tuner.max_wait_time);
         return null;
     }

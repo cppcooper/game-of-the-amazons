@@ -3,6 +3,7 @@ package data.structures;
 import data.Heuristic;
 import data.Move;
 import data.parallel.SynchronizedArrayList;
+import org.apache.commons.math3.util.Precision;
 import tools.Tuner;
 
 import java.util.Comparator;
@@ -73,7 +74,16 @@ public class GameTreeNode {
         if(!Tuner.disable_propagation_code) {
             if (!heuristic.has_propagated.get()) {
                 force_propagate();
-                update_aggregate(Tuner.get_aggregate_base(heuristic), 1);
+                if(!state_after_move.get().CanGameContinue()) {
+                    double ab = Tuner.get_aggregate_base(heuristic);
+                    if(Tuner.use_only_winning){
+                        if(!Precision.equals(ab, 0, 0.0001)){
+                            update_aggregate(ab, heuristic.aggregate_count.get() + 1);
+                        }
+                    } else {
+                        update_aggregate(ab, heuristic.aggregate_count.get() + 1);
+                    }
+                }
             }
         }
     }
@@ -117,7 +127,6 @@ public class GameTreeNode {
                 for (int i = 0; i < super_nodes.size(); ++i) {
                     GameTreeNode parent = super_nodes.get(i);
                     double new_p_aggregate = parent.heuristic.aggregate.get() + delta_aggregate;
-                    ;
                     int new_p_aggregate_count = parent.heuristic.aggregate_count.get() + delta_count;
                     parent.update_aggregate(new_p_aggregate, new_p_aggregate_count);
                 }
@@ -148,9 +157,6 @@ public class GameTreeNode {
         public int compare(GameTreeNode o1, GameTreeNode o2) {
             Heuristic h1 = o1.heuristic;
             Heuristic h2 = o2.heuristic;
-            if (h1.has_aggregated.get() && h2.has_aggregated.get()) {
-                return Double.compare(h1.aggregate_avg.get(), h2.aggregate_avg.get());
-            }
             if (h1.is_ready.get()) {
                 if (h2.is_ready.get()) {
                     return Double.compare(h1.value.get(), h2.value.get());
@@ -172,6 +178,9 @@ public class GameTreeNode {
             }
             if (h1.has_territory.get() && h2.has_territory.get()){
                 return Double.compare(h1.territory.get(), h2.territory.get());
+            }
+            if (h1.has_propagated.get() && h2.has_propagated.get()) {
+                return Double.compare(h1.aggregate_avg.get(), h2.aggregate_avg.get());
             }
             return 0;
         }
