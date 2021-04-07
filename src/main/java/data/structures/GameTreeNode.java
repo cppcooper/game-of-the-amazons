@@ -157,26 +157,16 @@ public class GameTreeNode {
         public int compare(GameTreeNode o1, GameTreeNode o2) {
             Heuristic h1 = o1.heuristic;
             Heuristic h2 = o2.heuristic;
-            if (h1.is_ready.get()) {
-                if (h2.is_ready.get()) {
-                    return Double.compare(h1.value.get(), h2.value.get());
-                } else if (h2.has_mobility.get()) {
-                    return Double.compare(h1.mobility.get(), h2.mobility.get());
-                } else if (h2.has_territory.get()) {
-                    return Double.compare(h1.territory.get(), h2.territory.get());
-                }
+            if (h1.is_ready.get() && h2.is_ready.get()) {
+                return Double.compare(h1.value.get(), h2.value.get());
             }
-            if (h2.is_ready.get()) {
-                if (h1.has_mobility.get()) {
-                    return Double.compare(h1.mobility.get(), h2.mobility.get());
-                } else if (h1.has_territory.get()) {
-                    return Double.compare(h1.territory.get(), h2.territory.get());
-                }
+            if (h1.has_amazongs.get() && h2.has_amazongs.get()) {
+                return Double.compare(h1.amazongs.get(), h2.amazongs.get());
             }
-            if (h1.has_mobility.get() && h2.has_mobility.get()){
+            if (h1.has_mobility.get() && h2.has_mobility.get()) {
                 return Double.compare(h1.mobility.get(), h2.mobility.get());
             }
-            if (h1.has_territory.get() && h2.has_territory.get()){
+            if (h1.has_territory.get() && h2.has_territory.get()) {
                 return Double.compare(h1.territory.get(), h2.territory.get());
             }
             if (h1.has_propagated.get() && h2.has_propagated.get()) {
