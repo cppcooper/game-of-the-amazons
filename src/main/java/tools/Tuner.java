@@ -9,7 +9,7 @@ public class Tuner {
     public static final boolean use_heuristic_queue = false;
     public static final boolean use_decreasing_alpha_asymptote = true;
 
-    public static final boolean disable_propagation_code = true;
+    public static final boolean disable_propagation_code = false;
     public static final boolean use_only_winning = true;
     public static final boolean alter_winner_heuristic = true;
     public static final boolean find_best_aggregate = true;
@@ -29,7 +29,7 @@ public class Tuner {
 
     public static final double tc = 7.3;
 
-    public static final double t1c = 13.7;
+    public static final double t1c = 8.0;
     public static final double c1c = 3.5;
     public static final double c2c = 1.0;
     public static final double t2c = 1.0;
@@ -37,10 +37,10 @@ public class Tuner {
     public static final double t2p = 3.0;
 
     public static final double fwp = 1;
-    public static final double fw = 5.0;
-    public static final double alpha_curve = 0.75;
+    public static final double fw = 2.0;
+    public static final double alpha_curve = 0.5;
     public static final double alpha_cap = 30;
-    public static final double w_cap = 70;
+    public static final double w_cap = 65;
     public static final double falpha = 1.5;
     public static final double falphap = 1.5;
     public static final double falphab = 1;
