@@ -4,6 +4,7 @@ package ubc.cosc322;
 import java.util.ArrayList;
 import java.util.Map;
 
+import tools.Tuner;
 import ygraph.ai.smartfox.games.*;
 
 /**
@@ -76,10 +77,14 @@ public class AIPlayer extends GamePlayer{
 			AICore.LaunchThreads();
 		} else if (messageType.equals(GameMessage.GAME_ACTION_START)) {
 			if(userName.equals(msgDetails.get("player-black"))){
+				Tuner.our_player_num = 1;
+				Tuner.other_player_num = 2;
 				System.out.printf("black: %s\n", msgDetails.get("player-black"));
 				System.out.printf("white: %s\n", msgDetails.get("player-white"));
 				AICore.SendDelayedMessage();
 			} else {
+				Tuner.our_player_num = 2;
+				Tuner.other_player_num = 1;
 				System.out.printf("white: %s\n", msgDetails.get("player-white"));
 				System.out.printf("black: %s\n", msgDetails.get("player-black"));
 			}

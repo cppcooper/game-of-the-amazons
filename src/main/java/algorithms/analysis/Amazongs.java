@@ -90,11 +90,11 @@ public class Amazongs {
             t2 += Maths.delta(p1_d2, p2_d2);
         }
         c1 *= 2;
-        double term1 = Maths.f1(w) * t1;
+        double term1 = Tuner.t1c * Maths.f1(w) * t1;
         double term2 = Maths.f2(w) * c1;
         double term3 = Maths.f3(w) * c2;
         double term4 = Maths.f4(w) * t2;
-        double t = term1 + term2 + term3 + term4;
+        double t = Tuner.tc * (term1 + term2 + term3 + term4);
         double[] p1_a = new double[num_pieces];
         double[] p2_a = new double[num_pieces];
         for (int piece = 0; piece < num_pieces; ++piece) {

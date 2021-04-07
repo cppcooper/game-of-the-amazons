@@ -30,9 +30,10 @@ public class Heuristic {
 
     @Override
     public String toString() {
-        return String.format("value: %.4f\naggregate: %.4f\n" +
+        return String.format("value: %.4f\naggregate avg: %.4f\n" +
+                "aggregate count: %d\naggregate: %.4f\n" +
                 "amazongs: %.4f\nwinning: %.4f\n" +
                 "mobility: %.4f\nterritory: %.4f\n",
-                value.get(), aggregate_avg.get(), amazongs.get(), winner.get(), mobility.get(), territory.get());
+                value.get(), aggregate_avg.get(), aggregate_count.get(), aggregate.get(), amazongs.get(), winner.get(), mobility.get(), territory.get());
     }
 }

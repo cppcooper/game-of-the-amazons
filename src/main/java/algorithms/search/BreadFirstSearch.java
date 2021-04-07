@@ -6,6 +6,8 @@ import org.apache.commons.math3.util.Pair;
 import data.structures.GameState;
 import data.structures.GameTree;
 import data.Move;
+import tools.Debug;
+import tools.Tuner;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -32,7 +34,7 @@ public class BreadFirstSearch {
             if (moves == null || moves.isEmpty()) {
                 return;
             }
-            Queue<Pair<GameState, GameTreeNode>> branch_jobs = new LinkedList<>();
+            Queue<GameTreeNode> branch_jobs = new LinkedList<>();
             for(Move m : moves){
                 if(Thread.currentThread().isInterrupted()){
                     return;
@@ -44,7 +46,7 @@ public class BreadFirstSearch {
                         // LocalState is a new position
                         node = new GameTreeNode(m, parent, new_state);
                         parent.adopt(node);
-                        if(depth > 1) {
+                        if(Tuner.use_heuristic_queue && depth > 1) {
                             HeuristicsQueue.add(node);
                         } else {
                             HeuristicsQueue.CalculateHeuristicsAll(new_state, node, true);
@@ -57,14 +59,20 @@ public class BreadFirstSearch {
                         parent.adopt(node);
                     }
                     if (parent != node) {
-                        branch_jobs.add(new Pair<>(new_state, node));
+                        branch_jobs.add(node);
                     }
                 }
             }
             while(!branch_jobs.isEmpty()){
                 var job = branch_jobs.poll();
-                Search(job.getFirst(), job.getSecond(),1);
+                Search(job.state_after_move.get(), job,depth+1);
             }
+        } else if (!board.CanGameContinue()) {
+            HeuristicsQueue.FillWinner(parent.state_after_move.get(), parent.heuristic);
+            parent.propagate();
+            Debug.RunVerboseL1DebugCode(()->{
+                System.out.printf("Terminal state found\npoints: %.3f\n",parent.heuristic.winner.get());
+            });
         }
     }
 }

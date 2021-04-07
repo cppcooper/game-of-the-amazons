@@ -9,6 +9,93 @@ import tools.RandomGen;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class StateEvaluationTests {
+    /*@Test
+    void assert_state_evaluations(){
+        int[][] states = new int[][]{
+                Debug.test_state_alpha_debug,
+                Debug.test_state_alpha_debug,
+                Debug.test_state_white_good_opening,
+                Debug.test_state_white_good_opening,
+                Debug.test_state_black_good_opening,
+                Debug.test_state_black_good_opening,
+
+                Debug.test_state_black_winning,
+                Debug.test_state_black_winning,
+                Debug.test_state_black_clear_advantage,
+                Debug.test_state_black_clear_advantage,
+                Debug.test_state_black_advantage,
+                Debug.test_state_black_advantage,
+                Debug.test_state_black_disadvantage,
+                Debug.test_state_black_disadvantage,
+                Debug.test_state_black_clear_disadvantage,
+                Debug.test_state_black_clear_disadvantage,
+
+                Debug.test_state_white_winning,
+                Debug.test_state_white_winning,
+                Debug.test_state_white_clear_advantage,
+                Debug.test_state_white_clear_advantage,
+                Debug.test_state_white_advantage,
+                Debug.test_state_white_advantage,
+                Debug.test_state_white_disadvantage,
+                Debug.test_state_white_disadvantage,
+                Debug.test_state_white_clear_disadvantage,
+                Debug.test_state_white_clear_disadvantage,
+                Debug.late_state,
+        };
+        String[] state_info = new String[]{
+                "black piece alpha debug",
+                "black piece alpha debug",
+                "white opening",
+                "white opening",
+                "black opening",
+                "black opening",
+
+                "black winning",
+                "black winning",
+                "black clear advantage",
+                "black clear advantage",
+                "black advantage",
+                "black advantage",
+                "black disadvantage",
+                "black disadvantage",
+                "black clear disadvantage",
+                "black clear disadvantage",
+
+                "white winning",
+                "white winning",
+                "white clear advantage",
+                "white clear advantage",
+                "white advantage",
+                "white advantage",
+                "white disadvantage",
+                "white disadvantage",
+                "white clear disadvantage",
+                "white clear disadvantage",
+                "late state"
+        };
+        System.out.println("Remember that evaluations calculate the value the state has, usually with respect to the player that made the last move.");
+        GameState board;
+        double w;
+        double m;
+        double t;
+        double a;
+        //System.out.printf("w: %.4f\nm: %.4f\nt: %.4f\na: %.4f\ncurrent turn: %d\n", w, m, t, a, board.GetPlayerTurn());
+        int i = 0;
+        for(int[] state : states){
+            board = new GameState(state);
+            board.SetMoveNumber(i+1);
+            board.FindPieces();
+            System.out.printf("(%s::MN%d)\n  %s evaluation\n", state_info[i++], board.GetMoveNumber(), board.GetNextPlayerTurn() == 1 ? "black" : "white");
+            board.DebugPrint();
+            w = Winner.CalculateHeuristic(board);
+            m = Mobility.CalculateHeuristic(board);
+            t = Territory.CalculateHeuristic(board);
+            a = Amazongs.CalculateHeuristic(board);
+            double value = Maths.h(a, m+t, w);
+            System.out.printf("winner: %.4f\nmobility: %.4f\nterritory: %.4f\namazongs: %.4f\ncombined: %.4f\n\n", w, m, t, a, value);
+        }
+    }*/
+
     @Test
     void evaluate_states(){
         int[][] states = new int[][]{
@@ -97,6 +184,16 @@ public class StateEvaluationTests {
             double value = Maths.h(a, m+t, w);
             System.out.printf("winner: %.4f\nmobility: %.4f\nterritory: %.4f\namazongs: %.4f\ncombined: %.4f\n\n", w, m, t, a, value);
         }
+    }
+
+    @Test
+    void debug_move_compiler(){
+        GameState board = new GameState(Debug.no_moves_state);
+        board.FindPieces();
+        var moves = MoveCompiler.GetMoveList(board, board.GetPlayerPieces(1), true);
+        System.out.printf("Moves player 1: %d\n", moves != null ? moves.size() : 0);
+        moves = MoveCompiler.GetMoveList(board, board.GetPlayerPieces(2), true);
+        System.out.printf("Moves player 2: %d\n", moves != null ? moves.size() : 0);
     }
 
     @Test
