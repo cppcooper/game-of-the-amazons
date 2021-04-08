@@ -6,25 +6,27 @@ import data.structures.GameTree;
 import data.structures.GameTreeNode;
 import data.*;
 import tools.Debug;
+import tools.Maths;
 import tools.RandomGen;
 import tools.Tuner;
+import ubc.cosc322.AICore;
 
 import java.util.*;
 
 public class MonteCarlo {
 
-    public static boolean RunSimulation(GameState board, GameTreeNode sim_root, boolean breadthfirst, int branches) {
-        RandomGen rng = new RandomGen();;
-        if(breadthfirst) {
-            RunSimulation(rng, board, sim_root, new LinkedList<>(), branches, true);
-        } else {
-            RunSimulation(rng, board, sim_root, null, branches, true);
-        }
+    public static boolean RunSimulation(GameState board, GameTreeNode sim_root, boolean breadth_first) {
+        RandomGen rng = new RandomGen();
+        RunSimulation(rng, board, sim_root, breadth_first, new LinkedList<>(), Tuner.montecarlo_breadth_top, true);
         return !Thread.interrupted(); //Assuming execution was interrupted then we need to clear that flag, and restart from the current LocalState
     }
 
-    private static void RunSimulation(RandomGen rng, GameState board, GameTreeNode parent, Queue<GameTreeNode> farthest_nodes, int branches, boolean simulate) {
+    private static void RunSimulation(RandomGen rng, GameState board, GameTreeNode parent, boolean breadth_first, Deque<GameTreeNode> simulation_queue, int branches, boolean simulate) {
+        assert simulation_queue != null;
+        System.out.printf("%d\n", board.GetMoveNumber());
         if (board.CanGameContinue() && !Thread.currentThread().isInterrupted()) {
+            int round = AICore.GetCurrentMoveNumber();
+            branches = (int)Maths.lerp(Tuner.montecarlo_breadth_top, Tuner.montecarlo_breadth_bottom, Math.min(1, (board.GetMoveNumber() - round) / (92.0 - round)));
             TreeSet<GameTreeNode> candidates = new TreeSet<>(new GameTreeNode.NodeComparator());
             policy_type policy_type = rng.get_random_policy(board.GetMoveNumber());
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
@@ -70,28 +72,30 @@ public class MonteCarlo {
                     candidates.add(node);
                 }
             }
+            //candidate list is built
 
             int b = 0;
+            // add the best X positions to the simulation queue
             for (GameTreeNode node : candidates.descendingSet()) {
                 if(b++ >= branches || Thread.currentThread().isInterrupted()){
-                    return;
+                    break;
                 }
-                if(farthest_nodes != null){
-                    farthest_nodes.add(node);
+                if(breadth_first) {
+                    // add to the back
+                    simulation_queue.add(node);
                 } else {
-                    if(!Tuner.use_heuristic_queue){
-                        HeuristicsQueue.CalculateHeuristicsAll(node.state_after_move.get(), node, false);
-                    }
-                    RunSimulation(rng, node.state_after_move.get(), node, farthest_nodes, branches, true);
+                    // add to the front
+                    simulation_queue.push(node);
                 }
             }
-            if(farthest_nodes != null && simulate) {
-                while(!farthest_nodes.isEmpty()){
-                    GameTreeNode node = farthest_nodes.poll();
+            if(simulate) {
+                while(!simulation_queue.isEmpty()){
+                    // read from the front -> back
+                    GameTreeNode node = simulation_queue.poll();
                     if(!Tuner.use_heuristic_queue){
                         HeuristicsQueue.CalculateHeuristicsAll(node.state_after_move.get(), node, false);
                     }
-                    RunSimulation(rng, node.state_after_move.get(), node, farthest_nodes, branches, false);
+                    RunSimulation(rng, node.state_after_move.get(), node, breadth_first, simulation_queue, branches, false);
                 }
             }
         } else if (!board.CanGameContinue()) {

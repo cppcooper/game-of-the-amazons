@@ -7,7 +7,7 @@ public class Maths {
     public static double lerp(double v0, double v1, double alpha){
         double min = Math.min(v0,v1);
         double max = Math.max(v0,v1);
-        return Math.min(max,Math.max(min,min + (alpha * (max-min))));
+        return Math.min(max,Math.max(min,v0 + (alpha * (v1-v0))));
     }
     public static double clamp(double v, double min, double max){
         return Math.min(max,Math.max(min,v));

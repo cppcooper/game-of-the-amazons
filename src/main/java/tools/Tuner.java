@@ -21,6 +21,9 @@ public class Tuner {
     public static final int send_delay = 1000 * 15;
     public static final int max_wait_time = 1000 * 5;
 
+    public static final int montecarlo_breadth_top = 10;
+    public static final int montecarlo_breadth_bottom = 1;
+
     public static final int coord_min = 0;
     public static final int coord_max = 9;
     public static final int coord_upper = coord_max+1;

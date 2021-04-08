@@ -99,7 +99,7 @@ public class HeuristicsQueue {
 			}
 			double value = Maths.h(term1, term2, w);
 			h.value.set(value);
-			if(!Tuner.use_winner_aggregate || Tuner.use_winner_heuristic) {
+			if(!Tuner.use_winner_aggregate || Tuner.use_winner_heuristic || !board.CanGameContinue()) {
 				if (!skip_propagation) {
 					node.propagate();
 				} else {

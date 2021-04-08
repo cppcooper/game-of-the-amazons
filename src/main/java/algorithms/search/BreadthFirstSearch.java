@@ -15,7 +15,7 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class BreadFirstSearch {
+public class BreadthFirstSearch {
     private static Random rng = new Random();
 
     public static boolean Search(GameState board){

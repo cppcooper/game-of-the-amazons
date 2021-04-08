@@ -121,9 +121,14 @@ public class GameTreeNode {
             int delta_count = new_aggregate_count - heuristic.aggregate_count.get();
             if (delta_count != 0) {
                 double delta_aggregate = new_aggregate - heuristic.aggregate.get();
+                double m = new_aggregate / new_aggregate_count;
                 heuristic.aggregate.set(new_aggregate);
-                heuristic.aggregate_avg.set(new_aggregate / new_aggregate_count);
+                heuristic.aggregate_avg.set(m);
                 heuristic.aggregate_count.set(new_aggregate_count);
+                if(Tuner.use_winner_aggregate && !Tuner.use_winner_heuristic){
+                    heuristic.has_winner.set(true);
+                    heuristic.winner.set(m);
+                }
                 for (int i = 0; i < super_nodes.size(); ++i) {
                     GameTreeNode parent = super_nodes.get(i);
                     double new_p_aggregate = parent.heuristic.aggregate.get() + delta_aggregate;

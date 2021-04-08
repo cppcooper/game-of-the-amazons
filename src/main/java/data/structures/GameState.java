@@ -100,7 +100,6 @@ public class GameState {
 		valid_hash = other.valid_hash;
 	}
 	public GameState(ArrayList<Integer> state, boolean find_pieces, boolean copy_state) {
-		PopulateSet();
 		if(state.size() == Tuner.state_size) {
 			if (copy_state) {
 				board = new ArrayList<>(state);
@@ -138,6 +137,7 @@ public class GameState {
 			}
 		}
 		board = transformed_state;
+		PopulateSet();
 	}
 
 	public void DebugPrint(){

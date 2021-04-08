@@ -1,6 +1,6 @@
 package ubc.cosc322;
 
-import algorithms.search.BreadFirstSearch;
+import algorithms.search.BreadthFirstSearch;
 import algorithms.search.MoveCompiler;
 import algorithms.analysis.HeuristicsQueue;
 import algorithms.search.MonteCarlo;
@@ -129,7 +129,7 @@ public class AICore {
         Debug.PrintThreadID("ExhaustiveSearch");
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
-            if(BreadFirstSearch.Search(copy)){
+            if(BreadthFirstSearch.Search(copy)){
                 game_tree_is_explored.set(true);
                 System.out.println("\nGAME TREE IS NOW FULLY EXPLORED.\n");
                 return;
@@ -140,16 +140,10 @@ public class AICore {
 
     private static void MonteCarloTreeSearch_depthfirst(){
         Debug.PrintThreadID("MonteCarloSearch");
-        int branches = 3;
+        int branches = Tuner.montecarlo_breadth_bottom;
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
-            float p = copy.GetMoveNumber() / 92.0f;
-            float d = Math.abs(0.5f - p) / 0.5f;
-            if(MonteCarlo.RunSimulation(copy, root.get(), false, branches)){
-                branches++;
-            } else {
-                branches = 2;
-            }
+            MonteCarlo.RunSimulation(copy, root.get(), false);
             if(copy.GetMoveNumber() != GetState().GetMoveNumber()) {
                 copy = GetStateCopy();
             }
@@ -158,16 +152,10 @@ public class AICore {
 
     private static void MonteCarloTreeSearch_breadthfirst(){
         Debug.PrintThreadID("MonteCarloSearch");
-        int branches = 3;
+        int branches = Tuner.montecarlo_breadth_top;
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
-            float p = copy.GetMoveNumber() / 92.0f;
-            float d = Math.abs(0.5f - p) / 0.5f;
-            if(MonteCarlo.RunSimulation(copy, root.get(), true, branches)){
-                branches++;
-            } else {
-                branches = 2;
-            }
+            MonteCarlo.RunSimulation(copy, root.get(), true);
             if(copy.GetMoveNumber() != GetState().GetMoveNumber()) {
                 copy = GetStateCopy();
             }
@@ -319,6 +307,13 @@ public class AICore {
 
     public static synchronized int GetCurrentMoveNumber(){
         return current_board_state.GetMoveNumber();
+    }
+
+    public static synchronized void SetState(GameState board){
+        current_board_state = board;
+        root.set(new GameTreeNode(null,null, current_board_state));
+        game_tree_is_explored.set(false);
+        current_board_state.DebugPrint();
     }
 
     public static synchronized void SetState(ArrayList<Integer> state) {
