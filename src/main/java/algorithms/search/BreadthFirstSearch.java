@@ -28,7 +28,7 @@ public class BreadthFirstSearch {
         return !Thread.interrupted();
     }
 
-    public static void Search(GameState board, GameTreeNode parent, int depth){
+    private static void Search(GameState board, GameTreeNode parent, int depth){
         if(board.CanGameContinue() && !Thread.currentThread().isInterrupted()) {
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
             if (moves == null || moves.isEmpty()) {

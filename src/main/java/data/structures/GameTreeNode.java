@@ -177,7 +177,7 @@ public class GameTreeNode {
             if (h1.has_propagated.get() && h2.has_propagated.get()) {
                 return Double.compare(h1.aggregate_avg.get(), h2.aggregate_avg.get());
             }
-            return 0;
+            return Double.compare(h1.mobility.get(), h2.mobility.get()); //this may be set, but not flagged (reduction/freedom)
         }
     }
 }
