@@ -268,6 +268,9 @@ public class AICore {
                         best_agg = aggregate;
                         best_node = sub_node;
                     }
+                    if(B.Elapsed() >= Tuner.max_wait_time){
+                        break;
+                    }
                 }
                 // We've found our best nodes, now we need to return
                 if (best_node != null) {
