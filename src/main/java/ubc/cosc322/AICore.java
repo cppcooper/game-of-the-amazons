@@ -1,6 +1,6 @@
 package ubc.cosc322;
 
-import algorithms.search.BreadthFirstSearch;
+import algorithms.search.BreadthFirst;
 import algorithms.search.MoveCompiler;
 import algorithms.analysis.HeuristicsQueue;
 import algorithms.search.MonteCarlo;
@@ -129,7 +129,7 @@ public class AICore {
         Debug.PrintThreadID("ExhaustiveSearch");
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
-            if(BreadthFirstSearch.Search(copy)){
+            if(BreadthFirst.ExploreGameTree(copy)){
                 game_tree_is_explored.set(true);
                 System.out.println("\nGAME TREE IS NOW FULLY EXPLORED.\n");
                 return;
@@ -305,7 +305,7 @@ public class AICore {
 
     public static void PruneGameTree() {
         int prev_turn_num = GetState().GetMoveNumber() - 2;
-        GameTree.remove(prev_turn_num);
+        GameTree.prune(prev_turn_num);
     }
 
     public static synchronized int GetCurrentMoveNumber(){

@@ -34,7 +34,7 @@ public class GameTree {
         return null;
     }
 
-    public static void remove(int move_num){
+    public static void prune(int move_num){
         var inner_map = game_tree.get(move_num);
         if(inner_map != null) {
             for (GameTreeNode node : inner_map.values()) {

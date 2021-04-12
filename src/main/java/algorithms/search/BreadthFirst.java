@@ -2,7 +2,6 @@ package algorithms.search;
 
 import algorithms.analysis.HeuristicsQueue;
 import data.structures.GameTreeNode;
-import org.apache.commons.math3.util.Pair;
 import data.structures.GameState;
 import data.structures.GameTree;
 import data.Move;
@@ -13,22 +12,21 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-public class BreadthFirstSearch {
+public class BreadthFirst {
     private static Random rng = new Random();
 
-    public static boolean Search(GameState board){
+    public static boolean ExploreGameTree(GameState board){
         GameTreeNode sim_root = GameTree.get(board);
         if(sim_root == null){
             sim_root = new GameTreeNode(new Move(),null, board);
             GameTree.put(sim_root); //in the off chance our two threads run this line at the same time, the reference should be the same.. so it should not matter which gets there first
         }
-        Search(board, sim_root, 0);
+        ExploreGameTree(board, sim_root, 0);
         return !Thread.interrupted();
     }
 
-    private static void Search(GameState board, GameTreeNode parent, int depth){
+    private static void ExploreGameTree(GameState board, GameTreeNode parent, int depth){
         if(board.CanGameContinue() && !Thread.currentThread().isInterrupted()) {
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
             if (moves == null || moves.isEmpty()) {
@@ -65,7 +63,7 @@ public class BreadthFirstSearch {
             }
             while(!branch_jobs.isEmpty()){
                 var job = branch_jobs.poll();
-                Search(job.state_after_move.get(), job,depth+1);
+                ExploreGameTree(job.state_after_move.get(), job,depth+1);
             }
         } else if (!board.CanGameContinue()) {
             HeuristicsQueue.FillWinner(parent.state_after_move.get(), parent.heuristic);
