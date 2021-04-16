@@ -47,7 +47,7 @@ public class BreadthFirst {
                         if(Tuner.use_heuristic_queue && depth > 1) {
                             HeuristicsQueue.add(node);
                         } else {
-                            HeuristicsQueue.CalculateHeuristicsAll(new_state, node, true);
+                            node.calculate_heuristics(true);
                         }
                         GameTree.put(node);
                     } else { //no idea why parent == node
@@ -66,7 +66,7 @@ public class BreadthFirst {
                 ExploreGameTree(job.state_after_move.get(), job,depth+1);
             }
         } else if (!board.CanGameContinue()) {
-            HeuristicsQueue.FillWinner(parent.state_after_move.get(), parent.heuristic);
+            parent.heuristic.FillWinner(parent.state_after_move.get());
             parent.propagate();
             Debug.RunVerboseL1DebugCode(()->{
                 System.out.printf("Terminal state found\npoints: %.3f\n",parent.heuristic.winner.get());

@@ -4,6 +4,7 @@ import data.pod.Heuristic;
 import data.pod.Move;
 import data.parallel.SynchronizedArrayList;
 import org.apache.commons.math3.util.Precision;
+import tools.Maths;
 import tools.Tuner;
 
 import java.util.Comparator;
@@ -136,6 +137,51 @@ public class GameTreeNode {
                     double new_p_aggregate = parent.heuristic.aggregate.get() + delta_aggregate;
                     int new_p_aggregate_count = parent.heuristic.aggregate_count.get() + delta_count;
                     parent.update_aggregate(new_p_aggregate, new_p_aggregate_count);
+                }
+            }
+        }
+    }
+
+    public void calculate_heuristics(boolean skip_propagation) {
+        GameState board = state_after_move.get();
+        if(Tuner.use_winner_heuristic) {
+            heuristic.FillWinner(board);
+        }
+        if (Tuner.use_mobility_heuristic) {
+            heuristic.FillMobility(board);
+        }
+        if (Tuner.use_territory_heuristic) {
+            heuristic.FillTerritory(board);
+        }
+        if (Tuner.use_amazongs_heuristic) {
+            heuristic.FillAmazongs(board);
+        }
+        if (!heuristic.is_ready.get()) {
+            heuristic.is_ready.set(true);
+            double term1 = 0;
+            double term2 = 0;
+            double w = 1;
+            if (Tuner.use_amazongs_heuristic) {
+                term1 = heuristic.amazongs.get();
+            }
+            if (Tuner.use_territory_heuristic) {
+                double t = heuristic.territory.get();
+                term1 *= t;
+                term2 += t;
+            }
+            if (Tuner.use_mobility_heuristic) {
+                term2 += heuristic.mobility.get();
+            }
+            if (Tuner.use_winner_heuristic) {
+                w = heuristic.winner.get();
+            }
+            double v = Maths.h(term1, term2, w);
+            heuristic.value.set(v);
+            if(!Tuner.use_winner_aggregate || Tuner.use_winner_heuristic || !board.CanGameContinue()) {
+                if (!skip_propagation) {
+                    propagate();
+                } else {
+                    one_node_aggregation();
                 }
             }
         }

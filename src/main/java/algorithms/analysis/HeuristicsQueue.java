@@ -1,10 +1,8 @@
 package algorithms.analysis;
 
-import data.pod.Heuristic;
 import data.structures.GameState;
 import data.structures.GameTreeNode;
 import tools.Debug;
-import tools.Maths;
 import tools.Tuner;
 import main.AICore;
 
@@ -46,7 +44,7 @@ public class HeuristicsQueue {
 						if (AICore.GetCurrentMoveNumber() - 1 >= board.GetMoveNumber()) {
 							continue;
 						}
-						CalculateHeuristicsAll(board, node, false);
+						node.calculate_heuristics(false);
 						i = Math.max(0, i - 1);
 					} else {
 						Thread.sleep(++i * 1500);
@@ -64,81 +62,4 @@ public class HeuristicsQueue {
 		return !queue.isEmpty();
 	}
 
-	public static void CalculateHeuristicsAll(GameState board, GameTreeNode node, boolean skip_propagation) {
-		Heuristic h = node.heuristic;
-		if(Tuner.use_winner_heuristic) {
-			FillWinner(board, h);
-		}
-		if (Tuner.use_mobility_heuristic) {
-			FillMobility(board, h);
-		}
-		if (Tuner.use_territory_heuristic) {
-			FillTerritory(board, h);
-		}
-		if (Tuner.use_amazongs_heuristic) {
-			FillAmazongs(board, h);
-		}
-		if (!h.is_ready.get()) {
-			h.is_ready.set(true);
-			double term1 = 0;
-			double term2 = 0;
-			double w = 1;
-			if (Tuner.use_amazongs_heuristic) {
-				term1 = h.amazongs.get();
-			}
-			if (Tuner.use_territory_heuristic) {
-				double t = h.territory.get();
-				term1 *= t;
-				term2 += t;
-			}
-			if (Tuner.use_mobility_heuristic) {
-				term2 += h.mobility.get();
-			}
-			if (Tuner.use_winner_heuristic) {
-				w = h.winner.get();
-			}
-			double value = Maths.h(term1, term2, w);
-			h.value.set(value);
-			if(!Tuner.use_winner_aggregate || Tuner.use_winner_heuristic || !board.CanGameContinue()) {
-				if (!skip_propagation) {
-					node.propagate();
-				} else {
-					node.one_node_aggregation();
-				}
-			}
-		}
-	}
-
-	public static void FillAmazongs(GameState board, Heuristic h) {
-		if (!h.has_amazongs.get()) {
-			h.has_amazongs.set(true);
-			h.amazongs.set(Amazongs.CalculateHeuristic(board));
-		}
-	}
-
-	public static void FillTerritory(GameState board, Heuristic h) {
-		if (!h.has_territory.get()) {
-			h.has_territory.set(true);
-			h.territory.set(Territory.CalculateHeuristic(board));
-		}
-	}
-
-	public static void FillWinner(GameState board, Heuristic h) {
-		if (!h.has_winner.get()) {
-			h.has_winner.set(true);
-			h.winner.set(Winner.CalculateHeuristic(board));
-		}
-	}
-
-	public static void FillMobility(GameState board, Heuristic h) {
-		h.mobility.set(Mobility.CalculateHeuristic(board));
-	}
-
-	public static void FillFreedom(GameState board, Heuristic h) {
-		h.mobility.set(Mobility.CalculateFreedomHeuristic(board));
-	}
-
-	public static void FillReduction(GameState board, Heuristic h) {
-		h.mobility.set(Mobility.CalculateReductionHeuristic(board));
-	}
 }

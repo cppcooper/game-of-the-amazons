@@ -14,6 +14,8 @@ import main.AICore;
 import java.util.*;
 
 public class MonteCarlo {
+    private static RandomGen rng = new RandomGen();
+
     public static boolean exploreDepthFirst(GameTreeNode root) {
         MonteCarlo mc = new MonteCarlo();
         mc.run_simulation(root, false, true);
@@ -26,7 +28,6 @@ public class MonteCarlo {
     }
 
     private Deque<GameTreeNode> simulation_queue = new LinkedList<>();
-    private RandomGen rng = new RandomGen();
     private MonteCarlo(){}
 
     private void run_simulation(GameTreeNode parent, boolean breadth_first, boolean simulate) {
@@ -61,20 +62,20 @@ public class MonteCarlo {
                         HeuristicsQueue.add(node);
                     }
                     if (!Tuner.use_heuristic_queue && !node.heuristic.is_ready.get()) {
-                        HeuristicsQueue.CalculateHeuristicsAll(copy, node, false);
+                        node.calculate_heuristics(false);
                     } else {
                         switch (policy_type) {
                             case REDUCTION:
-                                HeuristicsQueue.FillReduction(copy, node.heuristic);
+                                node.heuristic.FillReduction(copy);
                                 break;
                             case FREEDOM:
-                                HeuristicsQueue.FillFreedom(copy, node.heuristic);
+                                node.heuristic.FillFreedom(copy);
                                 break;
                             case TERRITORY:
-                                HeuristicsQueue.FillTerritory(copy, node.heuristic);
+                                node.heuristic.FillTerritory(copy);
                                 break;
                             case AMAZONGS:
-                                HeuristicsQueue.FillAmazongs(copy, node.heuristic);
+                                node.heuristic.FillAmazongs(copy);
                                 break;
                         }
                     }
@@ -102,13 +103,13 @@ public class MonteCarlo {
                     // read from the front -> back
                     GameTreeNode node = simulation_queue.poll();
                     if (!Tuner.use_heuristic_queue) {
-                        HeuristicsQueue.CalculateHeuristicsAll(node.state_after_move.get(), node, false);
+                        node.calculate_heuristics(false);
                     }
                     run_simulation(node, breadth_first, false);
                 }
             }
         } else if (!board.CanGameContinue()) {
-            HeuristicsQueue.FillWinner(parent.state_after_move.get(), parent.heuristic);
+            parent.heuristic.FillWinner(parent.state_after_move.get());
             parent.propagate();
             Debug.RunVerboseL1DebugCode(() -> {
                 System.out.printf("Terminal state found\npoints: %.3f\n", parent.heuristic.winner.get());

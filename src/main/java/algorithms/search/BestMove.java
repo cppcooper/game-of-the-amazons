@@ -1,6 +1,5 @@
 package algorithms.search;
 
-import algorithms.analysis.HeuristicsQueue;
 import data.pod.Move;
 import data.structures.GameTreeNode;
 import tools.Benchmarker;
@@ -46,7 +45,7 @@ public class BestMove {
                 GameTreeNode selection = root.get(i);
                 if (!selection.heuristic.is_ready.get()) {
                     Debug.RunVerboseL1DebugCode(() -> System.out.printf("BestMove.Get: node not ready. [Node: %s]\n", selection));
-                    HeuristicsQueue.CalculateHeuristicsAll(selection.state_after_move.get(), selection, true);
+                    selection.calculate_heuristics(true);
                 }
                 final int edge = i;
                 Debug.RunVerboseL1DebugCode(() -> System.out.printf("BestMove.find_best_node: node %d\n%s", edge, selection));
