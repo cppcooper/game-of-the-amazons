@@ -15,7 +15,7 @@ public class MonteCarloTester {
         board.FindPieces();
         GameTreeNode sim_root = new GameTreeNode(null,null, board);
         B.Start();
-        MonteCarlo.RunSimulation(board, sim_root, true);
+        //MonteCarlo.RunSimulation(board, sim_root, true);
         System.out.printf("Monte Carlo simulation took %d ms\n", B.Elapsed());
     }
 }
