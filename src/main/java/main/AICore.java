@@ -14,7 +14,6 @@ import data.structures.MovePool;
 import tools.Debug;
 import tools.RandomGen;
 import tools.Tuner;
-import ygraph.ai.smartfox.games.amazons.BaseGameGUI;
 import ygraph.ai.smartfox.games.amazons.OurGameGUI;
 
 import java.util.ArrayList;
@@ -43,7 +42,6 @@ public class AICore {
             MovePool.generate_pool();
             RandomGen rng = new RandomGen();
             //player = new AIPlayer("coopstar" + rng.nextInt(4488), "secure_password");
-            BaseGameGUI.sys_setup();
             game_gui = new OurGameGUI();
             exploration_thread0 = Thread.currentThread();
             // todo: select colour

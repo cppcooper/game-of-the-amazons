@@ -7,7 +7,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class OurGameGUI extends BaseGameGUI {
+public class OurGameGUI extends GameGUIBase {
     public final AtomicBoolean is_closed = new AtomicBoolean(false);
     private ArrayList<Integer> queenfrom = null;
     private ArrayList<Integer> queennew = null;
@@ -16,6 +16,7 @@ public class OurGameGUI extends BaseGameGUI {
 
     public OurGameGUI() {
         super();
+        sys_setup();
         this.addWindowListener(new WindowListener() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -58,13 +59,16 @@ public class OurGameGUI extends BaseGameGUI {
         for(int tile : GameState.start){
             state.add(tile);
         }
-        //game_board.setGameState(state);
-        /*for(int i = 1; i < 11; ++i) {
+        game_board.setGameState(state);
+        for(int i = 1; i < 11; ++i) {
             for(int j = 1; j < 11; ++j) {
                 PlayerMoveHandler moveHandler = new PlayerMoveHandler(i, j, this);
                 game_board.setTHandler(i, j, moveHandler);
             }
-        }*/
+        }
+        configureControlPanel(getControlPanel());
+        pack();
+        setVisible(true);
     }
 
     class PlayerMoveHandler extends MouseAdapter {
