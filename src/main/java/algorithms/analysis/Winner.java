@@ -19,8 +19,8 @@ public class Winner {
     public static double CalculateHeuristic(GameState board) {
         if(!board.CanGameContinue()) {
             if (Tuner.alter_winner_heuristic) {
-                int p1 = count_accessible_positions(board, Tuner.our_player_num);
-                int p2 = count_accessible_positions(board, 3 - Tuner.our_player_num);
+                int p1 = count_accessible_positions(board, Tuner.ai_player_num);
+                int p2 = count_accessible_positions(board, 3 - Tuner.ai_player_num);
                 int d = p1 - p2;
                 if(Tuner.use_only_winning){
                     return d > 0 ? 1 : 0;

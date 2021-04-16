@@ -2,6 +2,7 @@ package ygraph.ai.smartfox.games.amazons;
 
 import data.structures.GameState;
 import main.AICore;
+import tools.Tuner;
 
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -60,10 +61,10 @@ public class OurGameGUI extends GameGUIBase {
             state.add(tile);
         }
         game_board.setGameState(state);
-        for(int i = 1; i < 11; ++i) {
-            for(int j = 1; j < 11; ++j) {
-                PlayerMoveHandler moveHandler = new PlayerMoveHandler(i, j, this);
-                game_board.setTHandler(i, j, moveHandler);
+        for(int y = 1; y < 11; ++y) {
+            for(int x = 1; x < 11; ++x) {
+                PlayerMoveHandler moveHandler = new PlayerMoveHandler(x, y, this);
+                game_board.setTHandler(y, x, moveHandler);
             }
         }
         configureControlPanel(getControlPanel());
@@ -72,33 +73,34 @@ public class OurGameGUI extends GameGUIBase {
     }
 
     class PlayerMoveHandler extends MouseAdapter {
-        int idi = 0;
-        int idj = 0;
+        int row = 0;
+        int col = 0;
         OurGameGUI gui;
 
-        public PlayerMoveHandler(int idi, int idj, OurGameGUI gui) {
-            this.idi = idi;
-            this.idj = idj;
+        public PlayerMoveHandler(int x, int y, OurGameGUI gui) {
+            this.row = y;
+            this.col = x;
             this.gui = gui;
         }
 
         public void mousePressed(MouseEvent e) {
-            boolean is_our_turn = true;
-            if(is_our_turn) {
+            if(Tuner.human_turn) {
                 if (this.gui.counter == 0) {
-                    OurGameGUI.this.queenfrom = new ArrayList();
-                    OurGameGUI.this.queenfrom.add(0, this.idi);
-                    OurGameGUI.this.queenfrom.add(1, this.idj);
-                    this.gui.counter++;
+                    if(game_board.isPlayerTile(Tuner.human_player_num, row, col)) {
+                        OurGameGUI.this.queenfrom = new ArrayList();
+                        OurGameGUI.this.queenfrom.add(0, this.row);
+                        OurGameGUI.this.queenfrom.add(1, this.col);
+                        this.gui.counter++;
+                    }
                 } else if (this.gui.counter == 1) {
                     OurGameGUI.this.queennew = new ArrayList();
-                    OurGameGUI.this.queennew.add(0, this.idi);
-                    OurGameGUI.this.queennew.add(1, this.idj);
+                    OurGameGUI.this.queennew.add(0, this.row);
+                    OurGameGUI.this.queennew.add(1, this.col);
                     OurGameGUI.this.counter++;
                 } else if (this.gui.counter == 2) {
                     OurGameGUI.this.arrow = new ArrayList();
-                    OurGameGUI.this.arrow.add(0, this.idi);
-                    OurGameGUI.this.arrow.add(1, this.idj);
+                    OurGameGUI.this.arrow.add(0, this.row);
+                    OurGameGUI.this.arrow.add(1, this.col);
                     OurGameGUI.this.counter++;
                 }
 

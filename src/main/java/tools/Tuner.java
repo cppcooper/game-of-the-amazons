@@ -3,8 +3,9 @@ package tools;
 import data.structures.Heuristic;
 
 public class Tuner {
-    public static int our_player_num = 1;
-    public static int other_player_num = 2;
+    public static int ai_player_num = 1;
+    public static int human_player_num = 2;
+    public static boolean human_turn = false;
     public static final boolean use_static_pieces = false;
     public static final boolean use_heuristic_queue = false;
     public static final boolean use_decreasing_alpha_asymptote = true;
