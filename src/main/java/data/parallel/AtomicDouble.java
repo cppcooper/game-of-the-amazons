@@ -5,6 +5,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class AtomicDouble {
     private AtomicLong value = new AtomicLong(Double.doubleToLongBits(0.0));
     private volatile double cached = 0.0;
+
+    public AtomicDouble(){}
+    public AtomicDouble(double d){
+        set(d);
+    }
     public double get(){
         return Double.longBitsToDouble(value.get());
     }
