@@ -14,24 +14,33 @@ import main.AICore;
 import java.util.*;
 
 public class MonteCarlo {
-
-    public static boolean RunSimulation(GameState board, GameTreeNode sim_root, boolean breadth_first) {
-        RandomGen rng = new RandomGen();
-        RunSimulation(rng, board, sim_root, breadth_first, new LinkedList<>(), Tuner.montecarlo_breadth_top, true);
-        return !Thread.interrupted(); //Assuming execution was interrupted then we need to clear that flag, and restart from the current LocalState
+    public static boolean exploreDepthFirst(GameTreeNode root) {
+        MonteCarlo mc = new MonteCarlo();
+        mc.run_simulation(root, false, true);
+        return !Thread.interrupted();
+    }
+    public static boolean exploreBreadthFirst(GameTreeNode root) {
+        MonteCarlo mc = new MonteCarlo();
+        mc.run_simulation(root, true, true);
+        return !Thread.interrupted();
     }
 
-    private static void RunSimulation(RandomGen rng, GameState board, GameTreeNode parent, boolean breadth_first, Deque<GameTreeNode> simulation_queue, int branches, boolean simulate) {
+    private Deque<GameTreeNode> simulation_queue = new LinkedList<>();
+    private RandomGen rng = new RandomGen();
+    private MonteCarlo(){}
+
+    private void run_simulation(GameTreeNode parent, boolean breadth_first, boolean simulate) {
         assert simulation_queue != null;
         //System.out.printf("%d\n", board.GetMoveNumber());
+        GameState board = parent.state_after_move.get();
         if (board.CanGameContinue() && !Thread.currentThread().isInterrupted()) {
             int round = AICore.GetCurrentMoveNumber();
-            branches = (int)Maths.lerp(Tuner.montecarlo_breadth_top, Tuner.montecarlo_breadth_bottom, Math.min(1, (board.GetMoveNumber() - round) / (92.0 - round)));
+            int branches = (int) Maths.lerp(Tuner.montecarlo_breadth_top, Tuner.montecarlo_breadth_bottom, Math.min(1, (board.GetMoveNumber() - round) / (92.0 - round)));
             TreeSet<GameTreeNode> candidates = new TreeSet<>(new GameTreeNode.NodeComparator());
             policy_type policy_type = rng.get_random_policy(board.GetMoveNumber());
             ArrayList<Move> moves = MoveCompiler.GetMoveList(board, board.GetTurnPieces(), true);
             if (moves == null || moves.isEmpty()) {
-                Debug.RunVerboseL2DebugCode(()->{
+                Debug.RunVerboseL2DebugCode(() -> {
                     System.out.printf("player %d no moves state:\n", board.GetPlayerTurn());
                     board.DebugPrint();
                 });
@@ -51,7 +60,7 @@ public class MonteCarlo {
                         GameTree.put(node);
                         HeuristicsQueue.add(node);
                     }
-                    if (!Tuner.use_heuristic_queue && !node.heuristic.is_ready.get()){
+                    if (!Tuner.use_heuristic_queue && !node.heuristic.is_ready.get()) {
                         HeuristicsQueue.CalculateHeuristicsAll(copy, node, false);
                     } else {
                         switch (policy_type) {
@@ -77,10 +86,10 @@ public class MonteCarlo {
             int b = 0;
             // add the best X positions to the simulation queue
             for (GameTreeNode node : candidates.descendingSet()) {
-                if(b++ >= branches || Thread.currentThread().isInterrupted()){
+                if (b++ >= branches || Thread.currentThread().isInterrupted()) {
                     break;
                 }
-                if(breadth_first) {
+                if (breadth_first) {
                     // add to the back
                     simulation_queue.add(node);
                 } else {
@@ -88,21 +97,21 @@ public class MonteCarlo {
                     simulation_queue.push(node);
                 }
             }
-            if(simulate) {
-                while(!simulation_queue.isEmpty()){
+            if (simulate) {
+                while (!simulation_queue.isEmpty()) {
                     // read from the front -> back
                     GameTreeNode node = simulation_queue.poll();
-                    if(!Tuner.use_heuristic_queue){
+                    if (!Tuner.use_heuristic_queue) {
                         HeuristicsQueue.CalculateHeuristicsAll(node.state_after_move.get(), node, false);
                     }
-                    RunSimulation(rng, node.state_after_move.get(), node, breadth_first, simulation_queue, branches, false);
+                    run_simulation(node, breadth_first, false);
                 }
             }
         } else if (!board.CanGameContinue()) {
             HeuristicsQueue.FillWinner(parent.state_after_move.get(), parent.heuristic);
             parent.propagate();
-            Debug.RunVerboseL1DebugCode(()->{
-                System.out.printf("Terminal state found\npoints: %.3f\n",parent.heuristic.winner.get());
+            Debug.RunVerboseL1DebugCode(() -> {
+                System.out.printf("Terminal state found\npoints: %.3f\n", parent.heuristic.winner.get());
             });
         }
     }

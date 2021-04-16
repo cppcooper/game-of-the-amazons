@@ -139,23 +139,15 @@ public class AICore {
 
     private static void MonteCarloTreeSearch_breadthfirst(){
         Debug.PrintThreadID("MonteCarloSearch");
-        GameState copy = GetStateCopy();
-        while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
-            MonteCarlo.RunSimulation(copy, root.get(), true);
-            if(copy.GetMoveNumber() != GetState().GetMoveNumber()) {
-                copy = GetStateCopy();
-            }
+        while (!game_tree_is_explored.get() && current_board_state.CanGameContinue() && !threads_terminating.get()) {
+            MonteCarlo.exploreBreadthFirst(root.get());
         }
     }
 
     private static void MonteCarloTreeSearch_depthfirst(){
         Debug.PrintThreadID("MonteCarloSearch");
-        GameState copy = GetStateCopy();
-        while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
-            MonteCarlo.RunSimulation(copy, root.get(), false);
-            if(copy.GetMoveNumber() != GetState().GetMoveNumber()) {
-                copy = GetStateCopy();
-            }
+        while (!game_tree_is_explored.get() && current_board_state.CanGameContinue() && !threads_terminating.get()) {
+            MonteCarlo.exploreDepthFirst(root.get());
         }
     }
 
