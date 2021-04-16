@@ -1,10 +1,10 @@
 package main;
 
+import algorithms.processing.HeuristicsQueue;
 import algorithms.search.BestMove;
 import algorithms.search.MoveCompiler;
-import algorithms.search.BreadthFirst;
-import algorithms.search.MonteCarlo;
-import algorithms.analysis.HeuristicsQueue;
+import algorithms.processing.BreadthFirst;
+import algorithms.processing.MonteCarlo;
 import data.pod.Move;
 import data.pod.Position;
 import data.structures.GameState;

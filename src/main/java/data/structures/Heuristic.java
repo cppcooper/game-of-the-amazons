@@ -1,4 +1,4 @@
-package data.pod;
+package data.structures;
 
 import algorithms.analysis.Amazongs;
 import algorithms.analysis.Mobility;

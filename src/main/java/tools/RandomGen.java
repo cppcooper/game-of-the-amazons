@@ -1,6 +1,6 @@
 package tools;
 
-import algorithms.search.MonteCarlo;
+import algorithms.processing.MonteCarlo;
 import data.pod.BoardPiece;
 import data.structures.GameState;
 import data.pod.Position;

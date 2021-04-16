@@ -1,6 +1,6 @@
-package algorithms.search;
+package algorithms.processing;
 
-import algorithms.analysis.HeuristicsQueue;
+import algorithms.search.MoveCompiler;
 import data.pod.Move;
 import data.structures.GameState;
 import data.structures.GameTree;

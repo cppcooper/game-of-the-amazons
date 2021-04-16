@@ -1,6 +1,6 @@
 package tools;
 
-import data.pod.Heuristic;
+import data.structures.Heuristic;
 
 public class Tuner {
     public static int our_player_num = 1;

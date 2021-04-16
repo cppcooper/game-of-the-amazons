@@ -1,4 +1,4 @@
-package algorithms.analysis;
+package algorithms.processing;
 
 import data.structures.GameState;
 import data.structures.GameTreeNode;
