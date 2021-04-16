@@ -11,7 +11,7 @@ public class MonteCarloTester {
     void execution_time(){
         Benchmarker B = new Benchmarker();
         GameState board = new GameState();
-        AICore.SetState(board);
+        //AICore.SetState(board);
         board.FindPieces();
         GameTreeNode sim_root = new GameTreeNode(null,null, board);
         B.Start();

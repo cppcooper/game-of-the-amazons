@@ -23,7 +23,7 @@ public class MonteCarlo {
 
     private static void RunSimulation(RandomGen rng, GameState board, GameTreeNode parent, boolean breadth_first, Deque<GameTreeNode> simulation_queue, int branches, boolean simulate) {
         assert simulation_queue != null;
-        System.out.printf("%d\n", board.GetMoveNumber());
+        //System.out.printf("%d\n", board.GetMoveNumber());
         if (board.CanGameContinue() && !Thread.currentThread().isInterrupted()) {
             int round = AICore.GetCurrentMoveNumber();
             branches = (int)Maths.lerp(Tuner.montecarlo_breadth_top, Tuner.montecarlo_breadth_bottom, Math.min(1, (board.GetMoveNumber() - round) / (92.0 - round)));

@@ -34,7 +34,7 @@ public class AICore {
     private static final AtomicBoolean threads_terminating = new AtomicBoolean(false);
     private static final AtomicBoolean game_tree_is_explored = new AtomicBoolean(false);
     private static final AtomicBoolean is_searching = new AtomicBoolean(false);
-    private static AtomicReference<GameTreeNode> root = new AtomicReference<>();
+    private static AtomicReference<GameTreeNode> root = new AtomicReference<>(new GameTreeNode(null,null, current_board_state));
 
     public static void main(String[] args) {
         try {
@@ -45,7 +45,7 @@ public class AICore {
             game_gui = new OurGameGUI();
             exploration_thread0 = Thread.currentThread();
             // todo: select colour
-            /*LaunchThreads();
+            LaunchThreads();
             while(!game_gui.is_closed.get()){
                 if(is_searching.get()){
                     BreadthFirst_exhaustive();
@@ -53,7 +53,7 @@ public class AICore {
                 try {
                     Thread.sleep(2500);
                 } catch (Exception e){}
-            }*/
+            }
             //TerminateThreads(); is called in gui closing event
         } catch (Exception e) {
             e.printStackTrace();
@@ -227,59 +227,6 @@ public class AICore {
 
     public static synchronized int GetCurrentMoveNumber(){
         return current_board_state.GetMoveNumber();
-    }
-
-    public static synchronized void SetState(GameState board){
-        current_board_state = board;
-        root.set(new GameTreeNode(null,null, current_board_state));
-        game_tree_is_explored.set(false);
-        current_board_state.DebugPrint();
-    }
-
-    public static synchronized void SetState(ArrayList<Integer> state) {
-        current_board_state = new GameState(state, true, false); // saves state reference instead of copying
-        root.set(new GameTreeNode(null,null, current_board_state));
-        game_tree_is_explored.set(false);
-        current_board_state.DebugPrint();
-    }
-
-    public static synchronized void UpdateState(final Map<String, Object> msgDetails) {
-        ArrayList<Integer> qcurr = (ArrayList) msgDetails.get("queen-position-current");
-        ArrayList<Integer> qnew = (ArrayList) msgDetails.get("queen-position-next");
-        ArrayList<Integer> arrow = (ArrayList) msgDetails.get("arrow-position");
-        Position p1 = new Position(qcurr);
-        Position p2 = new Position(qnew);
-        Position p3 = new Position(arrow);
-        Move move = new Move(
-                p1.CalculateIndex(),
-                p2.CalculateIndex(),
-                p3.CalculateIndex());
-        GameTreeNode parent = root.get();
-        if(!current_board_state.MakeMove(move, true, false)){
-            current_board_state.DebugPrint();
-            System.out.println("ILLEGAL MOVE");
-            System.out.println(move);
-            TerminateThreads();
-            //player.kill();
-            game_gui.dispose();
-            System.exit(1);
-        }
-        GameState copy = GetStateCopy();
-        GameTreeNode child = GameTree.get(copy);
-        if(child == null){
-            //we copy the state, because it's going to change.. and we don't want to invalidate the key we use in the hash map (game tree)
-            System.out.println("New Move.. updating game tree now.");
-            child = new GameTreeNode(move,parent,copy);
-            GameTree.put(child);
-        }
-        root.set(child);
-        GameTreeNode finalChild = child;
-        Debug.RunInfoL1DebugCode(()->{
-            if(!finalChild.heuristic.is_ready.get()){
-                HeuristicsQueue.CalculateHeuristicsAll(copy, finalChild, true);
-            }
-            PrintChoice(finalChild);
-        });
     }
 
     private static void PrintChoice(GameTreeNode node){
