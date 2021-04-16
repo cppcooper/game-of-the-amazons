@@ -1,8 +1,7 @@
 package data.structures;
 
 import algorithms.search.MoveCompiler;
-import data.Move;
-import data.structures.GameState;
+import data.pod.Move;
 
 import java.util.HashMap;
 

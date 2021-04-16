@@ -1,9 +1,9 @@
 package algorithms.analysis;
 
 import algorithms.search.MoveCompiler;
-import data.BoardPiece;
+import data.pod.BoardPiece;
 import data.structures.GameState;
-import data.Position;
+import data.pod.Position;
 import org.junit.jupiter.api.Test;
 import tools.Debug;
 import tools.Maths;

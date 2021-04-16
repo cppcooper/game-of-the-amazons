@@ -4,7 +4,7 @@ import data.structures.GameState;
 import data.structures.GameTreeNode;
 import org.junit.jupiter.api.Test;
 import tools.Benchmarker;
-import ubc.cosc322.AICore;
+import main.AICore;
 
 public class MonteCarloTester {
     @Test

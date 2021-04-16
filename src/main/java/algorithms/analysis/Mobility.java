@@ -1,7 +1,7 @@
 package algorithms.analysis;
 
 import algorithms.search.MoveCompiler;
-import data.BoardPiece;
+import data.pod.BoardPiece;
 import data.structures.GameState;
 import tools.Maths;
 

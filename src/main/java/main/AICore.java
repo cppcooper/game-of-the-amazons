@@ -1,20 +1,20 @@
-package ubc.cosc322;
+package main;
 
-import algorithms.search.BreadthFirst;
+import algorithms.search.BestMove;
 import algorithms.search.MoveCompiler;
-import algorithms.analysis.HeuristicsQueue;
+import algorithms.search.BreadthFirst;
 import algorithms.search.MonteCarlo;
+import algorithms.analysis.HeuristicsQueue;
 import data.pod.Move;
 import data.pod.Position;
 import data.structures.GameState;
 import data.structures.GameTree;
 import data.structures.GameTreeNode;
 import data.structures.MovePool;
-import tools.Benchmarker;
 import tools.Debug;
 import tools.RandomGen;
 import tools.Tuner;
-import ygraph.ai.smartfox.games.BaseGameGUI;
+import ygraph.ai.smartfox.games.amazons.BaseGameGUI;
 import ygraph.ai.smartfox.games.amazons.OurGameGUI;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AICore {
-    private static OurGameGUI game_gui = new OurGameGUI();
+    private static OurGameGUI game_gui;
     private static GameState current_board_state = new GameState();
     private static Thread exploration_thread0 = null;
     private static Thread exploration_thread1 = null;
@@ -44,9 +44,10 @@ public class AICore {
             RandomGen rng = new RandomGen();
             //player = new AIPlayer("coopstar" + rng.nextInt(4488), "secure_password");
             BaseGameGUI.sys_setup();
+            game_gui = new OurGameGUI();
             exploration_thread0 = Thread.currentThread();
             // todo: select colour
-            LaunchThreads();
+            /*LaunchThreads();
             while(!game_gui.is_closed.get()){
                 if(is_searching.get()){
                     BreadthFirst_exhaustive();
@@ -54,7 +55,7 @@ public class AICore {
                 try {
                     Thread.sleep(2500);
                 } catch (Exception e){}
-            }
+            }*/
             //TerminateThreads(); is called in gui closing event
         } catch (Exception e) {
             e.printStackTrace();
@@ -169,14 +170,8 @@ public class AICore {
                         Thread.sleep(Tuner.send_delay);
                     }
                     if (!Thread.currentThread().isInterrupted()) {
-                        GameTreeNode node = GetBestNode();
-                        Move move = null;
-                        if (node != null) {
-                            move = node.move.get();
-                            if (move == null) {
-                                throw new IllegalStateException("We found a node with a null move. This shouldn't even be possible.");
-                            }
-                        } else {
+                        Move move = BestMove.Get(root.get());
+                        if (move == null){
                             GameState copy = GetStateCopy();
                             ArrayList<Move> options = MoveCompiler.GetMoveList(copy, copy.GetTurnPieces(), true);
                             for (Move m : options) {
@@ -195,10 +190,7 @@ public class AICore {
                             var msg = MakeMessage(move);
                             //player.makeMove(msg);
                             //player.getGameClient().sendMoveMessage(msg);
-                            System.out.println("Move sent to server.");
-                            Debug.RunInfoL1DebugCode(()->{
-                                PrintChoice(node);
-                            });
+                            //System.out.println("Move sent to server.");
                             PruneGameTree();
                         }
                     }
@@ -210,77 +202,6 @@ public class AICore {
         } else {
             System.out.println("We are Desynchronized for some reason. SendDelayedMessage is already running.");
         }
-    }
-
-    private static GameTreeNode GetBestNode() throws Exception {
-        double best_agg;
-        double best_value;
-        boolean first_pass = true;
-        GameTreeNode best_node = null;
-        int bad_loop_count = 0;
-        Benchmarker B = new Benchmarker();
-        B.Start();
-        do {
-            best_agg = Double.NEGATIVE_INFINITY;
-            best_value = Double.NEGATIVE_INFINITY;
-            /* Control Structure
-             * check that we have a root to search from
-             * check that the root has edges
-             * compare edges
-             * */
-            GameTreeNode root = AICore.root.get();
-            if (root == null) {
-                Debug.NoParentNodeFound.set(true);
-                System.out.println("GetBestNode: GameTree can't find the state");
-                throw new IllegalStateException("There absolutely should be a root node, and we can't find it.");
-            } else if (root.edges() == 0) {
-                Debug.ZeroEdgesDetected.set(true);
-                System.out.println("GetBestNode: Zero edges");
-                throw new IllegalStateException(
-                        String.format("This should mean we have lost the game, in which case this thread should have been terminated.\n" +
-                                "[game can continue: %B]", GetState().CanGameContinue()));
-            } else {
-                Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: our root node has %d edges, now to find the best edge\n", root.edges()));
-                for (int i = 0; i < root.edges(); ++i) {
-                    final int edge = i;
-                    GameTreeNode sub_node = root.get(i);
-                    if (!sub_node.heuristic.is_ready.get() && B.Elapsed() < Tuner.max_wait_time) {
-                        Debug.RunVerboseL1DebugCode(() -> System.out.printf("GetBestNode: node not ready. [Node: %s]\n", sub_node));
-                        HeuristicsQueue.CalculateHeuristicsAll(sub_node.state_after_move.get(), sub_node, true);
-                    }
-                    Debug.RunVerboseL1DebugCode(() -> System.out.printf("GetBestNode: node %d\n%s", edge, sub_node));
-
-                    // need to check if this node is better than previous nodes
-                    double heuristic = Double.NEGATIVE_INFINITY;
-                    double aggregate = Double.NEGATIVE_INFINITY;
-                    if (Tuner.find_best_aggregate && sub_node.heuristic.has_aggregated.get()) {
-                        aggregate = sub_node.heuristic.aggregate_avg.get();
-                    }
-                    if(sub_node.heuristic.is_ready.get()) {
-                        heuristic = sub_node.heuristic.value.get();
-                    }
-
-                    if((heuristic > 0 || !first_pass) && heuristic >= best_value && aggregate >= best_agg) {
-                        Debug.RunInfoL2DebugCode(() -> System.out.printf("GetBestNode: new high node\n%s", sub_node));
-                        best_value = heuristic;
-                        best_agg = aggregate;
-                        best_node = sub_node;
-                    }
-                    if(B.Elapsed() >= Tuner.max_wait_time){
-                        break;
-                    }
-                }
-                // We've found our best nodes, now we need to return
-                if (best_node != null) {
-                    System.out.println("GetBestNode: found one");
-                    return best_node;
-                } else {
-                    System.out.println("GetBestNode: Could not find a good node.. try again?");
-                }
-            }
-            first_pass = false;
-        } while (B.Elapsed() < Tuner.max_wait_time);
-        return null;
     }
 
     private static Map<String, Object> MakeMessage(Move move) {

@@ -1,6 +1,6 @@
 package tools;
 
-import data.Heuristic;
+import data.pod.Heuristic;
 
 public class Tuner {
     public static int our_player_num = 1;
@@ -23,6 +23,7 @@ public class Tuner {
 
     public static final int montecarlo_breadth_top = 10;
     public static final int montecarlo_breadth_bottom = 1;
+    public static final int max_search_depth = 10;
 
     public static final int coord_min = 0;
     public static final int coord_max = 9;

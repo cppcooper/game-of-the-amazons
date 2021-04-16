@@ -1,7 +1,7 @@
 package data.structures;
 
-import data.Heuristic;
-import data.Move;
+import data.pod.Heuristic;
+import data.pod.Move;
 import data.parallel.SynchronizedArrayList;
 import org.apache.commons.math3.util.Precision;
 import tools.Tuner;
@@ -75,13 +75,13 @@ public class GameTreeNode {
             if (!heuristic.has_propagated.get()) {
                 force_propagate();
                 if(!state_after_move.get().CanGameContinue()) {
-                    double ab = Tuner.get_aggregate_base(heuristic);
+                    double aggregate_value = Tuner.get_aggregate_base(heuristic);
                     if(Tuner.use_only_winning){
-                        if(!Precision.equals(ab, 0, 0.0001)){
-                            update_aggregate(ab, heuristic.aggregate_count.get() + 1);
+                        if(!Precision.equals(aggregate_value, 0, 0.0001)){
+                            update_aggregate(aggregate_value, heuristic.aggregate_count.get() + 1);
                         }
                     } else {
-                        update_aggregate(ab, heuristic.aggregate_count.get() + 1);
+                        update_aggregate(aggregate_value, heuristic.aggregate_count.get() + 1);
                     }
                 }
             }
@@ -105,9 +105,11 @@ public class GameTreeNode {
             for (int i = 0; i < super_nodes.size(); ++i) {
                 GameTreeNode parent = super_nodes.get(i);
                 if (parent.heuristic.maximum_sub.get() < h) {
+                    parent.heuristic.has_max.set(true);
                     parent.heuristic.maximum_sub.set(h);
                 }
                 if (parent.heuristic.minimum_sub.get() > h) {
+                    parent.heuristic.has_min.set(true);
                     parent.heuristic.minimum_sub.set(h);
                 }
             }

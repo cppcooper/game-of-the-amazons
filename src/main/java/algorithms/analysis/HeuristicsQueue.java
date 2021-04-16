@@ -1,12 +1,12 @@
 package algorithms.analysis;
 
-import data.Heuristic;
+import data.pod.Heuristic;
 import data.structures.GameState;
 import data.structures.GameTreeNode;
 import tools.Debug;
 import tools.Maths;
 import tools.Tuner;
-import ubc.cosc322.AICore;
+import main.AICore;
 
 import java.util.concurrent.ConcurrentLinkedDeque;
 

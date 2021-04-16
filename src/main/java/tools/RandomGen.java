@@ -1,9 +1,9 @@
 package tools;
 
 import algorithms.search.MonteCarlo;
-import data.BoardPiece;
+import data.pod.BoardPiece;
 import data.structures.GameState;
-import data.Position;
+import data.pod.Position;
 
 import java.util.ArrayList;
 import java.util.Collections;

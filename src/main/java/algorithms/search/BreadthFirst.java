@@ -4,7 +4,7 @@ import algorithms.analysis.HeuristicsQueue;
 import data.structures.GameTreeNode;
 import data.structures.GameState;
 import data.structures.GameTree;
-import data.Move;
+import data.pod.Move;
 import tools.Debug;
 import tools.Tuner;
 

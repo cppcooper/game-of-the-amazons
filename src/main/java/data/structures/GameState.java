@@ -1,9 +1,9 @@
 package data.structures;
 
 import algorithms.search.MoveCompiler;
-import data.BoardPiece;
-import data.Move;
-import data.Position;
+import data.pod.BoardPiece;
+import data.pod.Move;
+import data.pod.Position;
 import tools.Tuner;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class GameState {
 	private int player_turn = 1;
 	private int hash = -1;
 	private boolean valid_hash = false;
-	private static int[] game_start = { //this is upside down compared to the GUI
+	public static int[] start = { //this is upside down compared to the GUI
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -53,7 +53,7 @@ public class GameState {
 		}
 	}
 	public GameState(){
-		this(game_start);
+		this(start);
 		FindPieces();
 	}
 	public GameState(int[] state){

@@ -1,4 +1,4 @@
-package data;
+package data.pod;
 
 import data.parallel.AtomicDouble;
 
@@ -11,8 +11,8 @@ public class Heuristic {
     public final AtomicInteger aggregate_count = new AtomicInteger();
 
     public final AtomicDouble value = new AtomicDouble();
-    public final AtomicDouble maximum_sub = new AtomicDouble();
-    public final AtomicDouble minimum_sub = new AtomicDouble();
+    public final AtomicDouble maximum_sub = new AtomicDouble(Double.NEGATIVE_INFINITY);
+    public final AtomicDouble minimum_sub = new AtomicDouble(Double.POSITIVE_INFINITY);
 
     public final AtomicDouble winner = new AtomicDouble();
     public final AtomicDouble amazongs = new AtomicDouble();
@@ -22,6 +22,8 @@ public class Heuristic {
     public final AtomicBoolean is_ready = new AtomicBoolean(false);
     public final AtomicBoolean has_propagated = new AtomicBoolean(false);
     public final AtomicBoolean has_aggregated = new AtomicBoolean(false);
+    public final AtomicBoolean has_max = new AtomicBoolean(false);
+    public final AtomicBoolean has_min = new AtomicBoolean(false);
     public final AtomicBoolean has_winner = new AtomicBoolean(false);
     public final AtomicBoolean has_amazongs = new AtomicBoolean(false);
     public final AtomicBoolean has_mobility = new AtomicBoolean(false);

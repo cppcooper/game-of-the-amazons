@@ -1,10 +1,10 @@
 package algorithms.search;
 
 import org.junit.jupiter.api.Test;
-import data.BoardPiece;
+import data.pod.BoardPiece;
 import data.structures.GameState;
 import data.structures.MovePool;
-import data.Position;
+import data.pod.Position;
 import tools.Benchmarker;
 import tools.RandomGen;
 

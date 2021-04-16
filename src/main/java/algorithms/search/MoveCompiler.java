@@ -1,6 +1,8 @@
 package algorithms.search;
 
-import data.*;
+import data.pod.BoardPiece;
+import data.pod.Move;
+import data.pod.Position;
 import data.structures.GameState;
 import data.structures.MovePool;
 import tools.Tuner;
