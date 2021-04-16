@@ -4,7 +4,8 @@ import algorithms.search.BreadthFirst;
 import algorithms.search.MoveCompiler;
 import algorithms.analysis.HeuristicsQueue;
 import algorithms.search.MonteCarlo;
-import data.*;
+import data.pod.Move;
+import data.pod.Position;
 import data.structures.GameState;
 import data.structures.GameTree;
 import data.structures.GameTreeNode;
@@ -14,6 +15,7 @@ import tools.Debug;
 import tools.RandomGen;
 import tools.Tuner;
 import ygraph.ai.smartfox.games.BaseGameGUI;
+import ygraph.ai.smartfox.games.amazons.OurGameGUI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,11 +25,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AICore {
-    private static GameState current_board_state = null;
-    private static AIPlayer player = null;
-    private static Thread search_thread0 = null;
-    private static Thread search_thread1 = null;
-    private static Thread search_thread2 = null;
+    private static OurGameGUI game_gui = new OurGameGUI();
+    private static GameState current_board_state = new GameState();
+    private static Thread exploration_thread0 = null;
+    private static Thread exploration_thread1 = null;
+    private static Thread exploration_thread2 = null;
     private static Thread heuristics_thread = null;
     private static Thread move_sender_orphan = null;
     private static final AtomicBoolean threads_terminating = new AtomicBoolean(false);
@@ -40,22 +42,20 @@ public class AICore {
             assert Tuner.use_amazongs_heuristic || Tuner.use_winner_heuristic || Tuner.use_territory_heuristic || Tuner.use_mobility_heuristic;
             MovePool.generate_pool();
             RandomGen rng = new RandomGen();
-            player = new AIPlayer("coopstar" + rng.nextInt(4488), "secure_password");
+            //player = new AIPlayer("coopstar" + rng.nextInt(4488), "secure_password");
             BaseGameGUI.sys_setup();
-            java.awt.EventQueue.invokeLater(new Runnable() {
-                public void run() {
-                    player.Go();
-                }
-            });
-            search_thread0 = Thread.currentThread();
-            while(player.isRunning()){
+            exploration_thread0 = Thread.currentThread();
+            // todo: select colour
+            LaunchThreads();
+            while(!game_gui.is_closed.get()){
                 if(is_searching.get()){
-                    MonteCarloTreeSearch_breadthfirst();
+                    BreadthFirst_exhaustive();
                 }
                 try {
                     Thread.sleep(2500);
                 } catch (Exception e){}
             }
+            //TerminateThreads(); is called in gui closing event
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -63,14 +63,14 @@ public class AICore {
 
     public static void TerminateThreads() {
         threads_terminating.set(true);
-        if (search_thread0 != null && search_thread0.isAlive()) {
-            search_thread0.interrupt();
+        if (exploration_thread0 != null && exploration_thread0.isAlive()) {
+            exploration_thread0.interrupt();
         }
-        if (search_thread1 != null && search_thread1.isAlive()) {
-            search_thread1.interrupt();
+        if (exploration_thread1 != null && exploration_thread1.isAlive()) {
+            exploration_thread1.interrupt();
         }
-        if (search_thread2 != null && search_thread2.isAlive()) {
-            search_thread2.interrupt();
+        if (exploration_thread2 != null && exploration_thread2.isAlive()) {
+            exploration_thread2.interrupt();
         }
         if(Tuner.use_heuristic_queue) {
             if (heuristics_thread != null && heuristics_thread.isAlive()) {
@@ -82,14 +82,14 @@ public class AICore {
         }
         try {
             while (
-                    (search_thread1 != null && search_thread1.isAlive())
-                    || (search_thread2 != null && search_thread2.isAlive())
+                    (exploration_thread1 != null && exploration_thread1.isAlive())
+                    || (exploration_thread2 != null && exploration_thread2.isAlive())
                     || (heuristics_thread != null && heuristics_thread.isAlive())
             ) {
                 Thread.sleep(100);
             }
-            search_thread1 = null;
-            search_thread2 = null;
+            exploration_thread1 = null;
+            exploration_thread2 = null;
             heuristics_thread = null;
         } catch (Exception e) {
             e.printStackTrace();
@@ -99,20 +99,20 @@ public class AICore {
     }
 
     public static void InterruptSimulations(){
-        search_thread0.interrupt();
-        search_thread1.interrupt();
-        search_thread2.interrupt();
+        exploration_thread0.interrupt();
+        exploration_thread1.interrupt();
+        exploration_thread2.interrupt();
     }
 
     public static void LaunchThreads(){
-        if(search_thread1 != null && search_thread1.isAlive() && !search_thread1.isInterrupted()){
-            search_thread1.interrupt();
+        if(exploration_thread1 != null && exploration_thread1.isAlive() && !exploration_thread1.isInterrupted()){
+            exploration_thread1.interrupt();
         }
-        if(search_thread2 != null && search_thread2.isAlive() && !search_thread2.isInterrupted()){
-            search_thread2.interrupt();
+        if(exploration_thread2 != null && exploration_thread2.isAlive() && !exploration_thread2.isInterrupted()){
+            exploration_thread2.interrupt();
         }
-        search_thread1 = new Thread(AICore::ExhaustiveSearch);
-        search_thread2 = new Thread(AICore::MonteCarloTreeSearch_depthfirst);
+        exploration_thread1 = new Thread(AICore::MonteCarloTreeSearch_breadthfirst);
+        exploration_thread2 = new Thread(AICore::MonteCarloTreeSearch_depthfirst);
         if(Tuner.use_heuristic_queue) {
             if (heuristics_thread == null) {
                 heuristics_thread = new Thread(HeuristicsQueue::ProcessQueue);
@@ -120,12 +120,12 @@ public class AICore {
             }
         }
 
-        search_thread1.start();
-        search_thread2.start();
+        exploration_thread1.start();
+        exploration_thread2.start();
         is_searching.set(true);
     }
 
-    private static void ExhaustiveSearch() {
+    private static void BreadthFirst_exhaustive() {
         Debug.PrintThreadID("ExhaustiveSearch");
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
@@ -138,24 +138,22 @@ public class AICore {
         }
     }
 
-    private static void MonteCarloTreeSearch_depthfirst(){
+    private static void MonteCarloTreeSearch_breadthfirst(){
         Debug.PrintThreadID("MonteCarloSearch");
-        int branches = Tuner.montecarlo_breadth_bottom;
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
-            MonteCarlo.RunSimulation(copy, root.get(), false);
+            MonteCarlo.RunSimulation(copy, root.get(), true);
             if(copy.GetMoveNumber() != GetState().GetMoveNumber()) {
                 copy = GetStateCopy();
             }
         }
     }
 
-    private static void MonteCarloTreeSearch_breadthfirst(){
+    private static void MonteCarloTreeSearch_depthfirst(){
         Debug.PrintThreadID("MonteCarloSearch");
-        int branches = Tuner.montecarlo_breadth_top;
         GameState copy = GetStateCopy();
         while (!game_tree_is_explored.get() && copy.CanGameContinue() && !threads_terminating.get()) {
-            MonteCarlo.RunSimulation(copy, root.get(), true);
+            MonteCarlo.RunSimulation(copy, root.get(), false);
             if(copy.GetMoveNumber() != GetState().GetMoveNumber()) {
                 copy = GetStateCopy();
             }
@@ -195,8 +193,8 @@ public class AICore {
                             current_board_state.MakeMove(move, true, true);
                             InterruptSimulations();
                             var msg = MakeMessage(move);
-                            player.makeMove(msg);
-                            player.getGameClient().sendMoveMessage(msg);
+                            //player.makeMove(msg);
+                            //player.getGameClient().sendMoveMessage(msg);
                             System.out.println("Move sent to server.");
                             Debug.RunInfoL1DebugCode(()->{
                                 PrintChoice(node);
@@ -343,7 +341,8 @@ public class AICore {
             System.out.println("ILLEGAL MOVE");
             System.out.println(move);
             TerminateThreads();
-            player.kill();
+            //player.kill();
+            game_gui.dispose();
             System.exit(1);
         }
         GameState copy = GetStateCopy();
