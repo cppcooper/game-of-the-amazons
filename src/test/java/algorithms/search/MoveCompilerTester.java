@@ -70,10 +70,10 @@ class MoveCompilerTester {
     }
 
     long RandomizedMoveCompilerTest(Position[] positions, RandomGen rng, boolean use_pooling){
-        GameState board = new GameState(rng.GetRandomState(0.35),false,false);
+        GameState board = new GameState(rng.GetRandomState(0.35));
         BoardPiece[] pieces = new BoardPiece[4];
         for(int i = 0; i < 4; ++i){
-            pieces[i] = new BoardPiece(positions[i].CalculateIndex(),1);
+            pieces[i] = new BoardPiece(positions[i].getIndex(),1);
         }
 
         Benchmarker B = new Benchmarker();

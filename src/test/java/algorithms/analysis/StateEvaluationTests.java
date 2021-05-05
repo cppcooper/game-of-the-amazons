@@ -162,38 +162,38 @@ public class StateEvaluationTests {
         };
         System.out.println("Remember that evaluations calculate the value the state has, usually with respect to the player that made the last move.");
         GameState board = new GameState();
-        board.SetMoveNumber(1);
-        board.FindPieces();
-        board.DebugPrint();
-        double w = Winner.CalculateHeuristic(board);
-        double m = Mobility.CalculateHeuristic(board);
-        double t = Territory.CalculateHeuristic(board);
-        double a = Amazongs.CalculateHeuristic(board);
-        System.out.printf("w: %.4f\nm: %.4f\nt: %.4f\na: %.4f\ncurrent turn: %d\n", w, m, t, a, board.GetPlayerTurn());
-        int i = 0;
-        for(int[] state : states){
-            board = new GameState(state);
-            board.SetMoveNumber(i+1);
-            board.FindPieces();
-            System.out.printf("(%s::MN%d)\n  %s evaluation\n", state_info[i++], board.GetMoveNumber(), board.GetNextPlayerTurn() == 1 ? "black" : "white");
-            board.DebugPrint();
-            w = Winner.CalculateHeuristic(board);
-            m = Mobility.CalculateHeuristic(board);
-            t = Territory.CalculateHeuristic(board);
-            a = Amazongs.CalculateHeuristic(board);
-            double value = Maths.h(a, m+t, w);
-            System.out.printf("winner: %.4f\nmobility: %.4f\nterritory: %.4f\namazongs: %.4f\ncombined: %.4f\n\n", w, m, t, a, value);
-        }
+//        board.setTurnNumber(1);
+//        board.FindPieces();
+//        board.DebugPrint();
+//        double w = Winner.CalculateHeuristic(board);
+//        double m = Mobility.CalculateHeuristic(board);
+//        double t = Territory.CalculateHeuristic(board);
+//        double a = Amazongs.CalculateHeuristic(board);
+//        System.out.printf("w: %.4f\nm: %.4f\nt: %.4f\na: %.4f\ncurrent turn: %d\n", w, m, t, a, board.GetPlayerTurn());
+//        int i = 0;
+//        for(int[] state : states){
+//            board = new GameState(state);
+//            board.setTurnNumber(i+1);
+//            board.FindPieces();
+//            System.out.printf("(%s::MN%d)\n  %s evaluation\n", state_info[i++], board.getTurnNumber(), board.GetNextPlayerTurn() == 1 ? "black" : "white");
+//            board.DebugPrint();
+//            w = Winner.CalculateHeuristic(board);
+//            m = Mobility.CalculateHeuristic(board);
+//            t = Territory.CalculateHeuristic(board);
+//            a = Amazongs.CalculateHeuristic(board);
+//            double value = Maths.h(a, m+t, w);
+//            System.out.printf("winner: %.4f\nmobility: %.4f\nterritory: %.4f\namazongs: %.4f\ncombined: %.4f\n\n", w, m, t, a, value);
+//        }
     }
 
     @Test
     void debug_move_compiler(){
         GameState board = new GameState(Debug.no_moves_state);
-        board.FindPieces();
-        var moves = MoveCompiler.GetMoveList(board, board.GetPlayerPieces(1), true);
-        System.out.printf("Moves player 1: %d\n", moves != null ? moves.size() : 0);
-        moves = MoveCompiler.GetMoveList(board, board.GetPlayerPieces(2), true);
-        System.out.printf("Moves player 2: %d\n", moves != null ? moves.size() : 0);
+        //board.FindPieces();
+        //var moves = MoveCompiler.GetMoveList(board, board.GetPlayerPieces(1), true);
+        //System.out.printf("Moves player 1: %d\n", moves != null ? moves.size() : 0);
+        //moves = MoveCompiler.GetMoveList(board, board.GetPlayerPieces(2), true);
+        //System.out.printf("Moves player 2: %d\n", moves != null ? moves.size() : 0);
     }
 
     @Test
@@ -255,7 +255,7 @@ public class StateEvaluationTests {
         double max = Double.NEGATIVE_INFINITY;
         double min = Double.POSITIVE_INFINITY;
         for(int i = 0; i < trials; ++i){
-            GameState board = new GameState(rng.GetRandomState(),true,true);
+            GameState board = new GameState(rng.GetRandomState());
             double heuristic = Territory.CalculateHeuristic(board);
             boolean new_value = false;
             if(heuristic > max){
