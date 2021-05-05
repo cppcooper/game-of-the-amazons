@@ -179,4 +179,9 @@ public class GameTreeNode extends GameTreeHeuristic {
         winning_branches.flag();
         maximum_sub.set(maximum_sub.get()); // set as evaluated
     }
+
+    @Override
+    public boolean isTerminal(){
+        return is_winning.get();
+    }
 }

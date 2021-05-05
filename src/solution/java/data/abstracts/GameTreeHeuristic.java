@@ -74,6 +74,7 @@ public abstract class GameTreeHeuristic extends NodeBase implements Comparable<G
     public abstract void evaluateFreedom();
     public abstract void evaluateReduction();
     public abstract void identifyTerminalState();
+    public abstract boolean isTerminal();
 
 //    @Override
 //    public String toString() {
