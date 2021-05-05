@@ -11,6 +11,7 @@ import tools.Tuner;
 import java.util.*;
 import java.util.function.*;
 
+//todo: reduce
 public class MoveCompiler {
     // To find all of one player's move options you calculate `pieces x positions x arrows` = 4*40*40 = 6400 max options/operations
     public static ArrayList<Move> compileList(GameState board, boolean use_pooling){
