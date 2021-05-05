@@ -15,9 +15,11 @@ public class BestNode {
     }
 
     protected BestNode(GameTreeNode root){
-        best_node = find_best_node(root, true);
-        if (best_node == null) {
-            best_node = find_best_node(root, false);
+        if(!root.isTerminal()) {
+            best_node = find_best_node(root, true);
+            if (best_node == null) {
+                best_node = find_best_node(root, false);
+            }
         }
     }
 
