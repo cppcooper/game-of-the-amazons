@@ -3,6 +3,10 @@ package main;
 import data.pod.BoardPiece;
 import data.pod.Move;
 import data.structures.GameState;
+import data.structures.GameTree;
+import controllers.AIController;
+import controllers.GameController;
+import controllers.HumanController;
 import org.junit.jupiter.api.Test;
 import tools.RandomGen;
 import ygraph.ai.smartfox.games.amazons.OurGameGUI;
@@ -11,9 +15,9 @@ import java.util.ArrayList;
 
 public class Game {
     private final ArrayList<Runnable> callbacks = new ArrayList<>();
-    protected final GameState state = new GameState();
-    protected final OurGameGUI gui = new OurGameGUI();
-    protected final GameController[] players = new GameController[2];
+    final GameState state = new GameState();
+    final OurGameGUI gui = new OurGameGUI();
+    private final GameController[] players = new GameController[2];
 
     public static Game Get(){
         return instance;
@@ -22,11 +26,11 @@ public class Game {
     private Game(){
         RandomGen rng = new RandomGen();
         if(rng.nextBoolean()){
-            players[0] = new HumanController(this,1);
-            players[1] = new AIController(this,2);
+            players[0] = new HumanController(state, gui,1);
+            players[1] = new AIController(state, gui,2);
         } else {
-            players[0] = new AIController(this,1);
-            players[1] = new HumanController(this,2);
+            players[0] = new AIController(state, gui,1);
+            players[1] = new HumanController(state, gui,2);
         }
     }
 
@@ -41,6 +45,15 @@ public class Game {
                 }
             }
         }
+    }
+
+    public synchronized void apply(Move move){
+        gui.updateGameState(move);
+        state.apply(move);
+    }
+
+    private boolean canContinue(){
+        return !GameTree.get(state).isTerminal();
     }
 
     public synchronized int getCurrentTurn(){
@@ -61,15 +74,6 @@ public class Game {
 
     public BoardPiece[] getPrevTurnPieces(int round){
         return players[getPrevTurnPlayer(round) - 1].getPlayerPieces();
-    }
-
-    public boolean canContinue(){
-        return true;
-    }
-
-    public synchronized void apply(Move move){
-        gui.updateGameState(move);
-        state.apply(move);
     }
 
     @Test
