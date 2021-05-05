@@ -1,6 +1,6 @@
 package data.parallel;
 
-import interfaces.GetSet;
+import data.interfaces.GetSet;
 
 import java.util.concurrent.atomic.AtomicLong;
 
