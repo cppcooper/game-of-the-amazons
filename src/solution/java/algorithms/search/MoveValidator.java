@@ -2,7 +2,7 @@ package algorithms.search;
 
 import data.pod.Move;
 import data.pod.Position;
-import main.GameController;
+import controllers.GameController;
 
 public class MoveValidator {
     private GameController controller;
