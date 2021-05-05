@@ -18,7 +18,6 @@ public class Exhaustive extends GameExplorer {
     protected void explore(GameTreeNode root, boolean is_root_invocation){
         job_queue.addAll(expandTree(root));
         if(is_root_invocation) {
-            signal.countDown();
             processJobs();
         }
     }

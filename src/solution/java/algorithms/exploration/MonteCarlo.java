@@ -41,7 +41,6 @@ public class MonteCarlo extends GameExplorer {
             job_queue = children;
         }
         if(is_root_invocation){
-            signal.countDown();
             processJobs();
         }
     }
@@ -74,11 +73,7 @@ public class MonteCarlo extends GameExplorer {
         do {
             int N = children.size();
             int NU = Maths.tri_num(N);
-            int selection = rng.nextInt(NU); //[    0    ][   1   ][  2  ][ 3 ][4]
-                                            // nu = 0; nu = 1; nu = 3; nu = 6; nu = 10; nu = 15
-                                            // n=5; nu=15; i: 0 -> 4
-                                            // max_ubound(0) = tri(N - (0+1))
-                                            //               = tri(5 - 1) = tri(4)
+            int selection = rng.nextInt(NU);
             int i;
             for(i = 0; i < N; ++i){
                 int j = i + 1;

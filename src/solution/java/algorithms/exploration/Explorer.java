@@ -65,17 +65,17 @@ public class Explorer {
             case exhaustive:
                 thread_pool.execute(this::Exhaustively);
                 break;
-            case alpha_beta:
-                thread_pool.execute(this::AlphaBeta);
-                break;
-            case montecarlo:
-                thread_pool.execute(this::MonteCarlo);
-                break;
             case montecarlo_bf:
                 thread_pool.execute(this::MonteCarlo_breadthFirst);
                 break;
             case montecarlo_df:
                 thread_pool.execute(this::MonteCarlo_depthFirst);
+                break;
+            case alpha_beta:
+                thread_pool.execute(this::AlphaBeta);
+                break;
+            case montecarlo:
+                thread_pool.execute(this::MonteCarlo);
                 break;
         }
     }
@@ -89,6 +89,11 @@ public class Explorer {
                 game_tree_is_explored.set(true);
             }
         }
+        if(game_tree_is_explored.get()){
+            for(int i = 0; i < signal.getCount(); ++i){
+                signal.countDown();
+            }
+        }
     }
     private void AlphaBeta(){
 
@@ -98,14 +103,16 @@ public class Explorer {
     }
     private void MonteCarlo_breadthFirst(){
         Debug.PrintThreadID("MonteCarlo_breadthfirst");
+        MonteCarlo explorer = new MonteCarlo(signal, true);
         while (!game_tree_is_explored.get() && !threads_terminating.get()) {
-            //MonteCarlo.exploreBreadthFirst(root);
+            explorer.explore(root);
         }
     }
     private void MonteCarlo_depthFirst(){
         Debug.PrintThreadID("MonteCarlo_depthFirst");
+        MonteCarlo explorer = new MonteCarlo(signal, false);
         while (!game_tree_is_explored.get() && !threads_terminating.get()) {
-            //MonteCarlo.exploreDepthFirst(root);
+            explorer.explore(root);
         }
     }
 }

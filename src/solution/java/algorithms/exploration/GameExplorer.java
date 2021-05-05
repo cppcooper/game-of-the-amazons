@@ -12,8 +12,8 @@ import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
 
 public abstract class GameExplorer {
+    private CountDownLatch signal;
     protected Deque<GameTreeNode> job_queue = new LinkedList<>();
-    protected CountDownLatch signal;
     protected GameExplorer(CountDownLatch signal){
         this.signal = signal;
     }
@@ -54,6 +54,7 @@ public abstract class GameExplorer {
                 }
             }
         }
+        signal.countDown();
         return nodes;
     }
 
