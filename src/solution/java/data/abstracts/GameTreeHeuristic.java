@@ -1,4 +1,8 @@
-package data.parallel;
+package data.abstracts;
+
+import data.parallel.Aggregate;
+import data.parallel.Evaluation;
+import data.parallel.Propagator;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

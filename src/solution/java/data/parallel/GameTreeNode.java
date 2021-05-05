@@ -3,13 +3,11 @@ package data.parallel;
 import algorithms.analysis.Amazongs;
 import algorithms.analysis.Mobility;
 import algorithms.analysis.Territory;
+import data.abstracts.GameTreeHeuristic;
 import data.pod.Move;
 import data.structures.GameState;
-import org.apache.commons.math3.util.Precision;
 import tools.Maths;
-import tools.Tuner;
 
-import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**

@@ -1,5 +1,7 @@
-package data.parallel;
+package data.abstracts;
 
+
+import data.parallel.SynchronizedArrayList;
 
 public abstract class NodeBase {
     protected final SynchronizedArrayList<NodeBase> super_nodes = new SynchronizedArrayList<>();

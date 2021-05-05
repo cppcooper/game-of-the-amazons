@@ -8,8 +8,8 @@ public class Evaluation implements GetSet, Comparable<Evaluation> {
     private final AtomicDouble evaluation = new AtomicDouble();
     private final AtomicBoolean is_evaluated = new AtomicBoolean(false);
 
-    Evaluation(){}
-    Evaluation(double value) {
+    public Evaluation(){}
+    public Evaluation(double value) {
         evaluation.set(value);
     }
 
