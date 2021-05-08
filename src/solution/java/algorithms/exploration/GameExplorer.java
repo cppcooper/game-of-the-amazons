@@ -22,7 +22,7 @@ public abstract class GameExplorer {
     protected abstract void explore(GameTreeNode root, boolean is_root_invocation);
     protected abstract void evaluate(GameTreeNode node);
 
-    LinkedList<GameTreeNode> expandTree(GameTreeNode root){
+    protected LinkedList<GameTreeNode> expandTree(GameTreeNode root){
         LinkedList<GameTreeNode> nodes = new LinkedList<>();
         GameState board = root.state_after_move.get();
         if(!Thread.currentThread().isInterrupted()) {
