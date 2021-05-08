@@ -4,34 +4,34 @@ public class Benchmarker {
     private long start = -1;
     private long end = -1;
     private boolean running;
-    public void Start(){
+    public void start(){
         start = System.nanoTime();
         running = true;
     }
-    public void Stop(){
+    public void stop(){
         end = System.nanoTime();
         running = false;
     }
-    public long Elapsed(){
+    public long elapsed(){
         if(!running){
             return (end - start)/1000000;
         }
         return (System.nanoTime() - start)/1000000;
     }
-    public long ElapsedNano(){
+    public long elapsedNano(){
         if(!running){
             return (end - start);
         }
         return (System.nanoTime() - start);
     }
 
-    public long AverageRuntime(Benchmarker B, int N, Runnable fn){
+    public long averageRuntime(Benchmarker B, int N, Runnable fn){
         long total = 0;
         for(int i = 0; i < N; ++i){
-            B.Start();
+            B.start();
             fn.run();
-            B.Stop();
-            total += B.ElapsedNano();
+            B.stop();
+            total += B.elapsedNano();
         }
         return total / N;
     }

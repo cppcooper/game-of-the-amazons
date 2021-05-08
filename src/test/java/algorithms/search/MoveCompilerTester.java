@@ -15,10 +15,10 @@ class MoveCompilerTester {
         final int trials = 64000;
         final boolean print_intermediaries = false;
         Benchmarker B = new Benchmarker();
-        B.Start();
+        B.start();
         MovePool.generate_pool();
-        B.Stop();
-        System.out.printf("Pool generation took: %d ms", B.Elapsed());
+        B.stop();
+        System.out.printf("Pool generation took: %d ms", B.elapsed());
         BenchmarkGetPooledMoveList(trials,print_intermediaries);
         BenchmarkGetNonPooledMoveList(trials,print_intermediaries);
         double x = -1.0;
@@ -77,9 +77,9 @@ class MoveCompilerTester {
         }
 
         Benchmarker B = new Benchmarker();
-        B.Start();
+        B.start();
         MoveCompiler.GetMoveList(board,pieces,use_pooling);
-        B.Stop();
-        return B.ElapsedNano();
+        B.stop();
+        return B.elapsedNano();
     }
 }
