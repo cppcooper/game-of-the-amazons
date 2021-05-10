@@ -48,7 +48,7 @@ public class HumanController extends GameController {
             Game.Get().apply(move);
             for(BoardPiece p : pieces){
                 if(p.getIndex() == move.start){
-                    p.moveTo(move.start);
+                    p.moveTo(move.next);
                     break;
                 }
             }
@@ -75,16 +75,22 @@ public class HumanController extends GameController {
                     move.start = index;
                     if(MoveValidator.verify(move, pc)){
                         count++;
+                    } else {
+                        System.out.println("Invalid selection");
                     }
                 } else if (count == 1 && index != move.start) {
                     move.next = index;
                     if(MoveValidator.verify(move, pc)){
                         count++;
+                    } else {
+                        System.out.println("Invalid selection");
                     }
                 } else if (count == 2 && index != move.next) {
                     move.arrow = index;
                     if(MoveValidator.verify(move, pc)){
                         count++;
+                    } else {
+                        System.out.println("Invalid selection");
                     }
                 }
 
