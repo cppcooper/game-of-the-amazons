@@ -143,7 +143,7 @@ public class GameState {
 		return board.get(index);
 	}
 	public void setTile(int index, int value){
-		valid_hash = valid_hash && board.set(index, value) == value; // last == new && valid_hash
+		valid_hash = board.set(index, value) == value && valid_hash; // last == new && valid_hash
 		// ie. true if already true AND the new value for the tile is the same as what was already there, otherwise false. IDE suggested this form so figured I'd explain it
 	}
 	public boolean isTileEmpty(int index){
