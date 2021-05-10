@@ -10,7 +10,7 @@ public class MovePool {
 
     public static void generate_pool(){
         int[] all_positions = MoveCompiler.GetAllValidPositions();
-        MoveCompiler.GetMoveList(new GameState(),all_positions,true);
+        MoveCompiler.compileList(new GameState(),all_positions,true,false);
     }
 
     private static int make_key(int start, int next, int arrow){

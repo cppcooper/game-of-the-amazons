@@ -48,6 +48,6 @@ public class Mobility {
     }
 
     private static int count_first_degree_moves(GameState board, BoardPiece[] pieces) {
-        return MoveCompiler.GetMoveList(board, pieces,true, false).size();
+        return MoveCompiler.compileList(board,true, false).size();
     }
 }

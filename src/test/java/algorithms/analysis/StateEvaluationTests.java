@@ -200,7 +200,7 @@ public class StateEvaluationTests {
     void find_all_possible_moves() {
         GameState board = new GameState();
         int[] positions = MoveCompiler.GetAllValidPositions();
-        var moves = MoveCompiler.GetMoveList(board,positions,true);
+        var moves = MoveCompiler.compileList(board, true);
         System.out.printf("possible moves (without pieces): %d\n",moves.size());
     }
 

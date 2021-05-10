@@ -13,66 +13,60 @@ import java.util.function.*;
 
 //todo: reduce
 public class MoveCompiler {
-    // To find all of one player's move options you calculate `pieces x positions x arrows` = 4*40*40 = 6400 max options/operations
+    // To find all of one player's move options you calculate `pieces x positions x arrows` = 4*35*35 = 4900 max options/operations
     public static ArrayList<Move> compileList(GameState board, boolean use_pooling){
-        return GetMoveList(board, Game.Get().getTurnPieces(board.getRoundNum()), use_pooling,true);
+        return compileList(board, use_pooling, true);
     }
 
-    public static ArrayList<Move> GetMoveList(GameState board, BoardPiece[] player_pieces, boolean use_pooling){
-        return GetMoveList(board,player_pieces,use_pooling,true);
-    }
-
-    public static ArrayList<Move> GetMoveList(GameState board, int[] piece_indices, boolean use_pooling){
-        return GetMoveList(board,piece_indices,use_pooling,true);
-    }
-
-    public static ArrayList<Move> GetMoveList(GameState board, BoardPiece[] player_pieces, boolean use_pooling, boolean use_interrupts) {
-        int[] piece_indices = new int[4];
-        for (int i = 0; i < piece_indices.length; ++i) {
-            piece_indices[i] = player_pieces[i].getIndex();
+    public static ArrayList<Move> compileList(GameState board, boolean use_pooling, boolean use_interrupts){
+        BoardPiece[] pieces = Game.Get().getTurnPieces(board.getRoundNum());
+        int[] positions = new int[pieces.length];
+        int i = 0;
+        for(BoardPiece p : pieces){
+            positions[i++] = p.getIndex();
         }
-        return GetMoveList(board,piece_indices,use_pooling,use_interrupts);
+        return compileList(board, positions, use_pooling, use_interrupts);
     }
 
-    public static ArrayList<Move> GetMoveList(GameState board, int[] piece_indices, boolean use_pooling, boolean use_interrupts){
+    public static ArrayList<Move> compileList(GameState board, int[] start_positions, boolean use_pooling, boolean use_interrupts){
         ArrayList<Move> all_moves = new ArrayList<>(5000);
         // Getting the available positions for a piece to move to
-        int [][] open_piece_positions = GetOpenPositions(board,piece_indices,use_interrupts); //values of -1 are invalid elements, to be ignored
+        int [][] next_positions = GetOpenPositions(board,start_positions,use_interrupts); //values of -1 are invalid elements, to be ignored
         if(use_interrupts && Thread.currentThread().isInterrupted()) {
             return null; // there are no moves to return yet
         }
-        for(int piece_i = 0; piece_i < piece_indices.length; ++piece_i){
+        for(int piece_i = 0; piece_i < start_positions.length; ++piece_i){
             // Getting the available positions for an arrow from all the positions a piece could shoot from
             GameState copy = new GameState(board);
-            copy.setTile(piece_indices[piece_i],0);
-            int[][] all_arrow_positions = GetOpenPositions(copy,open_piece_positions[piece_i],use_interrupts);
+            copy.setTile(start_positions[piece_i],0);
+            int[][] arrow_positions = GetOpenPositions(copy,next_positions[piece_i],use_interrupts);
             if(use_interrupts && Thread.currentThread().isInterrupted()){
                 return null; // there are no moves to return yet
             }
             //Time to construct Moves
             //but first, check that the open positions for this piece isn't null/empty
-            if(open_piece_positions[piece_i] != null) {
+            if(next_positions[piece_i] != null) {
                 //start iterating position/arrow combinations
-                for (int position_j = 0; position_j < open_piece_positions[piece_i].length; ++position_j) {
-                    if(open_piece_positions[piece_i][position_j] < 0){
+                for (int position_j = 0; position_j < next_positions[piece_i].length; ++position_j) {
+                    if(next_positions[piece_i][position_j] < 0){
                         break;
                     }
-                    for (int arrow_k = 0; arrow_k < all_arrow_positions[position_j].length; ++arrow_k) {
-                        if(all_arrow_positions[position_j][arrow_k] < 0){
+                    for (int arrow_k = 0; arrow_k < arrow_positions[position_j].length; ++arrow_k) {
+                        if(arrow_positions[position_j][arrow_k] < 0){
                             break;
                         }
                         if(use_interrupts && Thread.currentThread().isInterrupted()){
                             return null; // the caller is not going to be doing anything with the moves anyway
                         }
                         //check that the arrow array for this position isn't null/empty
-                        if (all_arrow_positions[position_j] != null) {
-                            int start = piece_indices[piece_i];
-                            int next = open_piece_positions[piece_i][position_j];
-                            int arrow = all_arrow_positions[position_j][arrow_k];
+                        if (arrow_positions[position_j] != null) {
+                            int start = start_positions[piece_i];
+                            int next = next_positions[piece_i][position_j];
+                            int arrow = arrow_positions[position_j][arrow_k];
                             if(use_pooling) {
                                 all_moves.add(MovePool.get(start, next, arrow));
                             } else {
-                                all_moves.add(new Move(piece_indices[piece_i], open_piece_positions[piece_i][position_j], all_arrow_positions[position_j][arrow_k]));
+                                all_moves.add(new Move(start_positions[piece_i], next_positions[piece_i][position_j], arrow_positions[position_j][arrow_k]));
                             }
                         }
                     }
@@ -101,20 +95,22 @@ public class MoveCompiler {
 
     //this will always be faster than a parallel version for the board size we have
     public static int[] ScanAllDirections(GameState board, int index, boolean use_interrupts){
-        int[] moves = new int[40];
+        int[] moves = new int[35];
         Position pos = new Position(index); //JVM should optimize this to be in the stack memory
 
         int starting_index = 0;
         starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,-1,0,use_interrupts);
         starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,1,0,use_interrupts);
+
         starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,0,1,use_interrupts);
         starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,0,-1,use_interrupts);
 
         starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,1,1,use_interrupts);
         starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,-1,-1,use_interrupts);
+
         starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,1,-1,use_interrupts);
         starting_index = ScanDirection(moves,starting_index,board,pos.x,pos.y,-1,1,use_interrupts);
-        if(starting_index < 40){
+        if(starting_index < 35){
             moves[starting_index] = -1; //consider this to be null termination of the array
         }
 
