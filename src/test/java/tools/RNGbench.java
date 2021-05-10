@@ -1,3 +1,5 @@
+package tools;
+
 import org.junit.jupiter.api.Test;
 import tools.Benchmarker;
 import tools.RandomGen;
