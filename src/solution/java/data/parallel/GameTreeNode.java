@@ -17,8 +17,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 
 public class GameTreeNode extends GameTreeHeuristic {
-    private final SynchronizedArrayList<GameTreeNode> super_nodes = new SynchronizedArrayList<>();
-    private final SynchronizedArrayList<GameTreeNode> sub_nodes = new SynchronizedArrayList<>(); //note: that there is no way to remove nodes! this is by design!
     final public AtomicReference<Move> move = new AtomicReference<>();
     final public AtomicReference<GameState> state_after_move = new AtomicReference<>();
 
@@ -38,8 +36,11 @@ public class GameTreeNode extends GameTreeHeuristic {
         if (o == null || getClass() != o.getClass()) return false;
 
         GameTreeNode that = (GameTreeNode) o;
-        if(move.get().equals(that.move.get())){
-            return state_after_move.get().equals(that.state_after_move.get());
+        //todo: revise
+        if(move != null && that.move != null) {
+            if (move.get().equals(that.move.get())) {
+                return state_after_move.get().equals(that.state_after_move.get());
+            }
         }
         return false;
     }
@@ -60,7 +61,7 @@ public class GameTreeNode extends GameTreeHeuristic {
                 if (!has_propagated.get()) {
                     has_propagated.set(true);
                 }
-                GameTreeNode parent = super_nodes.get(i);
+                GameTreeNode parent = (GameTreeNode)super_nodes.get(i);
                 if (x1) {
                     winning_branches.unflag();
                     parent.winning_branches.value.aggregate(winning_branches.value.sum.get(), winning_branches.value.count.get(), (a, b) -> {
@@ -130,7 +131,7 @@ public class GameTreeNode extends GameTreeHeuristic {
             evaluateFreedom();
             evaluateReduction();
             combined.set(Maths.combine(amazongs,territory,mobility,freedom,reduction));
-            aggregated.value.contribution.set(combined.get()); //todo: add value selector, integrate here
+            aggregated.value.contribution.set(combined.get());
             aggregated.flag();
             maximum_sub.flag();
             minimum_sub.flag();
